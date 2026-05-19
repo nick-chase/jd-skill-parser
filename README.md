@@ -1,16 +1,71 @@
-# React + Vite
+# Tech Job Skill Parser
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A web app that parses job descriptions and your resume to identify skill gaps for tech roles (Software Engineering, ML/AI, Data Science).
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Parse Job Descriptions** — Extract required skills, proficiency levels, and importance tiers
+- **Parse Resume** — Analyze your technical skills from education, projects, and experience
+- **Gap Analysis** — See exactly what skills you're missing and what needs improvement
+- **Role Templates** — Get baseline skill expectations for common tech roles
+- **Job Metadata** — Extract location type, job type, and company info
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend:** React + Vite + Tailwind CSS
+- **Parsing:** Rule-based skill extraction (extensible for AI later)
+- **Classification:** OPM 5-Level Scale + Lightcast skill taxonomy
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+## How It Works
+
+### 1. Parse a Job Description
+Paste any tech job description and the parser extracts:
+- Skill names (matched against 100+ skill dictionary)
+- Proficiency levels (L1-L5 based on context and experience years)
+- Importance tiers (Critical, Required, Preferred, Nice-to-have)
+
+### 2. Parse Your Resume
+Upload your resume (text paste for now, PDF coming soon) and extract:
+- Technical skills from coursework (capped at L2 for students)
+- Skills from projects (L2 for academic projects)
+- Professional experience (L3+ only for tech roles)
+
+### 3. See Your Gap Analysis
+Compare your skills against the job:
+- ✅ Matched skills (you meet the requirement)
+- ⚠️ Level gaps (you have it but need more depth)
+- ❌ Missing critical skills (priority to learn)
+- 🎁 Bonus skills (you have but JD doesn't ask for)
+
+## Future Features
+
+- PDF resume upload
+- Chrome extension for LinkedIn integration
+- AI-powered resume analysis (freemium)
+- Skill learning path recommendations
+- PayPal donations
+
+## Project Status
+
+**In Development** — Currently optimized for Software Engineering, ML/AI, and Data Science roles.
+
+## Author
+
+[Nicholas Chase](https://github.com/nick-chase) — NJIT MS Artificial Intelligence
+
+---
+
+**Note:** This is an educational project. Skill classifications are rule-based heuristics, not formal assessments.
