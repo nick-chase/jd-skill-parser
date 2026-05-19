@@ -61,6 +61,29 @@ Compare your skills against the job:
 ## Project Status
 
 **In Development** — Currently optimized for Software Engineering, ML/AI, and Data Science roles.
+## Roadmap
+
+### ✅ v1.0 (Live Now)
+- [x] Parse job descriptions for skills, importance, level
+- [x] Parse resumes for skill extraction by section
+- [x] Gap analysis: match % + missing skills
+- [x] Company/role/metadata extraction
+- [x] 100+ skills in dictionary
+- [x] 10 role templates with critical/required/preferred lists
+
+### 📋 v2.0 (Upcoming)
+- [ ] **PDF resume upload & parsing** (highest priority)
+- [ ] Expand tech roles library (20+ roles)
+- [ ] Add Cyber roles library
+- [ ] Add financial roles library
+- [ ] Chrome extension (scrape LinkedIn/Indeed JDs)
+
+### 🚀 v3.0 (Future)
+- [ ] Learning path recommendations
+- [ ] Salary/location insights per role
+- [ ] ???
+
+---
 
 ## Author
 
