@@ -2,6 +2,8 @@
 
 A web app that parses job descriptions and your resume to identify skill gaps for tech roles (Software Engineering, ML/AI, Data Science).
 
+**🔗 [Live App](https://jd-skill-parser.vercel.app)**
+
 ## Features
 
 - **Parse Job Descriptions** — Extract required skills, proficiency levels, and importance tiers
@@ -9,25 +11,6 @@ A web app that parses job descriptions and your resume to identify skill gaps fo
 - **Gap Analysis** — See exactly what skills you're missing and what needs improvement
 - **Role Templates** — Get baseline skill expectations for common tech roles
 - **Job Metadata** — Extract location type, job type, and company info
-
-## Tech Stack
-
-- **Frontend:** React + Vite + Tailwind CSS
-- **Parsing:** Rule-based skill extraction (extensible for AI later)
-- **Classification:** OPM 5-Level Scale + Lightcast skill taxonomy
-
-## Getting Started
-
-```bash
-# Install dependencies
-npm install
-
-# Start dev server
-npm run dev
-
-# Build for production
-npm run build
-```
 
 ## How It Works
 
@@ -50,17 +33,10 @@ Compare your skills against the job:
 - ❌ Missing critical skills (priority to learn)
 - 🎁 Bonus skills (you have but JD doesn't ask for)
 
-## Future Features
-
-- PDF resume upload
-- Chrome extension for LinkedIn integration
-- AI-powered resume analysis (freemium)
-- Skill learning path recommendations
-- PayPal donations
-
 ## Project Status
 
 **In Development** — Currently optimized for Software Engineering, ML/AI, and Data Science roles.
+
 ## Roadmap
 
 ### ✅ v1.0 (Live Now)
@@ -83,7 +59,24 @@ Compare your skills against the job:
 - [ ] Salary/location insights per role
 - [ ] ???
 
----
+## Tech Stack
+
+- **Frontend:** React + Vite + Tailwind CSS
+- **Parsing:** Rule-based skill extraction (extensible for AI later)
+- **Classification:** OPM 5-Level Scale + Lightcast skill taxonomy
+
+## Getting Started
+
+```bash
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev
+
+# Build for production
+npm run build
+```
 
 ## Author
 
