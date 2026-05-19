@@ -67,16 +67,45 @@ Compare your skills against the job:
 
 ## Getting Started
 
+## Getting Started
+
+### Prerequisites
+- Node.js 18+ 
+- npm 10+
+
+### Installation
+
+1. Clone the repository
 ```bash
-# Install dependencies
+git clone https://github.com/nick-chase/jd-skill-parser.git
+cd jd-skill-parser
+```
+
+2. Install dependencies
+```bash
 npm install
+```
 
-# Start dev server
+3. Start development server
+```bash
 npm run dev
+```
+The app will open at `http://localhost:5173`
 
-# Build for production
+4. Build for production
+```bash
 npm run build
 ```
+
+### Development
+- Styling: Tailwind CSS
+- Main component: `src/jd-skill-parser.jsx`
+- Skill dictionary & role templates are in the same file (ready to refactor into separate files)
+
+### Technologies
+- React 18 + Vite
+- Tailwind CSS 4
+- Deployed on Vercel - Link at top of page-
 
 ## Author
 
