@@ -29,11 +29,17 @@ const SKILL_DICTIONARY = {
     'Java': { aliases: ['java'], category: 'Programming Language' },
     'C++': { aliases: ['c\\+\\+', 'C\\+\\+', 'cpp', 'CPP', 'c/c\\+\\+', 'C/C\\+\\+'], category: 'Programming Language' },
     'C#': { aliases: ['c#', 'C#', 'csharp', 'CSHARP'], category: 'Programming Language' },
-    'C': { aliases: ['\\bc\\b(?!\\+|#)', '\\bC\\b(?!\\+|#)'], category: 'Programming Language' },
+    'C': {
+        aliases: ['\\bc\\b(?!\\+|#|\\-suite|\\-level|[A-Z]O)', '\\bC\\b(?!\\+|#|\\-suite|\\-level|[A-Z]O)'],
+        category: 'Programming Language'
+    },
     'R': { aliases: ['r programming', r_lang_alias()], category: 'Programming Language' },
     'SQL': { aliases: ['sql'], category: 'Programming Language' },
     'Go': { aliases: ['golang'], category: 'Programming Language' },
-    'Rust': { aliases: ['\\bRust\\b'], category: 'Programming Language' },
+    'Rust': {
+        aliases: ['\\bRust\\b(?=\\s+language|\\s+programming|\\s+code|\\s+system)'],
+        category: 'Programming Language'
+    },
     'Ruby': { aliases: ['ruby', '\\bruby\\b'], category: 'Programming Language' },
     'Perl': { aliases: ['perl'], category: 'Programming Language' },
     'Scala': { aliases: ['scala'], category: 'Programming Language' },
@@ -72,12 +78,21 @@ const SKILL_DICTIONARY = {
     'Power BI': { aliases: ['power bi', 'powerbi'], category: 'Data Tool' },
 
     // ── Big Data / Pipelines ──
-    'Apache Spark': { aliases: ['apache spark', 'pyspark', '\\bSpark\\b'], category: 'Big Data' },
+    'Apache Spark': {
+        aliases: ['apache spark', 'pyspark', '\\bspark\\b(?=\\s+framework|\\s+cluster|\\s+sql|\\s+streaming|\\s+rdd)'],
+        category: 'Big Data'
+    },
     'Hadoop': { aliases: ['hadoop'], category: 'Big Data' },
     'Kafka': { aliases: ['kafka'], category: 'Big Data' },
-    'Airflow': { aliases: ['airflow'], category: 'Big Data' },
+    'Airflow': {
+        aliases: ['airflow(?=\\s+workflow|\\s+orchestration|\\s+dag|\\s+pipeline|\\s+scheduler)'],
+        category: 'Big Data'
+    },
     'Databricks': { aliases: ['databricks'], category: 'Big Data' },
-    'Snowflake': { aliases: ['snowflake'], category: 'Big Data' },
+    'Snowflake': {
+        aliases: ['snowflake(?=\\s+data|\\s+warehouse|\\s+database|\\s+cloud|\\s+sql)'],
+        category: 'Big Data'
+    },
 
     // ── Cloud / Infra ──
     'AWS': { aliases: ['\\bAWS\\b', 'amazon web services'], category: 'Cloud / Infra' },
@@ -98,7 +113,10 @@ const SKILL_DICTIONARY = {
     'Git': { aliases: ['\\bgit\\b', 'github', 'gitlab', 'version control'], category: 'Dev Tool' },
     'Linux': { aliases: ['linux', 'unix'], category: 'Dev Tool' },
     'CI/CD': { aliases: ['ci/cd', 'continuous integration'], category: 'Dev Tool' },
-    'REST API': { aliases: ['rest api', 'restful', 'rest service'], category: 'Dev Tool' },
+    'REST API': {
+        aliases: ['rest api', 'rest service', '\\brest\\b(?=\\s+api|\\s+endpoint|\\s+service|\\s+architectural)'],
+        category: 'Dev Tool'
+    },
     'GraphQL': { aliases: ['graphql'], category: 'Dev Tool' },
 
     // ── Foundational Concepts ──
@@ -119,14 +137,28 @@ const SKILL_DICTIONARY = {
     'Experimental Design': { aliases: ['experimental design', 'design of experiments'], category: 'Methodology' },
 
     // ── Frontend / Web ──
-    'React': { aliases: ['react', 'react.js'], category: 'Frontend Framework' },
+    'React': {
+        aliases: ['react(?=\\s+\\.|\\s+js|\\s+framework|\\s+component|\\s+library|\\s+native)', 'react.js'],
+        category: 'Frontend Framework'
+    },
     'TypeScript': { aliases: ['typescript', 'ts'], category: 'Programming Language' },
-    'HTML': { aliases: ['html', 'html5'], category: 'Frontend' },
+    'HTML': {
+        aliases: [
+            '(?<!\\.)\\bhtml5?\\b'
+        ],
+        category: 'Frontend'
+    },
     'CSS': { aliases: ['css', 'css3', 'scss', 'sass'], category: 'Frontend' },
     'Next.js': { aliases: ['next.js', 'nextjs',], category: 'Frontend Framework' },
     'Remix': { aliases: ['remix'], category: 'Frontend Framework' },
-    'Vue': { aliases: ['vue', 'vue.js'], category: 'Frontend Framework' },
-    'Angular': { aliases: ['angular'], category: 'Frontend Framework' },
+    'Vue': {
+        aliases: ['vue(?=\\s+\\.|\\s+js|\\s+framework|\\s+component)', 'vue.js'],
+        category: 'Frontend Framework'
+    },
+    'Angular': {
+        aliases: ['angular(?=\\s+\\.|\\s+js|\\s+framework|\\s+typescript)', '\\bNG\\b'],
+        category: 'Frontend Framework'
+    },
 
     // ── CSS/Styling ──
     'Tailwind': { aliases: ['tailwind', 'tailwind css'], category: 'Frontend' },
@@ -139,12 +171,24 @@ const SKILL_DICTIONARY = {
     'Swift': { aliases: ['swift'], category: 'Programming Language' },
 
     // ── Backend Frameworks ──
-    'Spring Boot': { aliases: ['spring boot', 'spring'], category: 'Backend Framework' },
-    'Flask': { aliases: ['flask'], category: 'Backend Framework' },
-    'FastAPI': { aliases: ['fastapi', 'fast api'], category: 'Backend Framework' },
+    'Spring Boot': {
+        aliases: ['spring boot', '\\bspring\\b(?=\\s+boot|\\s+framework|\\s+application|\\s+mvc)'],
+        category: 'Backend Framework'
+    },
+    'Flask': {
+        aliases: ['flask(?=\\s+framework|\\s+application|\\s+backend|\\s+python)'],
+        category: 'Backend Framework'
+    },
+    'FastAPI': {
+        aliases: ['fastapi', 'fast api(?=\\s+framework|\\s+python)'],
+        category: 'Backend Framework'
+    },
     'Node.js': { aliases: ['node.js', 'nodejs', 'node js'], category: 'Backend Framework' },
     'Django': { aliases: ['django'], category: 'Backend Framework' },
-    'Express.js': { aliases: ['express.js', 'expressjs', 'express'], category: 'Backend Framework' },
+    'Express.js': {
+        aliases: ['express.js', 'expressjs', '\\bexpress\\b(?=\\s+js|\\s+framework|\\s+app|\\s+server|\\s+api)'],
+        category: 'Backend Framework'
+    },
 
     // ── Game Development ──
     'Unity': { aliases: ['unity', 'unity3d'], category: 'Game Engine' },
@@ -166,9 +210,66 @@ const SKILL_DICTIONARY = {
     // ── Other Group ──
     'Microservices': { aliases: ['microservices', 'microservice'], category: 'Architecture' },
     'Distributed Systems': { aliases: ['distributed system', 'distributed systems'], category: 'Architecture' },
-    'Temporal': { aliases: ['temporal'], category: 'Workflow Tool' },
+    'Temporal': {
+        aliases: ['temporal(?=\\s+workflow|\\s+framework|\\s+engine|\\s+.io)'],
+        category: 'Workflow Tool'
+    },
     'Clickhouse': { aliases: ['clickhouse'], category: 'Database' },
     'Cloudflare': { aliases: ['cloudflare'], category: 'Cloud / Infra' },
+
+    // ── Office / Productivity Tools ──
+    'Microsoft Excel': {
+        aliases: ['excel', '\\bms excel\\b', 'microsoft excel', 'spreadsheet analysis', '\\bvba\\b'],
+        category: 'Office Tool'
+    },
+    'Microsoft Word': {
+        aliases: ['word', 'microsoft word', '\\bms word\\b'],
+        category: 'Office Tool'
+    },
+    'Microsoft PowerPoint': {
+        aliases: ['powerpoint', 'ppt', 'microsoft powerpoint', '\\bms powerpoint\\b'],
+        category: 'Office Tool'
+    },
+    'Microsoft Teams': {
+        aliases: ['microsoft teams', '\\bteams\\b(?=\\s+communication|\\s+collaboration|\\s+meeting)', 'teams collaboration'],
+        category: 'Communication Tool'
+    },
+    'Slack': {
+        aliases: ['slack'],
+        category: 'Communication Tool'
+    },
+    'Zoom': {
+        aliases: ['zoom'],
+        category: 'Communication Tool'
+    },
+    'Google Sheets': {
+        aliases: ['google sheets', 'gsheets'],
+        category: 'Office Tool'
+    },
+    'Google Docs': {
+        aliases: ['google docs', 'gdocs'],
+        category: 'Office Tool'
+    },
+    'Jira': {
+        aliases: ['jira'],
+        category: 'Project Management'
+    },
+    'Asana': {
+        aliases: ['asana'],
+        category: 'Project Management'
+    },
+    'Trello': {
+        aliases: ['trello'],
+        category: 'Project Management'
+    },
+    'Notion': {
+        aliases: ['notion'],
+        category: 'Productivity Tool'
+    },
+    'Confluence': {
+        aliases: ['confluence'],
+        category: 'Documentation Tool'
+    },
 
 };
 
@@ -400,9 +501,10 @@ function parseCompanyAndRole(text) {
 
 function parseJobMeta(text) {
     const meta = {
-        locationType: null,  // On-site, Remote, Hybrid
-        jobType: null,       // Full-time, Part-time, Internship, Contract
-        location: null,      // City, State
+        locationType: null,
+        jobType: null,
+        location: null,
+        yearsRequired: null,
     };
 
     const lower = text.toLowerCase();
@@ -412,15 +514,23 @@ function parseJobMeta(text) {
     else if (lower.includes('hybrid')) meta.locationType = 'Hybrid';
     else if (lower.includes('remote')) meta.locationType = 'Remote';
 
-    // Job type
-    if (lower.includes('internship') || lower.includes('intern')) meta.jobType = 'Internship';
-    else if (lower.includes('full-time') || lower.includes('full time')) meta.jobType = 'Full-time';
+    // Job type — check Full-time/Part-time/Contract FIRST, internship only if those don't match
+    if (lower.includes('full-time') || lower.includes('full time')) meta.jobType = 'Full-time';
     else if (lower.includes('part-time') || lower.includes('part time')) meta.jobType = 'Part-time';
     else if (lower.includes('contract')) meta.jobType = 'Contract';
+    else if (lower.includes('internship') || lower.includes('intern')) meta.jobType = 'Internship';
 
-    // Location (City, State pattern)
-    const locationMatch = text.match(/([A-Z][a-zA-Z\s]+,\s*[A-Z]{2})/);
+    // Location — try "Location:" prefix first, then fallback to City, State · pattern
+    let locationMatch = text.match(/(?:Location|📍)[:\s]*([A-Z][a-zA-Z\s]{1,20},\s*[A-Z]{2})/i);
+    if (!locationMatch) {
+        // Fallback: City, State · pattern (limit city to 20 chars to avoid "Enterprise Architecture Piscataway")
+        locationMatch = text.substring(0, 800).match(/\n([A-Z][a-zA-Z\s]{1,20},\s*[A-Z]{2})\s*·/);
+    }
     if (locationMatch) meta.location = locationMatch[1].trim();
+
+    // Years of Experience — just match number + years
+    const yearsMatch = text.match(/(\d+)\s*\+?\s*years\b/i);
+    if (yearsMatch) meta.yearsRequired = parseInt(yearsMatch[1]);
 
     return meta;
 }
@@ -1031,7 +1141,7 @@ function GapAnalysisView({ gap, companyName, jobRole, jobMeta }) {
     const scoreColor = score >= 70 ? '#059669' : score >= 40 ? '#d97706' : '#dc2626';
     const scoreLabel = score >= 70 ? 'Strong Match' : score >= 40 ? 'Partial Match' : 'Weak Match';
 
-    
+
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -1074,6 +1184,11 @@ function GapAnalysisView({ gap, companyName, jobRole, jobMeta }) {
                             {jobMeta.jobType && (
                                 <span style={{ fontSize: '11px', padding: '2px 8px', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '20px' }}>
                                     💼 {jobMeta.jobType}
+                                </span>
+                            )}
+                            {jobMeta.yearsRequired && (
+                                <span style={{ fontSize: '11px', padding: '2px 8px', backgroundColor: '#fce7f3', color: '#be185d', borderRadius: '20px' }}>
+                                    📅 {jobMeta.yearsRequired}+ years
                                 </span>
                             )}
                         </div>
@@ -1292,7 +1407,7 @@ function Legend() {
                         <li><span className="font-semibold text-sky-700">Preferred</span> — Preferred / Desired</li>
                         <li><span className="font-semibold text-slate-600">Nice-to-have</span> — Bonus / Plus / Nice-to-have</li>
                     </ul>
-                    
+
                     <div>
                         <h4 className="font-medium text-slate-700 mb-2 uppercase tracking-wider text-[10px]">
                             Phrase Detection
@@ -1320,7 +1435,7 @@ function Legend() {
 
                 </div>
             </div>
-            
+
         </div>
     );
 }
@@ -1529,7 +1644,7 @@ export default function App() {
                                     the structured requirement profile.
                                 </div>
                             ) : (
-                                    <ResultsView results={results} companyName={companyName} jobRole={jobRole} jobMeta={jobMeta} />
+                                <ResultsView results={results} companyName={companyName} jobRole={jobRole} jobMeta={jobMeta} />
                             )}
                         </div>
                     </div>
@@ -1609,7 +1724,7 @@ export default function App() {
                                 </div>
                             </div>
                         ) : (
-                                <GapAnalysisView gap={runGapAnalysis(results, resumeResults)} companyName={companyName} jobRole={jobRole} jobMeta={jobMeta} />
+                            <GapAnalysisView gap={runGapAnalysis(results, resumeResults)} companyName={companyName} jobRole={jobRole} jobMeta={jobMeta} />
                         )}
                     </div>
                 )}
