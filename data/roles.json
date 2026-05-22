@@ -1,49 +1,96 @@
 {
   "version": "2026.1",
   "updated": "2026-05-22",
-  "note": "SEED FILE. Roles reference skill IDs from skills.json — never duplicate skill names here. Four roles are fully defined as exemplars; six are stubs (status: 'stub') to be completed by porting ROLE_TEMPLATES from src/jd-skill-parser.jsx. Stubs may need new skills (e.g. kotlin, swift, terraform) added to skills.json first.",
   "roles": [
-    {
-      "id": "ml-engineer",
-      "label": "ML Engineer",
-      "tiers": {
-        "critical": ["python", "machine-learning"],
-        "required": ["pandas", "numpy", "sql"],
-        "preferred": ["pytorch", "scikit-learn", "docker"]
-      }
-    },
     {
       "id": "backend-engineer",
       "label": "Backend Engineer",
       "tiers": {
-        "critical": ["python", "sql"],
-        "required": ["django", "fastapi", "nodejs"],
-        "preferred": ["docker", "aws", "linux"]
+        "critical": ["python", "java", "sql", "git", "rest-api"],
+        "required": ["docker", "postgresql", "nodejs", "spring-boot"],
+        "preferred": ["kubernetes", "microservices", "ci-cd", "aws"]
       }
     },
     {
       "id": "frontend-engineer",
       "label": "Frontend Engineer",
       "tiers": {
-        "critical": ["javascript", "react"],
-        "required": ["tailwind", "git"],
-        "preferred": ["nextjs"]
+        "critical": ["javascript", "react", "html", "css", "git"],
+        "required": ["typescript", "rest-api"],
+        "preferred": ["angular", "vue", "testing", "tailwind"]
+      }
+    },
+    {
+      "id": "full-stack-engineer",
+      "label": "Full Stack Engineer",
+      "tiers": {
+        "critical": ["javascript", "react", "python", "sql", "git"],
+        "required": ["html", "css", "rest-api", "docker"],
+        "preferred": ["typescript", "kubernetes", "microservices", "aws"]
+      }
+    },
+    {
+      "id": "ml-engineer",
+      "label": "ML Engineer",
+      "tiers": {
+        "critical": ["python", "machine-learning", "pytorch", "tensorflow", "sql"],
+        "required": ["statistics", "pandas", "numpy", "jupyter"],
+        "preferred": ["mlops", "kubernetes", "aws", "deep-learning"]
       }
     },
     {
       "id": "data-scientist",
       "label": "Data Scientist",
       "tiers": {
-        "critical": ["python", "machine-learning"],
-        "required": ["pandas", "numpy", "sql"],
-        "preferred": ["scikit-learn", "jupyter", "deep-learning"]
+        "critical": ["python", "sql", "statistics", "pandas", "jupyter"],
+        "required": ["machine-learning", "data-visualization", "numpy"],
+        "preferred": ["tensorflow", "tableau", "power-bi", "aws"]
       }
     },
-    { "id": "full-stack-engineer", "label": "Full Stack Engineer", "status": "stub", "tiers": { "critical": [], "required": [], "preferred": [] } },
-    { "id": "generative-ai-developer", "label": "Generative AI Developer", "status": "stub", "tiers": { "critical": [], "required": [], "preferred": [] } },
-    { "id": "android-developer", "label": "Android Developer", "status": "stub", "tiers": { "critical": [], "required": [], "preferred": [] } },
-    { "id": "ios-developer", "label": "iOS Developer", "status": "stub", "tiers": { "critical": [], "required": [], "preferred": [] } },
-    { "id": "devops-engineer", "label": "DevOps Engineer", "status": "stub", "tiers": { "critical": [], "required": [], "preferred": [] } },
-    { "id": "data-engineer", "label": "Data Engineer", "status": "stub", "tiers": { "critical": [], "required": [], "preferred": [] } }
+    {
+      "id": "generative-ai-developer",
+      "label": "Generative AI Developer",
+      "tiers": {
+        "critical": ["python", "generative-ai", "large-language-models", "prompt-engineering"],
+        "required": ["machine-learning", "pytorch", "tensorflow", "langchain"],
+        "preferred": ["mlops", "docker", "aws", "kubernetes", "hugging-face"]
+      }
+    },
+    {
+      "id": "android-developer",
+      "label": "Android Developer",
+      "tiers": {
+        "critical": ["java", "kotlin", "android", "git"],
+        "required": ["rest-api", "sql"],
+        "preferred": ["ci-cd", "docker", "testing"]
+      }
+    },
+    {
+      "id": "ios-developer",
+      "label": "iOS Developer",
+      "tiers": {
+        "critical": ["swift", "ios", "git"],
+        "required": ["rest-api", "xcode"],
+        "preferred": ["ci-cd", "testing", "docker"]
+      }
+    },
+    {
+      "id": "devops-engineer",
+      "label": "DevOps Engineer",
+      "tiers": {
+        "critical": ["docker", "kubernetes", "ci-cd", "git", "aws"],
+        "required": ["linux", "terraform", "bash"],
+        "preferred": ["monitoring", "ansible", "gcp", "azure"]
+      }
+    },
+    {
+      "id": "data-engineer",
+      "label": "Data Engineer",
+      "tiers": {
+        "critical": ["python", "sql", "apache-spark", "git"],
+        "required": ["docker", "postgresql", "kafka"],
+        "preferred": ["kubernetes", "airflow", "aws", "big-data"]
+      }
+    }
   ]
 }

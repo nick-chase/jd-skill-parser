@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import * as registry from './lib/registry.js';
 
 // ============================================================
 // CLASSIFICATION SYSTEM
@@ -18,324 +19,6 @@ const IMPORTANCE_STYLES = {
     2: 'bg-slate-100 text-slate-600 border-slate-200',
     1: 'bg-slate-50 text-slate-500 border-slate-200',
 };
-
-// Skill dictionary. Aliases support regex syntax when they contain `\b`.
-// Plain strings get auto-wrapped in word boundaries.
-const SKILL_DICTIONARY = {
-    // ── Programming Languages ──
-    'Python': { aliases: ['python'], category: 'Programming Language' },
-    'Kotlin': { aliases: ['kotlin'], category: 'Programming Language' },
-    'JavaScript': { aliases: ['javascript', 'typescript', 'js'], category: 'Programming Language' },
-    'Java': { aliases: ['java'], category: 'Programming Language' },
-    'C++': { aliases: ['c\\+\\+', 'C\\+\\+', 'cpp', 'CPP', 'c/c\\+\\+', 'C/C\\+\\+'], category: 'Programming Language' },
-    'C#': { aliases: ['c#', 'C#', 'csharp', 'CSHARP'], category: 'Programming Language' },
-    'C': {
-        aliases: ['\\bc\\b(?!\\+|#|\\-suite|\\-level|[A-Z]O)', '\\bC\\b(?!\\+|#|\\-suite|\\-level|[A-Z]O)'],
-        category: 'Programming Language'
-    },
-    'R': { aliases: ['r programming', r_lang_alias()], category: 'Programming Language' },
-    'SQL': { aliases: ['sql'], category: 'Programming Language' },
-    'Go': { aliases: ['golang'], category: 'Programming Language' },
-    'Rust': {
-        aliases: ['\\bRust\\b(?=\\s+language|\\s+programming|\\s+code|\\s+system)'],
-        category: 'Programming Language'
-    },
-    'Ruby': { aliases: ['ruby', '\\bruby\\b'], category: 'Programming Language' },
-    'Perl': { aliases: ['perl'], category: 'Programming Language' },
-    'Scala': { aliases: ['scala'], category: 'Programming Language' },
-    'MATLAB': { aliases: ['matlab'], category: 'Programming Language' },
-    'Bash': { aliases: ['bash', 'shell scripting'], category: 'Programming Language' },
-
-    // ── ML / AI Concepts ──
-    'Machine Learning': { aliases: ['machine learning', '\\bML\\b'], category: 'ML / AI' },
-    'Deep Learning': { aliases: ['deep learning'], category: 'ML / AI' },
-    'Neural Networks': { aliases: ['neural network'], category: 'ML / AI' },
-    'NLP': { aliases: ['natural language processing', '\\bNLP\\b'], category: 'ML / AI' },
-    'Computer Vision': { aliases: ['computer vision'], category: 'ML / AI' },
-    'Reinforcement Learning': { aliases: ['reinforcement learning'], category: 'ML / AI' },
-    'Large Language Models': { aliases: ['large language model', '\\bLLM\\b', '\\bLLMs\\b'], category: 'ML / AI' },
-    'Generative AI': { aliases: ['generative ai', 'gen ai', 'genai'], category: 'ML / AI' },
-    'Transformers': { aliases: ['transformer'], category: 'ML / AI' },
-    'Recommendation Systems': { aliases: ['recommendation system', 'recommender system'], category: 'ML / AI' },
-
-    // ── ML Frameworks ──
-    'scikit-learn': { aliases: ['scikit-learn', 'sklearn', 'scikit learn'], category: 'ML Framework' },
-    'TensorFlow': { aliases: ['tensorflow'], category: 'ML Framework' },
-    'PyTorch': { aliases: ['pytorch'], category: 'ML Framework' },
-    'Keras': { aliases: ['keras'], category: 'ML Framework' },
-    'Hugging Face': { aliases: ['hugging face', 'huggingface'], category: 'ML Framework' },
-    'XGBoost': { aliases: ['xgboost'], category: 'ML Framework' },
-    'LangChain': { aliases: ['langchain'], category: 'ML Framework' },
-
-    // ── Data Tools ──
-    'Pandas': { aliases: ['pandas'], category: 'Data Tool' },
-    'NumPy': { aliases: ['numpy'], category: 'Data Tool' },
-    'Jupyter': { aliases: ['jupyter'], category: 'Data Tool' },
-    'Matplotlib': { aliases: ['matplotlib'], category: 'Data Tool' },
-    'Seaborn': { aliases: ['seaborn'], category: 'Data Tool' },
-    'Plotly': { aliases: ['plotly'], category: 'Data Tool' },
-    'Tableau': { aliases: ['tableau'], category: 'Data Tool' },
-    'Power BI': { aliases: ['power bi', 'powerbi'], category: 'Data Tool' },
-
-    // ── Big Data / Pipelines ──
-    'Apache Spark': {
-        aliases: ['apache spark', 'pyspark', '\\bspark\\b(?=\\s+framework|\\s+cluster|\\s+sql|\\s+streaming|\\s+rdd)'],
-        category: 'Big Data'
-    },
-    'Hadoop': { aliases: ['hadoop'], category: 'Big Data' },
-    'Kafka': { aliases: ['kafka'], category: 'Big Data' },
-    'Airflow': {
-        aliases: ['airflow(?=\\s+workflow|\\s+orchestration|\\s+dag|\\s+pipeline|\\s+scheduler)'],
-        category: 'Big Data'
-    },
-    'Databricks': { aliases: ['databricks'], category: 'Big Data' },
-    'Snowflake': {
-        aliases: ['snowflake(?=\\s+data|\\s+warehouse|\\s+database|\\s+cloud|\\s+sql)'],
-        category: 'Big Data'
-    },
-
-    // ── Cloud / Infra ──
-    'AWS': { aliases: ['\\bAWS\\b', 'amazon web services'], category: 'Cloud / Infra' },
-    'Azure': { aliases: ['azure'], category: 'Cloud / Infra' },
-    'GCP': { aliases: ['google cloud', '\\bGCP\\b'], category: 'Cloud / Infra' },
-    'Docker': { aliases: ['docker'], category: 'Cloud / Infra' },
-    'Kubernetes': { aliases: ['kubernetes', 'k8s'], category: 'Cloud / Infra' },
-    'Terraform': { aliases: ['terraform'], category: 'Cloud / Infra' },
-
-    // ── Databases ──
-    'PostgreSQL': { aliases: ['postgresql', 'postgres'], category: 'Database' },
-    'MySQL': { aliases: ['mysql'], category: 'Database' },
-    'MongoDB': { aliases: ['mongodb', 'mongo'], category: 'Database' },
-    'Redis': { aliases: ['redis'], category: 'Database' },
-    'Elasticsearch': { aliases: ['elasticsearch'], category: 'Database' },
-
-    // ── Dev Tools ──
-    'Git': { aliases: ['\\bgit\\b', 'github', 'gitlab', 'version control'], category: 'Dev Tool' },
-    'Linux': { aliases: ['linux', 'unix'], category: 'Dev Tool' },
-    'CI/CD': { aliases: ['ci/cd', 'continuous integration'], category: 'Dev Tool' },
-    'REST API': {
-        aliases: ['rest api', 'rest service', '\\brest\\b(?=\\s+api|\\s+endpoint|\\s+service|\\s+architectural)'],
-        category: 'Dev Tool'
-    },
-    'GraphQL': { aliases: ['graphql'], category: 'Dev Tool' },
-
-    // ── Foundational Concepts ──
-    'Statistics': { aliases: ['statistics', 'statistical'], category: 'Foundational Concept' },
-    'Probability': { aliases: ['probability'], category: 'Foundational Concept' },
-    'Linear Algebra': { aliases: ['linear algebra'], category: 'Foundational Concept' },
-    'Calculus': { aliases: ['calculus'], category: 'Foundational Concept' },
-    'Data Structures': { aliases: ['data structures'], category: 'Foundational Concept' },
-    'Algorithms': { aliases: ['algorithms'], category: 'Foundational Concept' },
-    'Object-Oriented Programming': { aliases: ['object[- ]oriented', '\\bOOP\\b'], category: 'Foundational Concept' },
-
-    // ── Methodology ──
-    'Agile / Scrum': { aliases: ['agile', 'scrum'], category: 'Methodology' },
-    'A/B Testing': { aliases: ['a/b test'], category: 'Methodology' },
-    'Feature Engineering': { aliases: ['feature engineering'], category: 'Methodology' },
-    'MLOps': { aliases: ['mlops', 'model deployment'], category: 'Methodology' },
-    'Data Visualization': { aliases: ['data visualization', 'data viz'], category: 'Methodology' },
-    'Experimental Design': { aliases: ['experimental design', 'design of experiments'], category: 'Methodology' },
-
-    // ── Frontend / Web ──
-    'React': {
-        aliases: ['react(?=\\s+\\.|\\s+js|\\s+framework|\\s+component|\\s+library|\\s+native)', 'react.js'],
-        category: 'Frontend Framework'
-    },
-    'TypeScript': { aliases: ['typescript', 'ts'], category: 'Programming Language' },
-    'HTML': {
-        aliases: [
-            '(?<!\\.)\\bhtml5?\\b'
-        ],
-        category: 'Frontend'
-    },
-    'CSS': { aliases: ['css', 'css3', 'scss', 'sass'], category: 'Frontend' },
-    'Next.js': { aliases: ['next.js', 'nextjs',], category: 'Frontend Framework' },
-    'Remix': { aliases: ['remix'], category: 'Frontend Framework' },
-    'Vue': {
-        aliases: ['vue(?=\\s+\\.|\\s+js|\\s+framework|\\s+component)', 'vue.js'],
-        category: 'Frontend Framework'
-    },
-    'Angular': {
-        aliases: ['angular(?=\\s+\\.|\\s+js|\\s+framework|\\s+typescript)', '\\bNG\\b'],
-        category: 'Frontend Framework'
-    },
-
-    // ── CSS/Styling ──
-    'Tailwind': { aliases: ['tailwind', 'tailwind css'], category: 'Frontend' },
-    'Material-UI': { aliases: ['material-ui', 'mui', 'material ui'], category: 'Frontend' },
-
-
-    // ── Mobile Development ──
-    'Android': { aliases: ['android', 'android development'], category: 'Mobile' },
-    'iOS': { aliases: ['ios', 'iphone'], category: 'Mobile' },
-    'Swift': { aliases: ['swift'], category: 'Programming Language' },
-
-    // ── Backend Frameworks ──
-    'Spring Boot': {
-        aliases: ['spring boot', '\\bspring\\b(?=\\s+boot|\\s+framework|\\s+application|\\s+mvc)'],
-        category: 'Backend Framework'
-    },
-    'Flask': {
-        aliases: ['flask(?=\\s+framework|\\s+application|\\s+backend|\\s+python)'],
-        category: 'Backend Framework'
-    },
-    'FastAPI': {
-        aliases: ['fastapi', 'fast api(?=\\s+framework|\\s+python)'],
-        category: 'Backend Framework'
-    },
-    'Node.js': { aliases: ['node.js', 'nodejs', 'node js'], category: 'Backend Framework' },
-    'Django': { aliases: ['django'], category: 'Backend Framework' },
-    'Express.js': {
-        aliases: ['express.js', 'expressjs', '\\bexpress\\b(?=\\s+js|\\s+framework|\\s+app|\\s+server|\\s+api)'],
-        category: 'Backend Framework'
-    },
-
-    // ── Game Development ──
-    'Unity': { aliases: ['unity', 'unity3d'], category: 'Game Engine' },
-    'Unreal': { aliases: ['unreal', 'unreal engine', 'ue4', 'ue5'], category: 'Game Engine' },
-
-    // ── Graphics & Low-Level ──
-    'Graphics API': { aliases: ['graphics api', 'directx', 'opengl', 'vulkan'], category: 'Graphics' },
-
-    // ── Testing ──
-    'Unit Testing': { aliases: ['unit test', 'unit testing'], category: 'Testing' },
-    'Automated Testing': { aliases: ['automated test', 'test automation'], category: 'Testing' },
-
-    // ── Embedded/Systems ──
-    'Embedded Systems': { aliases: ['embedded', 'embedded systems', 'embedded software'], category: 'Systems' },
-    'Linux Kernel': { aliases: ['linux kernel', 'kernel module', 'kernel development'], category: 'Systems' },
-    'Device Drivers': { aliases: ['device driver', 'driver development'], category: 'Systems' },
-    'Network Stack': { aliases: ['network stack', 'network protocol'], category: 'Systems' },
-
-    // ── Other Group ──
-    'Microservices': { aliases: ['microservices', 'microservice'], category: 'Architecture' },
-    'Distributed Systems': { aliases: ['distributed system', 'distributed systems'], category: 'Architecture' },
-    'Temporal': {
-        aliases: ['temporal(?=\\s+workflow|\\s+framework|\\s+engine|\\s+.io)'],
-        category: 'Workflow Tool'
-    },
-    'Clickhouse': { aliases: ['clickhouse'], category: 'Database' },
-    'Cloudflare': { aliases: ['cloudflare'], category: 'Cloud / Infra' },
-
-    // ── Office / Productivity Tools ──
-    'Microsoft Excel': {
-        aliases: ['excel', '\\bms excel\\b', 'microsoft excel', 'spreadsheet analysis', '\\bvba\\b'],
-        category: 'Office Tool'
-    },
-    'Microsoft Word': {
-        aliases: ['word', 'microsoft word', '\\bms word\\b'],
-        category: 'Office Tool'
-    },
-    'Microsoft PowerPoint': {
-        aliases: ['powerpoint', 'ppt', 'microsoft powerpoint', '\\bms powerpoint\\b'],
-        category: 'Office Tool'
-    },
-    'Microsoft Teams': {
-        aliases: ['microsoft teams', '\\bteams\\b(?=\\s+communication|\\s+collaboration|\\s+meeting)', 'teams collaboration'],
-        category: 'Communication Tool'
-    },
-    'Slack': {
-        aliases: ['slack'],
-        category: 'Communication Tool'
-    },
-    'Zoom': {
-        aliases: ['zoom'],
-        category: 'Communication Tool'
-    },
-    'Google Sheets': {
-        aliases: ['google sheets', 'gsheets'],
-        category: 'Office Tool'
-    },
-    'Google Docs': {
-        aliases: ['google docs', 'gdocs'],
-        category: 'Office Tool'
-    },
-    'Jira': {
-        aliases: ['jira'],
-        category: 'Project Management'
-    },
-    'Asana': {
-        aliases: ['asana'],
-        category: 'Project Management'
-    },
-    'Trello': {
-        aliases: ['trello'],
-        category: 'Project Management'
-    },
-    'Notion': {
-        aliases: ['notion'],
-        category: 'Productivity Tool'
-    },
-    'Confluence': {
-        aliases: ['confluence'],
-        category: 'Documentation Tool'
-    },
-
-};
-
-const ROLE_TEMPLATES = {
-    'backend engineer': {
-        critical: ['Python', 'Java', 'SQL', 'Git', 'REST API'],
-        required: ['Docker', 'PostgreSQL', 'Node.js', 'Spring Boot'],
-        preferred: ['Kubernetes', 'Microservices', 'CI/CD', 'AWS']
-    },
-    'frontend engineer': {
-        critical: ['JavaScript', 'React', 'HTML', 'CSS', 'Git'],
-        required: ['TypeScript', 'REST API'],
-        preferred: ['Angular', 'Vue', 'Testing', 'Tailwind']
-    },
-    'full stack engineer': {
-        critical: ['JavaScript', 'React', 'Python', 'SQL', 'Git'],
-        required: ['HTML', 'CSS', 'REST API', 'Docker'],
-        preferred: ['TypeScript', 'Kubernetes', 'Microservices', 'AWS']
-    },
-    'ml engineer': {
-        critical: ['Python', 'Machine Learning', 'PyTorch', 'TensorFlow', 'SQL'],
-        required: ['Statistics', 'Pandas', 'NumPy', 'Jupyter'],
-        preferred: ['MLOps', 'Kubernetes', 'AWS', 'Deep Learning']
-    },
-    'data scientist': {
-        critical: ['Python', 'SQL', 'Statistics', 'Pandas', 'Jupyter'],
-        required: ['Machine Learning', 'Data Visualization', 'NumPy'],
-        preferred: ['TensorFlow', 'Tableau', 'Power BI', 'AWS']
-    },
-    'generative ai developer': {
-        critical: ['Python', 'Generative AI', 'Large Language Models', 'Prompt Engineering'],
-        required: ['Machine Learning', 'PyTorch', 'TensorFlow', 'LangChain'],
-        preferred: ['MLOps', 'Docker', 'AWS', 'Kubernetes', 'Hugging Face']
-    },
-    'android developer': {
-        critical: ['Java', 'Kotlin', 'Android', 'Git'],
-        required: ['REST API', 'SQL'],
-        preferred: ['CI/CD', 'Docker', 'Testing']
-    },
-    'ios developer': {
-        critical: ['Swift', 'iOS', 'Git'],
-        required: ['REST API', 'Xcode'],
-        preferred: ['CI/CD', 'Testing', 'Docker']
-    },
-    'devops engineer': {
-        critical: ['Docker', 'Kubernetes', 'CI/CD', 'Git', 'AWS'],
-        required: ['Linux', 'Terraform', 'Bash'],
-        preferred: ['Monitoring', 'Ansible', 'GCP', 'Azure']
-    },
-    'data engineer': {
-        critical: ['Python', 'SQL', 'Apache Spark', 'Git'],
-        required: ['Docker', 'PostgreSQL', 'Kafka'],
-        preferred: ['Kubernetes', 'Airflow', 'AWS', 'Big Data']
-    }
-};
-
-function matchRoleTemplate(jobRole) {
-    if (!jobRole) return null;
-    const normalized = jobRole.toLowerCase();
-    for (const [role, template] of Object.entries(ROLE_TEMPLATES)) {
-        if (normalized.includes(role) || role.includes(normalized)) {
-            return { role, ...template };
-        }
-    }
-    return null;
-}
 
 function compareSkillsToRole(results, roleTemplate) {
     if (!roleTemplate) return null;
@@ -361,11 +44,6 @@ function compareSkillsToRole(results, roleTemplate) {
     };
 
     return { missing, matched, coverage };
-}
-
-function r_lang_alias() {
-    // Match standalone "R" only when clearly referring to the language
-    return '\\bR\\b(?=\\s*(?:,|\\.|\\)|\\sand|\\sor|\\s+programming|/))';
 }
 
 // ============================================================
@@ -491,7 +169,7 @@ function parseCompanyAndRole(text) {
     }
 
     // Match against role templates
-    const matched = matchRoleTemplate(jobRole);
+    const matched = registry.matchRole(jobRole);
     if (matched) {
         jobRole = matched.role; // Replace with canonical role name
     }
@@ -541,15 +219,11 @@ function parseJobDescription(text) {
     const sections = getSections(text);
     const skills = new Map();
 
-    // Sort skills by longest alias first to prevent substring collisions
-    const entries = Object.entries(SKILL_DICTIONARY).flatMap(([canonical, cfg]) =>
-        cfg.aliases.map(alias => ({ canonical, alias, category: cfg.category }))
-    );
-    entries.sort((a, b) => b.alias.length - a.alias.length);
+    const entries = registry.getAllSkillEntries();
 
     for (const section of sections) {
         const used = new Set();
-        for (const { canonical, alias, category } of entries) {
+        for (const { canonical, alias, category, guardWords } of entries) {
             const isRegex = alias.includes('\\b') || alias.includes('(?');
             let pattern;
 
@@ -569,6 +243,12 @@ function parseJobDescription(text) {
                     if (used.has(i)) { alreadyUsed = true; break; }
                 }
                 if (alreadyUsed) continue;
+                if (guardWords?.length) {
+                    const wStart = Math.max(0, m.index - 150);
+                    const wEnd   = Math.min(section.text.length, m.index + m[0].length + 150);
+                    const win = section.text.substring(wStart, wEnd).toLowerCase();
+                    if (guardWords.some(gw => win.includes(gw.toLowerCase()))) continue;
+                }
                 for (let i = m.index; i < m.index + m[0].length; i++) used.add(i);
 
                 const ctxStart = Math.max(0, m.index - 90);
@@ -669,13 +349,10 @@ function extractSkillsFromTechnicalSection(text) {
     const skills = [];
     if (!text) return skills;
 
-    const entries = Object.entries(SKILL_DICTIONARY).flatMap(([canonical, cfg]) =>
-        cfg.aliases.map(alias => ({ canonical, alias, category: cfg.category }))
-    );
-    entries.sort((a, b) => b.alias.length - a.alias.length);
+    const entries = registry.getAllSkillEntries();
 
     const used = new Set();
-    for (const { canonical, alias, category } of entries) {
+    for (const { canonical, alias, category, guardWords } of entries) {
         const isRegex = alias.includes('\\b') || alias.includes('(?');
         let pattern;
         if (alias.toLowerCase().includes('c#')) {
@@ -693,6 +370,12 @@ function extractSkillsFromTechnicalSection(text) {
                 if (used.has(i)) { alreadyUsed = true; break; }
             }
             if (alreadyUsed) continue;
+            if (guardWords?.length) {
+                const wStart = Math.max(0, m.index - 150);
+                const wEnd   = Math.min(text.length, m.index + m[0].length + 150);
+                const win = text.substring(wStart, wEnd).toLowerCase();
+                if (guardWords.some(gw => win.includes(gw.toLowerCase()))) continue;
+            }
             for (let i = m.index; i < m.index + m[0].length; i++) used.add(i);
 
             // Check context window for "learning" keyword
@@ -719,13 +402,10 @@ function extractSkillsFromEducation(text) {
     const skills = [];
     if (!text) return skills;
 
-    const entries = Object.entries(SKILL_DICTIONARY).flatMap(([canonical, cfg]) =>
-        cfg.aliases.map(alias => ({ canonical, alias, category: cfg.category }))
-    );
-    entries.sort((a, b) => b.alias.length - a.alias.length);
+    const entries = registry.getAllSkillEntries();
 
     const used = new Set();
-    for (const { canonical, alias, category } of entries) {
+    for (const { canonical, alias, category, guardWords } of entries) {
         const isRegex = alias.includes('\\b') || alias.includes('(?');
         let pattern;
         if (alias.toLowerCase().includes('c#')) {
@@ -743,6 +423,12 @@ function extractSkillsFromEducation(text) {
                 if (used.has(i)) { alreadyUsed = true; break; }
             }
             if (alreadyUsed) continue;
+            if (guardWords?.length) {
+                const wStart = Math.max(0, m.index - 150);
+                const wEnd   = Math.min(text.length, m.index + m[0].length + 150);
+                const win = text.substring(wStart, wEnd).toLowerCase();
+                if (guardWords.some(gw => win.includes(gw.toLowerCase()))) continue;
+            }
             for (let i = m.index; i < m.index + m[0].length; i++) used.add(i);
 
             const ctxStart = Math.max(0, m.index - 60);
@@ -771,13 +457,10 @@ function extractSkillsFromProjects(text) {
     const skills = [];
     if (!text) return skills;
 
-    const entries = Object.entries(SKILL_DICTIONARY).flatMap(([canonical, cfg]) =>
-        cfg.aliases.map(alias => ({ canonical, alias, category: cfg.category }))
-    );
-    entries.sort((a, b) => b.alias.length - a.alias.length);
+    const entries = registry.getAllSkillEntries();
 
     const used = new Set();
-    for (const { canonical, alias, category } of entries) {
+    for (const { canonical, alias, category, guardWords } of entries) {
         const isRegex = alias.includes('\\b') || alias.includes('(?');
         let pattern;
         if (alias.toLowerCase().includes('c#')) {
@@ -795,6 +478,12 @@ function extractSkillsFromProjects(text) {
                 if (used.has(i)) { alreadyUsed = true; break; }
             }
             if (alreadyUsed) continue;
+            if (guardWords?.length) {
+                const wStart = Math.max(0, m.index - 150);
+                const wEnd   = Math.min(text.length, m.index + m[0].length + 150);
+                const win = text.substring(wStart, wEnd).toLowerCase();
+                if (guardWords.some(gw => win.includes(gw.toLowerCase()))) continue;
+            }
             for (let i = m.index; i < m.index + m[0].length; i++) used.add(i);
 
             const ctxStart = Math.max(0, m.index - 60);
@@ -838,13 +527,10 @@ function extractSkillsFromExperience(text) {
         const titleLine = block.split('\n')[0];
         if (!isTechRole(titleLine)) continue; // Skip non-tech roles
 
-        const entries = Object.entries(SKILL_DICTIONARY).flatMap(([canonical, cfg]) =>
-            cfg.aliases.map(alias => ({ canonical, alias, category: cfg.category }))
-        );
-        entries.sort((a, b) => b.alias.length - a.alias.length);
+        const entries = registry.getAllSkillEntries();
 
         const used = new Set();
-        for (const { canonical, alias, category } of entries) {
+        for (const { canonical, alias, category, guardWords } of entries) {
             const isRegex = alias.includes('\\b') || alias.includes('(?');
             let pattern;
             if (alias.toLowerCase().includes('c#')) {
@@ -862,6 +548,12 @@ function extractSkillsFromExperience(text) {
                     if (used.has(i)) { alreadyUsed = true; break; }
                 }
                 if (alreadyUsed) continue;
+                if (guardWords?.length) {
+                    const wStart = Math.max(0, m.index - 150);
+                    const wEnd   = Math.min(block.length, m.index + m[0].length + 150);
+                    const win = block.substring(wStart, wEnd).toLowerCase();
+                    if (guardWords.some(gw => win.includes(gw.toLowerCase()))) continue;
+                }
                 for (let i = m.index; i < m.index + m[0].length; i++) used.add(i);
 
                 const ctxStart = Math.max(0, m.index - 60);
@@ -925,9 +617,9 @@ const SAMPLE_JD = `Machine Learning Intern — Summer 2026
 
  About the job
 
-SeatGeek believes live events are powerful experiences that unite humans. With our technological savvy and fan-first attitude we’re simplifying and modernizing the ticketing industry.
+SeatGeek believes live events are powerful experiences that unite humans. With our technological savvy and fan-first attitude we're simplifying and modernizing the ticketing industry.
 
-We’re building an awesome entertainment ecosystem where fans have effortless access to incredible live experiences, while sports teams, venues, and shows have unprecedented access to their audiences – because everyone should expect more from the ticketing industry.
+We're building an awesome entertainment ecosystem where fans have effortless access to incredible live experiences, while sports teams, venues, and shows have unprecedented access to their audiences – because everyone should expect more from the ticketing industry.
 
 Open roles for new graduates
 
@@ -971,7 +663,7 @@ Perks
 
     Equity stake
     Discretionary annual bonus
-    Flexible work environment, allowing you to work as many days a week in the office as you’d like or 100% remotely
+    Flexible work environment, allowing you to work as many days a week in the office as you'd like or 100% remotely
     A WFH stipend to support your home office setup
     Unlimited PTO
     Eligible for the SG discretionary annual bonus based on individual and company performance
@@ -1041,7 +733,7 @@ function ResultsViewSimple({ results, companyName, jobRole }) {
 
             {/* Role Template Comparison */}
             {(() => {
-                const roleTemplate = matchRoleTemplate(jobRole);
+                const roleTemplate = registry.matchRole(jobRole);
                 if (!roleTemplate) return null;
 
                 const comparison = compareSkillsToRole(results, roleTemplate);
