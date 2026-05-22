@@ -1,0 +1,49 @@
+{
+  "version": "2026.1",
+  "updated": "2026-05-22",
+  "note": "SEED FILE. Roles reference skill IDs from skills.json — never duplicate skill names here. Four roles are fully defined as exemplars; six are stubs (status: 'stub') to be completed by porting ROLE_TEMPLATES from src/jd-skill-parser.jsx. Stubs may need new skills (e.g. kotlin, swift, terraform) added to skills.json first.",
+  "roles": [
+    {
+      "id": "ml-engineer",
+      "label": "ML Engineer",
+      "tiers": {
+        "critical": ["python", "machine-learning"],
+        "required": ["pandas", "numpy", "sql"],
+        "preferred": ["pytorch", "scikit-learn", "docker"]
+      }
+    },
+    {
+      "id": "backend-engineer",
+      "label": "Backend Engineer",
+      "tiers": {
+        "critical": ["python", "sql"],
+        "required": ["django", "fastapi", "nodejs"],
+        "preferred": ["docker", "aws", "linux"]
+      }
+    },
+    {
+      "id": "frontend-engineer",
+      "label": "Frontend Engineer",
+      "tiers": {
+        "critical": ["javascript", "react"],
+        "required": ["tailwind", "git"],
+        "preferred": ["nextjs"]
+      }
+    },
+    {
+      "id": "data-scientist",
+      "label": "Data Scientist",
+      "tiers": {
+        "critical": ["python", "machine-learning"],
+        "required": ["pandas", "numpy", "sql"],
+        "preferred": ["scikit-learn", "jupyter", "deep-learning"]
+      }
+    },
+    { "id": "full-stack-engineer", "label": "Full Stack Engineer", "status": "stub", "tiers": { "critical": [], "required": [], "preferred": [] } },
+    { "id": "generative-ai-developer", "label": "Generative AI Developer", "status": "stub", "tiers": { "critical": [], "required": [], "preferred": [] } },
+    { "id": "android-developer", "label": "Android Developer", "status": "stub", "tiers": { "critical": [], "required": [], "preferred": [] } },
+    { "id": "ios-developer", "label": "iOS Developer", "status": "stub", "tiers": { "critical": [], "required": [], "preferred": [] } },
+    { "id": "devops-engineer", "label": "DevOps Engineer", "status": "stub", "tiers": { "critical": [], "required": [], "preferred": [] } },
+    { "id": "data-engineer", "label": "Data Engineer", "status": "stub", "tiers": { "critical": [], "required": [], "preferred": [] } }
+  ]
+}
