@@ -1,0 +1,24 @@
+Machine Learning Engineer — Acme AI Corp
+Austin, TX · Hybrid · Full-time
+
+About the Role
+Acme AI Corp is looking for a Machine Learning Engineer to join our growing data science
+team. You will design, build, and deploy ML models that power our core product. We love
+the spring season here in Austin, but we especially love engineers who ship.
+
+Required Skills & Qualifications
+- 3+ years of professional experience in machine learning and software engineering
+- Strong proficiency in Python for data analysis and model development
+- Experience with SQL for querying and managing large datasets
+- Hands-on experience with scikit-learn and PyTorch
+- Familiarity with Docker for containerized model deployment
+- Proficiency with Git and version control workflows
+
+Preferred Qualifications
+- Experience deploying models to AWS (SageMaker, S3, EC2)
+- Exposure to distributed training or large-scale pipelines
+
+Benefits
+- Competitive salary
+- Remote-friendly (hybrid schedule)
+- Annual learning stipend

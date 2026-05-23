@@ -1,0 +1,24 @@
+Jane Smith
+jane@example.com | github.com/janesmith
+
+SUMMARY
+Recent CS graduate with a passion for data science and machine learning.
+
+TECHNICAL SKILLS
+Python, SQL, Git
+Currently learning React.js as a side hobby
+
+EDUCATION
+B.S. Computer Science — State University, 2024
+
+PROJECTS
+- Deployed a containerized data pipeline using Docker
+- Built a recommendation engine for movie ratings
+
+PROFESSIONAL EXPERIENCE
+Machine Learning Engineer Intern | DataCo | Summer 2023
+- Trained and evaluated models using PyTorch and machine learning best practices
+- Processed and cleaned datasets with Python
+
+ADDITIONAL INFORMATION
+Interests: hiking, board games

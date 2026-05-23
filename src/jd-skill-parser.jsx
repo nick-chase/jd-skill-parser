@@ -177,7 +177,7 @@ function parseCompanyAndRole(text) {
     return { companyName, jobRole };
 }
 
-function parseJobMeta(text) {
+export function parseJobMeta(text) {
     const meta = {
         locationType: null,
         jobType: null,
@@ -213,7 +213,7 @@ function parseJobMeta(text) {
     return meta;
 }
 
-function parseJobDescription(text) {
+export function parseJobDescription(text) {
     if (!text || !text.trim()) return [];
 
     const sections = getSections(text);
@@ -574,7 +574,7 @@ function extractSkillsFromExperience(text) {
 }
 
 // Main resume parser - merges all sections, deduplicates, takes highest level
-function parseResumeText(text) {
+export function parseResumeText(text) {
     if (!text || !text.trim()) return [];
 
     const sections = extractResumeSections(text);
@@ -1133,6 +1133,62 @@ function Legend() {
 }
 
 // ============================================================
+// GAP ANALYSIS
+// ============================================================
+
+export function runGapAnalysis(jdSkills, resumeSkills) {
+    if (!jdSkills || !resumeSkills) return null;
+
+    const resumeMap = new Map(resumeSkills.map(s => [s.name, s]));
+
+    const critical = [];    // In JD, not in resume
+    const levelGaps = [];   // In resume but below required level
+    const matched = [];     // In resume at or above required level
+    const bonus = [];       // In resume, not in JD
+
+    // Check each JD skill against resume
+    for (const jdSkill of jdSkills) {
+        const resumeSkill = resumeMap.get(jdSkill.name);
+        if (!resumeSkill) {
+            // Missing entirely
+            critical.push({
+                ...jdSkill,
+                resumeLevel: 0,
+                gap: jdSkill.level,
+            });
+        } else if (resumeSkill.level < jdSkill.level || resumeSkill.level === 0) {
+            // Have it but below required level
+            levelGaps.push({
+                ...jdSkill,
+                resumeLevel: resumeSkill.level,
+                gap: jdSkill.level - resumeSkill.level,
+            });
+        } else {
+            // Have it at or above required level
+            matched.push({
+                ...jdSkill,
+                resumeLevel: resumeSkill.level,
+                gap: 0,
+            });
+        }
+    }
+
+    // Check resume skills not in JD
+    const jdSkillNames = new Set(jdSkills.map(s => s.name));
+    for (const resumeSkill of resumeSkills) {
+        if (!jdSkillNames.has(resumeSkill.name)) {
+            bonus.push(resumeSkill);
+        }
+    }
+
+    // Sort critical by importance (most important first)
+    critical.sort((a, b) => b.importance - a.importance);
+    levelGaps.sort((a, b) => b.importance - a.importance);
+
+    return { critical, levelGaps, matched, bonus };
+}
+
+// ============================================================
 // MAIN - APP
 // ============================================================
 
@@ -1168,57 +1224,6 @@ export default function App() {
         }
     };
 
-    const runGapAnalysis = (jdSkills, resumeSkills) => {
-        if (!jdSkills || !resumeSkills) return null;
-
-        const resumeMap = new Map(resumeSkills.map(s => [s.name, s]));
-
-        const critical = [];    // In JD, not in resume
-        const levelGaps = [];   // In resume but below required level
-        const matched = [];     // In resume at or above required level
-        const bonus = [];       // In resume, not in JD
-
-        // Check each JD skill against resume
-        for (const jdSkill of jdSkills) {
-            const resumeSkill = resumeMap.get(jdSkill.name);
-            if (!resumeSkill) {
-                // Missing entirely
-                critical.push({
-                    ...jdSkill,
-                    resumeLevel: 0,
-                    gap: jdSkill.level,
-                });
-            } else if (resumeSkill.level < jdSkill.level || resumeSkill.level === 0) {
-                // Have it but below required level
-                levelGaps.push({
-                    ...jdSkill,
-                    resumeLevel: resumeSkill.level,
-                    gap: jdSkill.level - resumeSkill.level,
-                });
-            } else {
-                // Have it at or above required level
-                matched.push({
-                    ...jdSkill,
-                    resumeLevel: resumeSkill.level,
-                    gap: 0,
-                });
-            }
-        }
-
-        // Check resume skills not in JD
-        const jdSkillNames = new Set(jdSkills.map(s => s.name));
-        for (const resumeSkill of resumeSkills) {
-            if (!jdSkillNames.has(resumeSkill.name)) {
-                bonus.push(resumeSkill);
-            }
-        }
-
-        // Sort critical by importance (most important first)
-        critical.sort((a, b) => b.importance - a.importance);
-        levelGaps.sort((a, b) => b.importance - a.importance);
-
-        return { critical, levelGaps, matched, bonus };
-    };
     const exportJson = () => {
         if (!results) return;
         const data = JSON.stringify(results, null, 2);
