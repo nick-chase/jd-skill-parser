@@ -1,0 +1,83 @@
+Company logo for, Deloitte.
+
+Deloitte
+
+Unqork Developer 
+
+Morristown, NJ · Reposted 2 weeks ago · 19 people clicked apply
+
+Promoted by hirer · Responses managed off LinkedIn
+Hybrid
+Full-time
+Apply
+Use AI to assess how you fit
+
+Get AI-powered advice on this job and more exclusive features with Premium. Try Premium for $0
+
+    Show match details
+
+    Tailor my resume
+
+    Help me stand out
+
+People you can reach out to
+
+School alumni from New Jersey Institute of Technology
+Show all
+About the job
+
+Position Summary
+
+Join our AI & Engineering team in transforming technology platforms, driving innovation, and helping make a significant impact on our clients' success. You'll work alongside talented professionals reimagining and re-engineering operations and processes that are critical to businesses. Your contributions can help clients improve financial performance, accelerate new digital ventures, and fuel growth through innovation.
+
+AI & Engineering leverages cutting-edge engineering capabilities to build, deploy, and operate integrated/verticalized sector solutions in software, data, AI, network, and hybrid cloud infrastructure. These solutions are powered by engineering for business advantage, transforming mission-critical operations. We enable clients to stay ahead with the latest advancements by transforming engineering teams and modernizing technology & data platforms. Our delivery models are tailored to meet each client's unique requirements.
+
+Recruiting for this role ends on May 5, 2026.
+
+The team
+
+Our Industry Solutions offering provides verticalized solutions that transform how clients sell products, deliver services, generate growth, and execute mission-critical operations. We deliver integrated business expertise with scalable, repeatable technology solutions specifically engineered for each sector.
+
+Insurance moves the world forward. It's the invisible safety net behind everything else that happens in society. To stay ahead, insurers need modern solutions. Our Insurance Transformation practitioners serve as trusted advisors to our clients, combining strategic thinking with deep industry knowledge to solve complex business problems in a team-based environment. We architect operating models and processes that enable growth, optimize capital, and maximize operational efficiency. We implement innovative technology solutions spanning core, digital, data, analytics, cloud and AI.
+
+Deloitte's Financial Services Industry consulting practice is the largest in the world, serving over 90% of Fortune 500 banking, insurance, securities, investment management, and real estate companies.
+
+Work you'll do
+
+As an Insurance Solutions Senior Consultant specializing in Unqork Development, you will be responsible for:
+
+    Building and configuring enterprise applications on the Unqork no-code platform across the software development lifecycle (SDLC)
+    Translating business and technical requirements into Unqork modules, user interface workflows, validations, business rules, and data mappings
+    Developing and supporting integrations between Unqork and enterprise systems using Representational State Transfer (REST) APIs, events/queues as applicable, databases, and identity and access management (IAM) services
+    Implementing quality practices including unit testing, integration testing support, defect triage, and documentation to enable maintainable releases
+    Supporting Agile delivery through estimation, sprint planning, backlog refinement, demos, and release readiness in collaboration with product owners, architects, and quality assurance
+    Troubleshooting production and lower-environment issues, performing root-cause analysis, and implementing sustainable fixes with appropriate monitoring and controls
+
+Qualifications
+
+Required:
+
+    Bachelor's degree
+    4+ years of experience delivering enterprise applications in software engineering or configuration-based platforms
+    3+ years designing, developing, and deploying applications on the Unqork platform
+    2+ implementations delivering enterprise integrations using RESTful APIs, databases, and authentication and authorization services such as OAuth 2.0 or OpenID Connect
+    Experience working in Agile delivery teams using Scrum ceremonies and release processes
+    Ability to travel 50%, on average, based on the work you do and the clients and industries/sectors you serve.
+    Limited immigration sponsorship may be available.
+
+Preferred:
+
+    Advanced degree
+    Experience delivering insurance solutions using Unqork in underwriting, policy administration, claims, billing, or customer and agent portals
+    Experience with Unqork environments, deployment approaches, and delivery automation including continuous integration and continuous delivery (CI/CD) in partnership with DevOps teams
+    Experience supporting performance and security testing, including non-functional requirements, test planning, and remediation
+    1+ cloud platform implementation supporting Unqork using Amazon Web Services (AWS), Microsoft Azure, or Google Cloud Platform (GCP)
+    Unqork Developer or Architect certification, if available
+
+The wage range for this role takes into account the wide range of factors that are considered in making compensation decisions including but not limited to skill sets; experience and training; licensure and certifications; and other business and organizational needs. The disclosed range estimate has not been adjusted for the applicable geographic differential associated with the location at which the position may be filled. At Deloitte, it is not typical for an individual to be hired at or near the top of the range for their role and compensation decisions are dependent on the facts and circumstances of each case. A reasonable estimate of the current range is $107,600 to $198,400.
+
+You may also be eligible to participate in a discretionary annual incentive program, subject to the rules governing the program, whereby an award, if any, depends on various factors, including, without limitation, individual and organizational performance.
+
+Information for applicants with a need for accommodation:
+
+https://www2.deloitte.com/us/en/pages/careers/articles/join-deloitte-assistance-for-disabled-applicants.html

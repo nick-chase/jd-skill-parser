@@ -1,0 +1,65 @@
+
+PNY Technologies logo
+PNY Technologies
+Test Development Engineer 
+Parsippany, NJ · Reposted 1 week ago · 94 people clicked apply
+
+Promoted by hirer · Responses managed off LinkedIn
+Test Development Engineer
+PNY Technologies · Parsippany, NJ (On-site)
+How your profile and resume fit this job
+
+About the job
+
+This position is based onsite in Parsippany, NJ. Relocation assistance is not available for this role.
+
+Main Function
+
+    Create, validate, implement and maintain PNY's software and hardware test methods
+    Provide test engineering support for all PNY facilities
+
+Qualifications
+
+    Bachelor’s degree in Engineering or equivalent
+    Advanced degree and/or additional technical education is a plus
+    2+ years’ experience in a test engineering environment
+    Excellent troubleshooting, problem solving and project management skills
+    Ability to multitask, in a fast paced production environment
+    Proficient with operating systems and component test hardware
+    Working knowledge of :
+        Automated Test Equipment (ATE)
+        UNIX/Linux
+        Programming languages a plus
+    Familiar with the operations of memory, video and NAND Flash
+    Excellent oral and written communications skills, including ability to communicate effectively in English
+    Ability to travel (less than 5%)
+
+Working Conditions
+
+Time is split between regular office, lab and production test areas, with ESD procedures to be observed.
+
+Key Relationships
+
+Interfaces with Engineering, Manufacturing, Quality, Purchasing, Sales, Operations, suppliers and customers
+
+Duties And Responsibilities
+
+To perform this job successfully, the individual must be able to perform each essential duty satisfactorily. The requirements listed below are representative of the knowledge, skill, and/or ability required. Reasonable accommodations may be made to enable individuals with disabilities to perform the essential functions.
+
+    Create, validate and implement PNY's production software and hardware test approaches and methodologies
+    Generate product application test reports (ATR) for new product at time of qualification
+    Maintain PNY's manufacturing test platform software and hardware, including the test network
+    Provide technical assistance and training to test lab staff
+    Generate and validate production test software and hardware
+    Perform system administration on all production test platforms at NJ location
+    Coordinate with external agencies to ensure qualification of PNY products
+    Coordinate with customers regarding test issues
+    Assist in other areas, as assigned
+
+Compensation
+
+The base salary range for this position is $80,000.00 to $120,000.00; the exact salary depends on several factors such as experience, skills, education, and budget.
+
+Benefits Overview
+
+We offer a competitive benefits package that includes medical, dental, vision, basic life and AD&D coverage, short- and long-term disability, a 401(k) retirement plan, annual discretionary salary increases and bonuses. Employees receive paid company holidays, paid time off, and access to company-paid training. Optional benefits include tuition reimbursement, a 529 college savings plan, pet insurance, legal and ID theft coverage, and other voluntary insurance plans.
