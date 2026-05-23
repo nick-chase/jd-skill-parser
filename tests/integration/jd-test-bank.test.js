@@ -39,7 +39,7 @@ const TEST_CASES = [
     file:           'job_desc_2.txt',
     label:          'Data Engineering Intern',
     minSkills:      0, // data-ops / warehouse tooling not yet in skill dictionary
-    assertJobType:  false, // bug #2: Full-time text may override Internship detection
+    assertJobType:  true,
     jobType:        'Internship',
     expectedSkills: [],
   },
@@ -87,7 +87,7 @@ const TEST_CASES = [
     file:           'job_desc_8.txt',
     label:          'SWE Intern – Wedbush',
     minSkills:      3,
-    assertJobType:  false, // bug #2
+    assertJobType:  true,
     jobType:        'Internship',
     expectedSkills: ['Microsoft Excel'], // Python mentioned but not parsed for this JD
   },
@@ -95,7 +95,7 @@ const TEST_CASES = [
     file:           'job_desc_9.txt',
     label:          'AI Vibe Coding Intern',
     minSkills:      3,
-    assertJobType:  false, // bug #2
+    assertJobType:  true,
     jobType:        'Internship',
     expectedSkills: ['Python', 'JavaScript'],
   },

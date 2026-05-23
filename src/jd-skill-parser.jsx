@@ -192,11 +192,12 @@ export function parseJobMeta(text) {
     else if (lower.includes('hybrid')) meta.locationType = 'Hybrid';
     else if (lower.includes('remote')) meta.locationType = 'Remote';
 
-    // Job type — check Full-time/Part-time/Contract FIRST, internship only if those don't match
-    if (lower.includes('full-time') || lower.includes('full time')) meta.jobType = 'Full-time';
+    // Job type — internship is most specific; check it first to prevent "full-time internship" misclassification.
+    // Word-boundary regex avoids matching "internal" / "international" as false positives.
+    if (/\binternship|\bintern\b/i.test(lower)) meta.jobType = 'Internship';
+    else if (lower.includes('full-time') || lower.includes('full time')) meta.jobType = 'Full-time';
     else if (lower.includes('part-time') || lower.includes('part time')) meta.jobType = 'Part-time';
     else if (lower.includes('contract')) meta.jobType = 'Contract';
-    else if (lower.includes('internship') || lower.includes('intern')) meta.jobType = 'Internship';
 
     // Location — try "Location:" prefix first, then fallback to City, State · pattern
     let locationMatch = text.match(/(?:Location|📍)[:\s]*([A-Z][a-zA-Z\s]{1,20},\s*[A-Z]{2})/i);
