@@ -1,0 +1,113 @@
+
+Linde logo
+Linde
+Staff Engineer I - Govt 
+New Providence, NJ · Reposted 1 week ago · 32 people clicked apply
+
+Promoted by hirer · Responses managed off LinkedIn
+How your profile and resume fit this job
+
+Get AI-powered advice on this job and more exclusive features with Premium. Try Premium for $0
+
+People you can reach out to
+
+    Pranay profile photo
+
+Pranay profile photo
+Pranay Shah 
+· 3rd
+Director IT 
+School alum from New Jersey Institute of Technology
+About the job
+
+Purpose of the position:
+
+Linde Special Projects in New Providence, NJ is seeking a skilled Software Engineer to support and advance specialized, mission-critical hardware systems focused on gas handling and metrology. This role blends software development and process control of hardware components with hands-on system support, requiring a strong understanding of physical systems, electronics, instrumentation, and data acquisition.
+
+The ideal candidate will minimize downtime and ensure the reliability of existing systems while designing and implementing software for next-generation hardware platforms. This position requires a DOD security clearance; US citizenship is required.
+
+Principal responsibilities will include:
+
+Laboratory & Technical Leadership
+
+     Maintain, monitor, and troubleshoot software systems that control and interface with gas handling and radioactive measurement equipment; help ensure reliable operation and minimal downtime of existing systems
+     Integrate sensors, detectors, and instrumentation with software platforms for real-time monitoring and analysis
+     Collaborate with engineers and scientists to define system requirements and translate them into robust software solutions
+     Optimize hardware systems for performance, reliability, and safety
+     Implement data processing pipelines for measurement analysis, calibration, and reporting
+     Support system upgrades, testing, and validation, including documentation and compliance
+     Participate in debugging hardware and software issues in a laboratory environment
+
+Research & Innovation
+
+     Develop and successfully deploy software for new hardware systems, including control logic, data acquisition, and user interfaces
+     Lead or contribute to research projects from concept through implementation and validation.
+
+Communication
+
+     Interface with key stakeholders, including department technical staff, management, and US government technical staff.
+     Prepare clear, data-driven technical reports and presentations and present project updates and technical recommendations to our sponsor and collaborators.
+
+Collaboration
+
+     Work closely with internal and external scientists, engineers, and technicians on multidisciplinary research projects.
+     Support troubleshooting and root-cause investigations for instrumentation or process issues.
+
+Key interfaces
+
+     Department technical staff (Engineers/Scientists/Technicians)
+     Department management
+     US Government Technical staff
+
+Key competencies
+
+     Safety-first mentality
+     Intellectual curiosity and innovation mindset
+     Strong analytical and problem-solving abilities
+     Ability to work independently and as a part of a team in a lab-based, hands-on environment
+     Excellent communication skills; clear and confident presenter
+     Attention to detail, especially in safety-critical systems
+     Decisiveness & Task execution
+
+Required Qualifications
+
+     Bachelors degree in Electrical Engineering, Physics, Applied Physics or a closely related field
+     Strong programming experience used in hardware development such as C/C++, Assembly, PLC programming; experience with high-level languages such as python, etc.
+     Experience interfacing software with hardware systems (e.g., DAQ systems, embedded systems, industrial controls, etc.)
+     Familiarity with signal processing, instrumentation, or measurement systems
+     Familiarity with Windows and Linux operating systems
+     Familiarity with relational databases (SQL, etc.)
+     Understanding of gas flow systems, vacuum systems, and radiation detection principles
+     Ability to rapidly troubleshoot, maintain, repair, and improve complex systems
+     Ability to obtain and maintain a DOD secret level security clearance (This requires US citizenship).
+
+Preferred Qualifications
+
+     Experience with legacy programming languages such as Visual Basic 6.0, Delphi/Pascal, FORTRAN
+     Experience with radioactive counting systems, detectors (e.g., scintillation counters, Geiger-Müller counting), or spectroscopy
+     Knowledge of communication protocols (e.g., TCP/IP, serial, Modbus)
+     Familiarity with laboratory or industrial safety standards
+
+Why you will enjoy working with us:
+
+Linde is a leading global industrial gases and engineering company with 2025 sales of $33 billion. We live our mission of making our world more productive every day by providing high-quality solutions, technologies and services which are making our customers more successful and helping to sustain, decarbonize and protect our planet.
+
+Linde Gas & Equipment Inc. (LG&E) is part of the largest Welding, Industrial, Medical, and Specialty Gases companies in the U.S. We carry a comprehensive selection of industrial gases, such as oxygen, nitrogen, argon, and carbon dioxide, etc. LG&E has an extensive network of production plants, retail stores, distribution centers, and customer service locations with a focus on making our world more productive every day by providing high-quality solutions, technologies and services which are making our customers more successful by helping to sustain and protect our planet.
+
+For more information about the company, please visit our website.
+
+Don’t wait, fill out an application right from your phone today! DRIVE YOUR CAREER FORWARD!
+
+All qualified applicants will receive consideration for employment without regard to race, color, religion, sex, national origin, age, disability, protected veteran status, pregnancy, sexual orientation, gender identity or expression, or any other reason prohibited by applicable law.
+
+Primary Location
+
+New Jersey-New Providence
+
+Schedule
+
+Full-time
+
+Unposting Date
+
+Ongoing

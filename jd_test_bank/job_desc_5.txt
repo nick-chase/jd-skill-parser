@@ -1,0 +1,70 @@
+
+IBM logo
+IBM
+Software Engineer Apprentice 
+Armonk, NY · Reposted 1 week ago · Over 100 people clicked apply
+
+Promoted by hirer · Responses managed off LinkedIn
+How your profile and resume fit this job
+
+Get AI-powered advice on this job and more exclusive features with Premium. Try Premium for $0
+
+People you can reach out to
+
+    United Airlines logo
+
+United Airlines logo
+Company alumni from United Airlines and others in your network
+About the job
+
+Introduction
+
+At IBM, work is more than a job - it's a calling: To build. To design. To code. To consult. To think along with clients and sell. To make markets. To invent. To collaborate. Not just to do something better, but to attempt things you've never thought possible. Are you ready to lead in this new era of technology and solve some of the world's most challenging problems? If so, lets talk.
+
+Your Role And Responsibilities
+
+Are you interested in pursuing a software development career? Have you heard about agile development, but want to learn more about how it ‘works’? Are you someone that has a foundational understanding of development or programming concepts, but want to take a less traditional path to achieve it?
+
+What is an Apprenticeship?
+
+IBM Apprenticeship Program, which lasts approximately 12 months, is an official registered apprenticeship recognized by the Department of Labor (DOL). Every graduate of a Registered Apprenticeship program receives a nationally-recognized credential from the DOL.
+
+During the apprenticeship duration, you will be required to complete specific learning hours and on the job training that has been outlined to ensure you are developing the skills and competencies essential to the role. You will be able to learn and grow at your own pace, but we expect most apprentices will complete their learning within 12 months. Once you graduate and receive your certificate from our apprentice program, you will be eligible to apply to available full-time roles at IBM.
+
+Who You Are
+
+An apprenticeship is about learning. We’re seeking candidates who have the following requirements, but we know you’re just getting your career started, and we’re committed to helping you learn and grow. If you’ve had some experience with coding or development in the past, you’re exactly the type of candidate we’re looking for….
+
+    Drive and eagerness to learn
+    Strong problem solving and communication skills
+    Able to work independently and take initiative, as well as work collaboratively and contribute to an agile team environment
+    Some knowledge or experience in ONE or more of the following:
+        Java, JavaScript, PHP, C#, Objective-C, C/C++, Python, Ruby and/or functional languages (Haskell, Scala, F#, Clojure)
+        Design Thinking
+        Hypothesis driven development
+        Social coding
+        Agile principles
+        Container development using tools such as Docker or Vagrant
+        Application Development, DevOps automation, and the development toolchain (e.g. Travis, Jenkins, Junit, automated test tools)
+
+What’s the Experience? 
+
+As an apprentice, you'll join with other apprentices in a local cohort. You'll go through your first few weeks together, learning about IBM and the skills you'll be attaining throughout your apprenticeship. Then, you'll work with your managers and mentors to progress through your personal skills roadmap, learning and demonstrating new knowledge and competencies through hands-on application with your project teams. You'll complete milestones along the way, earning digital credentials to validate your skills, and will come back together with other apprentices to participate in on-going training and development focused on your professional and technical skills.
+
+As a Software Engineer Apprentice at IBM, you’ll work as part of a larger team of experienced developers and mentors in an interactive, collaborative environment. You’ll learn the fundamentals of development, software design, testing, and cloud computing, agile principles, IBM Design Thinking, DevOps and continuous delivery. You will also learn how to resolve IBM customer issues, debug customer problems and environments, and increase Cloud Service skills, and will build the skills to grow your career as a Software Developer. Best of all, you are a contributing member of your team, putting forward ideas, taking on responsibilities and making choices about how you get the job done just like any other IBMer.
+
+This position is not eligible for visa sponsorship. No relocation is available for this position.
+
+Preferred Education
+
+Associate's Degree/College Diploma
+
+Required Technical And Professional Expertise
+
+    Must have basic knowledge in one of the following programming languages: Java, JavaScript, PHP, C#, Objective-C, C/C++, Python, Ruby and/or functional languages (Haskell, Scala, F#, Clojure)
+    Willingness to complete the requirements of the apprenticeship program.
+
+Preferred Technical And Professional Experience
+
+    None
+

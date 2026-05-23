@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "report": "vitest run --config vitest.report.config.js"
   },
   "dependencies": {
     "react": "^19.2.6",

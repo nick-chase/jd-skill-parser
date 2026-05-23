@@ -1,0 +1,98 @@
+Senior Software Engineer / Tech Lead (AI tools/.NET/C#/React) - job post
+Trigyn
+3.73.7 out of 5 stars
+New York, NY•Hybrid work
+Contract
+Trigyn
+New York, NY•Hybrid work
+You must create an Indeed account before continuing to the company website to apply
+Profile insights
+Find out how your skills align with the job description
+Skills
+Do you have experience in Risk assessment?
+&nbsp;
+Job details
+Job type
+
+    Contract
+
+Work setting
+
+    Hybrid work
+
+&nbsp;
+Full job description
+Job Description: Senior Software Engineer / Tech Lead (AI tools/.NET/C#/React)
+
+Position Id:
+
+J0526-0049
+
+Job Type:
+
+4-6 months (contract)
+
+Country:
+
+United States
+
+Location:
+
+New York, NY
+
+Pay Rate:
+
+Open
+
+Contact Recruiter:
+
+(732) 876 7640
+Job Description:
+
+Trigyn's direct government client has an immediate need for Senior Software Engineer / Tech Lead in New York, NY. The details of the opportunity are below.
+NOTE:
+
+    Hybrid work
+    Local candidates preferred.
+
+Description:
+The client is seeking a Senior Software Engineer / Tech Lead to join the Public Facing Systems team within the IT Enterprise Solutions Delivery team. This is a hands-on technical development role responsible for the architecture, development, and modernization of mission-critical applications that serve residents, Section 8 landlords, and the general public.
+
+The ideal candidate is a seasoned full-stack engineer who thrives at the intersection of legacy system modernization and modern AI-assisted development. You will serve as the technical anchor for a portfolio of public-facing applications - leading design decisions, mentoring engineers, and driving the adoption of AI tooling to accelerate delivery and improve code quality across the team.
+
+Tasks/Duties:
+Technical Leadership:
+
+    Serve as the technical lead for one or more cross-functional development teams, owning architecture decisions, code quality standards, and delivery outcomes
+    Translate business and program requirements from stakeholders into scalable, maintainable technical solutions
+    Lead system design reviews, define technical standards, and establish best practices across the team
+    Collaborate closely with the Senior Manager to inform roadmap prioritization, resource planning, and technical risk assessment
+    Act as a subject matter expert and escalation point for complex engineering challenges across the portfolio
+
+Application Development & Modernization:
+
+    Design, develop, and maintain features across .NET/C#, Java, and React-based applications in both web and mobile contexts
+    Drive the modernization of legacy systems - refactoring aging codebases, improving performance, and introducing contemporary patterns (REST APIs, microservices, component-based front ends) using AI-assisted development workflows
+    Build and maintain RESTful APIs and integrate with internal data systems, third-party services, and city agency platforms
+    Ensure all applications meet security, accessibility (WCAG), and compliance standards appropriate for a public-sector environment
+    Contribute to mobile development efforts supporting the iOS and Android applications.
+
+AI Tooling & Developer Productivity:
+
+    Champion the adoption of AI-assisted development tools (e.g., GitHub Copilot, Cursor, Claude Code, or similar) to increase team velocity and reduce technical debt remediation timelines
+    Develop and refine internal AI-augmented workflows for code generation, automated testing, documentation, and legacy code analysis
+    Evaluate and implement LLM-based capabilities where appropriate within applications (e.g., intelligent search, automated summarization, chatbot interfaces for resident-facing features)
+    Stay current on AI/ML tooling trends and serve as an internal resource for the team on responsible and effective AI usage in software development
+
+Mentorship & Team Development:
+
+    Mentor mid-level and junior engineers through code reviews, pairing sessions, design discussions, and direct feedback
+    Foster a collaborative team culture that values craft, continuous learning, and inclusive problem-solving.
+
+NEW YORK CITY HOUSING AUTHORITY RESIDENTS STRONGLY ENCOURAGED TO APPLY.
+
+For Immediate Response call 732-876-7640, or send your resume to RecruiterPC@Trigyn.com
+
+Trigyn-8181
+
+TRIGYN TECHNOLOGIES, INC. is an EQUAL OPPORTUNITY EMPLOYER and has been in business for 35 years. TRIGYN is an ISO 27001:2022 and CMMI Level 5 certified company.
