@@ -1,0 +1,78 @@
+Company logo for, Tata Consultancy Services.
+
+Tata Consultancy Services
+
+Engineer 
+
+Princeton, NJ · Reposted 5 days ago · 63 people clicked apply
+
+Promoted by hirer · Responses managed off LinkedIn
+Full-time
+Apply
+
+Your profile and resume are missing some required qualifications
+
+    Show match details
+
+BETA • Is this information helpful?
+People you can reach out to
+
+School alumni from New Jersey Institute of Technology
+Show all
+About the job
+
+Job Description
+
+Key Responsibilities
+
+Own and execute QA activities across the SDLC: test planning, test design, automation, execution, defect management, and reporting.
+
+Develop and maintain automated UI test scripts using Selenium WebDriver with Java.
+
+Implement BDD automation using Cucumber
+
+Write robust Java code for automation utilities, reusable functions, and framework enhancements.
+
+Translate functional requirements and user stories into test scenarios and test cases (manual + automation).
+
+Perform regression testing and ensure automation coverage is aligned with release goals.
+
+Analyze failures, troubleshoot issues, and provide clear defect reports with reproducible steps and evidence.
+
+Collaborate with developers, product owners, and DevOps teams to improve testability and quality outcomes.
+
+Participate in code reviews and continuously improve automation standards, best practices, and coverage.
+
+Contribute to test metrics, execution status reporting, and quality dashboards.
+
+Must-Have Skills
+
+Strong understanding of QA fundamentals: test types, test design techniques, defect lifecycle, SDLC/STLC.
+
+Solid Java concepts (OOP, collections, exception handling, inheritance, interfaces).
+
+Hands-on Java coding for automation scripting and utilities.
+
+Strong experience with Selenium
+
+Experience in Cucumber for BDD
+
+TCS Employee Benefits Summary
+
+Discretionary Annual Incentive.
+
+Comprehensive Medical Coverage: Medical & Health, Dental & Vision, Disability Planning & Insurance, Pet Insurance Plans.
+
+Family Support: Maternal & Parental Leaves.
+
+Insurance Options: Auto & Home Insurance, Identity Theft Protection.
+
+Convenience & Professional Growth: Commuter Benefits & Certification & Training Reimbursement.
+
+Time Off: Vacation, Time Off, Sick Leave & Holidays.
+
+Legal & Financial Assistance: Legal Assistance, 401K Plan, Performance Bonus, College Fund, Student Loan Refinancing.
+
+Salary Range: $90,000 - $100,000 a year
+
+Qualifications: BACHELOR OF COMPUTER SCIENCE

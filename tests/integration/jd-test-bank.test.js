@@ -118,7 +118,7 @@ describe.each(TEST_CASES)(
 
     beforeAll(() => {
       text     = loadJD(file)
-      jdSkills = parseJobDescription(text)
+      jdSkills = parseJobDescription(text).technicalSignals
       meta     = parseJobMeta(text)
     })
 

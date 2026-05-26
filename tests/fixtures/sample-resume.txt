@@ -3,6 +3,7 @@ jane@example.com | github.com/janesmith
 
 SUMMARY
 Recent CS graduate with a passion for data science and machine learning.
+Known for strong problem-solving skills, attention to detail, and collaborative teamwork.
 
 TECHNICAL SKILLS
 Python, SQL, Git

@@ -213,6 +213,78 @@ export function parseJobMeta(text) {
     return meta;
 }
 
+// Scan full JD text for behavioral signal vocabulary. Returns only found signals.
+// No level assigned — behavioral signals are present/absent only.
+function extractBehavioralSignals(text) {
+    if (!text || !text.trim()) return [];
+
+    const entries = registry.getSoftSkills();
+    const found = new Map();
+    const used = new Set();
+
+    for (const { canonical, alias, category, guardWords } of entries) {
+        const isRegex = alias.includes('\\b') || alias.includes('(?');
+        let pattern;
+        try {
+            pattern = isRegex
+                ? new RegExp(alias, 'gi')
+                : new RegExp(`\\b${escapeRegex(alias)}\\b`, 'gi');
+        } catch { continue; }
+
+        let m;
+        while ((m = pattern.exec(text)) !== null) {
+            let alreadyUsed = false;
+            for (let i = m.index; i < m.index + m[0].length; i++) {
+                if (used.has(i)) { alreadyUsed = true; break; }
+            }
+            if (alreadyUsed) continue;
+            if (guardWords?.length) {
+                const wStart = Math.max(0, m.index - 150);
+                const wEnd   = Math.min(text.length, m.index + m[0].length + 150);
+                const win    = text.substring(wStart, wEnd).toLowerCase();
+                if (guardWords.some(gw => win.includes(gw.toLowerCase()))) continue;
+            }
+            for (let i = m.index; i < m.index + m[0].length; i++) used.add(i);
+
+            if (!found.has(canonical)) {
+                found.set(canonical, { name: canonical, category });
+            }
+        }
+    }
+
+    return Array.from(found.values()).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+// Duty section header patterns — ordered most-specific first.
+const DUTY_HEADER_RE = /(?:^|\n)\s*(?:what\s+you(?:'ll|(?:\s+will))\s+(?:do|be\s+doing)|key\s+responsibilities|primary\s+responsibilities|responsibilities|in\s+this\s+role|your\s+responsibilities|day[- ]to[- ]day|what\s+the\s+role\s+(?:involves|entails)|role\s+overview)\s*:?\s*(?:\n|$)/gi;
+
+// Extract bullet-point job duties from the first matching duties section.
+// Returns an array of plain strings, capped at 10. No matching against vocabulary.
+function extractJobDuties(text) {
+    if (!text || !text.trim()) return [];
+
+    DUTY_HEADER_RE.lastIndex = 0;
+    const m = DUTY_HEADER_RE.exec(text);
+    if (!m) return [];
+
+    const start = m.index + m[0].length;
+    const rest  = text.substring(start, start + 1500);
+
+    // Stop at the next visually distinct section (blank line + title-cased/all-caps word)
+    const nextSectionIdx = rest.search(/\n\s*\n\s*(?:[A-Z][A-Z ]{3,}[\n:]|(?:What|Who|About|Our|Your|Requirements|Qualifications|Benefits|Compensation|Perks)\s)/);
+    const sectionText    = nextSectionIdx > 0 ? rest.substring(0, nextSectionIdx) : rest;
+
+    const duties = [];
+    for (const line of sectionText.split('\n')) {
+        const deBulleted = line.trim().replace(/^[•\-\*•‣◦→]+\s*/, '').trim();
+        if (deBulleted.length >= 15 && deBulleted.length <= 200) {
+            duties.push(deBulleted);
+        }
+    }
+
+    return duties.slice(0, 10);
+}
+
 export function parseJobDescription(text) {
     if (!text || !text.trim()) return [];
 
@@ -279,11 +351,17 @@ export function parseJobDescription(text) {
         }
     }
 
-    return Array.from(skills.values()).sort((a, b) => {
+    const technicalSignals = Array.from(skills.values()).sort((a, b) => {
         if (b.importance !== a.importance) return b.importance - a.importance;
         if (b.level !== a.level) return b.level - a.level;
         return a.name.localeCompare(b.name);
     });
+
+    return {
+        technicalSignals,
+        behavioralSignals: extractBehavioralSignals(text),
+        jobDuties:         extractJobDuties(text),
+    };
 }
 
 
@@ -601,10 +679,15 @@ export function parseResumeText(text) {
         }
     }
 
-    return Array.from(merged.values()).sort((a, b) => {
+    const technicalSignals = Array.from(merged.values()).sort((a, b) => {
         if (b.level !== a.level) return b.level - a.level;
         return a.name.localeCompare(b.name);
     });
+
+    return {
+        technicalSignals,
+        behavioralSignals: extractBehavioralSignals(text),
+    };
 }
 
 
@@ -823,7 +906,49 @@ function ResultsViewSimple({ results, companyName, jobRole }) {
     );
 }
 
-function GapAnalysisView({ gap, companyName, jobRole, jobMeta }) {
+function BehavioralSignalsPanel({ signals, title = 'Behavioral Signals' }) {
+    if (!signals || signals.length === 0) return null;
+    return (
+        <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden', marginTop: '12px' }}>
+            <div style={{ padding: '10px 16px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '12px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    {title} ({signals.length})
+                </span>
+            </div>
+            <div style={{ padding: '12px 16px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {signals.map(s => (
+                    <span key={s.name} style={{ fontSize: '12px', padding: '4px 10px', backgroundColor: '#f1f5f9', color: '#475569', borderRadius: '20px', fontWeight: '500' }}>
+                        {s.name}
+                    </span>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function JobDutiesPanel({ duties }) {
+    if (!duties || duties.length === 0) return null;
+    return (
+        <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden', marginTop: '12px' }}>
+            <div style={{ padding: '10px 16px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '12px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    What This Role Does
+                </span>
+                <span style={{ fontSize: '11px', color: '#94a3b8', marginLeft: '8px' }}>read and decide</span>
+            </div>
+            <ul style={{ margin: 0, padding: '12px 16px', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                {duties.map((duty, i) => (
+                    <li key={i} style={{ fontSize: '13px', color: '#374151', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                        <span style={{ color: '#94a3b8', flexShrink: 0 }}>•</span>
+                        {duty}
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
+function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, jobMeta }) {
     if (!gap) return null;
 
     const { critical, levelGaps, matched, bonus } = gap;
@@ -997,6 +1122,39 @@ function GapAnalysisView({ gap, companyName, jobRole, jobMeta }) {
                     </div>
                 </div>
             )}
+
+            {/* Behavioral Signals */}
+            {behavioralGap && (behavioralGap.matched.length > 0 || behavioralGap.missing.length > 0) && (
+                <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+                    <div style={{ padding: '10px 16px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            Behavioral Signals
+                        </span>
+                        <span style={{ fontSize: '11px', color: '#94a3b8', marginLeft: '8px' }}>
+                            {behavioralGap.matched.length} matched · {behavioralGap.missing.length} not found on resume
+                        </span>
+                    </div>
+                    <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        {behavioralGap.matched.map(s => (
+                            <div key={s.name} style={{ fontSize: '13px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <span style={{ color: '#059669', fontWeight: '700', width: '12px' }}>✓</span>
+                                <span style={{ fontWeight: '500', color: '#0f172a' }}>{s.name}</span>
+                                <span style={{ fontSize: '11px', color: '#64748b' }}>— found on resume</span>
+                            </div>
+                        ))}
+                        {behavioralGap.missing.map(s => (
+                            <div key={s.name} style={{ fontSize: '13px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <span style={{ color: '#94a3b8', fontWeight: '700', width: '12px' }}>—</span>
+                                <span style={{ fontWeight: '500', color: '#0f172a' }}>{s.name}</span>
+                                <span style={{ fontSize: '11px', color: '#64748b' }}>— not found on resume</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Job Duties */}
+            <JobDutiesPanel duties={jobDuties} />
 
         </div>
     );
@@ -1188,6 +1346,14 @@ export function runGapAnalysis(jdSkills, resumeSkills) {
     return { critical, levelGaps, matched, bonus };
 }
 
+export function runBehavioralGap(jdBehavioral, resumeBehavioral) {
+    if (!jdBehavioral || !resumeBehavioral) return null;
+    const resumeNames = new Set(resumeBehavioral.map(s => s.name));
+    const matched = jdBehavioral.filter(s => resumeNames.has(s.name));
+    const missing = jdBehavioral.filter(s => !resumeNames.has(s.name));
+    return { matched, missing };
+}
+
 // ============================================================
 // MAIN - APP
 // ============================================================
@@ -1210,7 +1376,7 @@ export default function App() {
         setJobMeta(meta);
         const jdResults = parseJobDescription(input);
         setResults(jdResults);
-        if (resumeResults && resumeResults.length > 0) {
+        if (resumeResults?.technicalSignals?.length > 0) {
             setActiveTab('compare');
         }
     }
@@ -1219,7 +1385,7 @@ export default function App() {
         const parsed = parseResumeInput(resumeInput, 'text');
         setResumeResults(parsed);
         // Auto-switch to Gap Analysis if JD already parsed
-        if (results && results.length > 0) {
+        if (results?.technicalSignals?.length > 0) {
             setActiveTab('compare');
         }
     };
@@ -1326,7 +1492,7 @@ export default function App() {
                                 <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                                     Required Skill Profile
                                 </h2>
-                                {results && results.length > 0 && (
+                                {results?.technicalSignals?.length > 0 && (
                                     <button
                                         onClick={exportJson}
                                         className="text-xs px-2.5 py-1 border border-slate-300 rounded hover:bg-slate-100 transition"
@@ -1341,7 +1507,11 @@ export default function App() {
                                     the structured requirement profile.
                                 </div>
                             ) : (
-                                <ResultsView results={results} companyName={companyName} jobRole={jobRole} jobMeta={jobMeta} />
+                                <>
+                                    <ResultsView results={results.technicalSignals} companyName={companyName} jobRole={jobRole} jobMeta={jobMeta} />
+                                    <BehavioralSignalsPanel signals={results.behavioralSignals} title="Behavioral Signals" />
+                                    <JobDutiesPanel duties={results.jobDuties} />
+                                </>
                             )}
                         </div>
                     </div>
@@ -1394,12 +1564,15 @@ export default function App() {
                                 <div className="text-sm text-slate-500 p-12 text-center border border-dashed border-slate-300 rounded-lg bg-white">
                                     Paste your resume and click <b>Parse Resume</b> to see your skill profile.
                                 </div>
-                            ) : resumeResults.length === 0 ? (
+                            ) : resumeResults.technicalSignals.length === 0 ? (
                                 <div className="text-sm text-slate-500 p-8 text-center border border-dashed border-slate-300 rounded-lg bg-white">
                                     No recognized skills detected. Make sure your resume has a TECHNICAL SKILLS or EDUCATION section.
                                 </div>
                             ) : (
-                                <ResumeResultsView results={resumeResults} />
+                                <>
+                                    <ResumeResultsView results={resumeResults.technicalSignals} />
+                                    <BehavioralSignalsPanel signals={resumeResults.behavioralSignals} title="Behavioral Signals" />
+                                </>
                             )}
                         </div>
                     </div>
@@ -1421,7 +1594,14 @@ export default function App() {
                                 </div>
                             </div>
                         ) : (
-                            <GapAnalysisView gap={runGapAnalysis(results, resumeResults)} companyName={companyName} jobRole={jobRole} jobMeta={jobMeta} />
+                            <GapAnalysisView
+                                gap={runGapAnalysis(results.technicalSignals, resumeResults.technicalSignals)}
+                                behavioralGap={runBehavioralGap(results.behavioralSignals, resumeResults.behavioralSignals)}
+                                jobDuties={results.jobDuties}
+                                companyName={companyName}
+                                jobRole={jobRole}
+                                jobMeta={jobMeta}
+                            />
                         )}
                     </div>
                 )}

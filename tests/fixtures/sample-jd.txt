@@ -6,6 +6,13 @@ Acme AI Corp is looking for a Machine Learning Engineer to join our growing data
 team. You will design, build, and deploy ML models that power our core product. We love
 the spring season here in Austin, but we especially love engineers who ship.
 
+Responsibilities
+- Design and develop machine learning models for production use
+- Collaborate with cross-functional teams to understand product requirements
+- Write technical documentation for models, pipelines, and APIs
+- Participate in code reviews and mentor junior engineers
+- Troubleshoot and debug model performance issues
+
 Required Skills & Qualifications
 - 3+ years of professional experience in machine learning and software engineering
 - Strong proficiency in Python for data analysis and model development
@@ -13,6 +20,8 @@ Required Skills & Qualifications
 - Hands-on experience with scikit-learn and PyTorch
 - Familiarity with Docker for containerized model deployment
 - Proficiency with Git and version control workflows
+- Strong problem-solving skills and attention to detail
+- Excellent communication and collaboration skills
 
 Preferred Qualifications
 - Experience deploying models to AWS (SageMaker, S3, EC2)

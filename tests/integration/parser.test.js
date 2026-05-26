@@ -27,6 +27,7 @@ import {
   parseJobDescription,
   parseResumeText,
   runGapAnalysis,
+  runBehavioralGap,
   parseJobMeta,
 } from '../../src/jd-skill-parser.jsx';
 
@@ -46,38 +47,44 @@ const resumeText = readFileSync(resumeUrl, 'utf-8');
 // parseJobDescription() -- fixture-based tests
 // ---------------------------------------------------------------------------
 
-describe('parseJobDescription() -- skill extraction from sample JD', () => {
-  // Parse once and share across all tests in this describe block.
-  // Re-parsing per test would be slower and would duplicate the call under test.
-  const jdSkills = parseJobDescription(jdText);
+describe('parseJobDescription() -- result shape', () => {
+  // Parse once and share. Re-parsing per test is slower and adds no coverage.
+  const result = parseJobDescription(jdText);
 
-  test('returns a non-empty array', () => {
-    // Basic sanity. If this fails, nothing else in the describe block is meaningful.
+  test('returns an object with technicalSignals, behavioralSignals, and jobDuties', () => {
+    expect(result).toHaveProperty('technicalSignals');
+    expect(result).toHaveProperty('behavioralSignals');
+    expect(result).toHaveProperty('jobDuties');
+    expect(Array.isArray(result.technicalSignals)).toBe(true);
+    expect(Array.isArray(result.behavioralSignals)).toBe(true);
+    expect(Array.isArray(result.jobDuties)).toBe(true);
+  });
+});
+
+describe('parseJobDescription() -- technicalSignals extraction from sample JD', () => {
+  const { technicalSignals: jdSkills } = parseJobDescription(jdText);
+
+  test('returns a non-empty technicalSignals array', () => {
     expect(Array.isArray(jdSkills)).toBe(true);
     expect(jdSkills.length).toBeGreaterThan(0);
   });
 
   test('extracts Python from the sample JD', () => {
-    // Python appears in "Required Skills & Qualifications" as "Strong proficiency in Python".
-    // A failure here means either the python pattern or the section detector broke.
     const names = jdSkills.map((s) => s.name);
     expect(names).toContain('Python');
   });
 
   test('extracts Machine Learning from the sample JD', () => {
-    // "machine learning" appears in the job title, role description, and requirements.
     const names = jdSkills.map((s) => s.name);
     expect(names).toContain('Machine Learning');
   });
 
   test('extracts Docker from the sample JD', () => {
-    // "Familiarity with Docker" -- detected even with lower proficiency inference.
     const names = jdSkills.map((s) => s.name);
     expect(names).toContain('Docker');
   });
 
-  test('every extracted skill has shape: name, category, level (number), importance (number)', () => {
-    // Structural regression guard. Catches shape changes in parseJobDescription().
+  test('every technical signal has shape: name, category, level (number), importance (number)', () => {
     for (const skill of jdSkills) {
       expect(skill).toHaveProperty('name');
       expect(skill).toHaveProperty('category');
@@ -87,18 +94,61 @@ describe('parseJobDescription() -- skill extraction from sample JD', () => {
   });
 
   test('Machine Learning has importance 5 (Critical) from the Required Skills section', () => {
-    // "Required Skills & Qualifications" maps to section importance=5 (Critical).
-    // Machine Learning is listed there, so the merged importance must be 5.
     const ml = jdSkills.find((s) => s.name === 'Machine Learning');
     expect(ml).toBeDefined();
     expect(ml.importance).toBe(5);
   });
 
-  test('results are sorted by descending importance', () => {
-    // parseJobDescription() contract: results ordered by importance desc, then level desc.
+  test('technicalSignals are sorted by descending importance', () => {
     for (let i = 0; i < jdSkills.length - 1; i++) {
       expect(jdSkills[i].importance).toBeGreaterThanOrEqual(jdSkills[i + 1].importance);
     }
+  });
+});
+
+describe('parseJobDescription() -- behavioralSignals extraction from sample JD', () => {
+  const { behavioralSignals } = parseJobDescription(jdText);
+
+  test('returns a non-empty behavioralSignals array', () => {
+    expect(Array.isArray(behavioralSignals)).toBe(true);
+    expect(behavioralSignals.length).toBeGreaterThan(0);
+  });
+
+  test('every behavioral signal has name and category — no level field', () => {
+    // Regression guard: behavioral signals must never carry L1–L5 scoring.
+    for (const signal of behavioralSignals) {
+      expect(signal).toHaveProperty('name');
+      expect(signal).toHaveProperty('category');
+      expect(signal).not.toHaveProperty('level');
+      expect(signal).not.toHaveProperty('importance');
+    }
+  });
+
+  test('detects Problem-Solving from sample JD', () => {
+    // Sample JD contains "Problem solving abilities" in the requirements section.
+    const names = behavioralSignals.map((s) => s.name);
+    expect(names).toContain('Problem-Solving');
+  });
+});
+
+describe('parseJobDescription() -- jobDuties extraction from sample JD', () => {
+  const { jobDuties } = parseJobDescription(jdText);
+
+  test('returns a non-empty jobDuties array', () => {
+    // Sample JD has a "What You'll Do" section with bullet points.
+    expect(Array.isArray(jobDuties)).toBe(true);
+    expect(jobDuties.length).toBeGreaterThan(0);
+  });
+
+  test('every duty is a non-empty string', () => {
+    for (const duty of jobDuties) {
+      expect(typeof duty).toBe('string');
+      expect(duty.length).toBeGreaterThan(0);
+    }
+  });
+
+  test('jobDuties contains at most 10 items', () => {
+    expect(jobDuties.length).toBeLessThanOrEqual(10);
   });
 });
 
@@ -111,16 +161,15 @@ describe('parseJobDescription() -- guardWords suppress false positives', () => {
     // The sample JD says "We love the spring season here in Austin."
     // Spring Boot's guardWords include "spring season". If guardWords logic breaks,
     // Spring Boot appears as a required skill in a JD that never mentions the framework.
-    const jdSkills = parseJobDescription(jdText);
-    expect(jdSkills.map((s) => s.name)).not.toContain('Spring Boot');
+    const { technicalSignals } = parseJobDescription(jdText);
+    expect(technicalSignals.map((s) => s.name)).not.toContain('Spring Boot');
   });
 
   test("does NOT extract Spring Boot from a sentence containing only 'spring season'", () => {
     // Isolated synthetic text makes the guardWord assertion unambiguous.
-    // This exercises the 150-char window checked around each candidate match.
     const synthetic = 'We love the spring season here and fresh ideas from the team.';
-    const result = parseJobDescription(synthetic);
-    expect(result.map((s) => s.name)).not.toContain('Spring Boot');
+    const { technicalSignals } = parseJobDescription(synthetic);
+    expect(technicalSignals.map((s) => s.name)).not.toContain('Spring Boot');
   });
 });
 
@@ -128,18 +177,26 @@ describe('parseJobDescription() -- guardWords suppress false positives', () => {
 // parseResumeText() -- fixture-based tests
 // ---------------------------------------------------------------------------
 
-describe('parseResumeText() -- skill extraction from sample resume', () => {
-  // Parse once and share across all tests in this describe block.
-  const resumeSkills = parseResumeText(resumeText);
+describe('parseResumeText() -- result shape', () => {
+  const result = parseResumeText(resumeText);
 
-  test('returns a non-empty array', () => {
+  test('returns an object with technicalSignals and behavioralSignals', () => {
+    expect(result).toHaveProperty('technicalSignals');
+    expect(result).toHaveProperty('behavioralSignals');
+    expect(Array.isArray(result.technicalSignals)).toBe(true);
+    expect(Array.isArray(result.behavioralSignals)).toBe(true);
+  });
+});
+
+describe('parseResumeText() -- technicalSignals extraction from sample resume', () => {
+  const { technicalSignals: resumeSkills } = parseResumeText(resumeText);
+
+  test('returns a non-empty technicalSignals array', () => {
     expect(Array.isArray(resumeSkills)).toBe(true);
     expect(resumeSkills.length).toBeGreaterThan(0);
   });
 
-  test('every extracted skill has shape: name, category, level (number), source (string)', () => {
-    // Resume skills carry a "source" field instead of "importance".
-    // Different contract from JD skills -- test the shape explicitly.
+  test('every technical signal has shape: name, category, level (number), source (string)', () => {
     for (const skill of resumeSkills) {
       expect(skill).toHaveProperty('name');
       expect(skill).toHaveProperty('category');
@@ -149,17 +206,12 @@ describe('parseResumeText() -- skill extraction from sample resume', () => {
   });
 
   test('Python is level 3 -- Experience section wins over Technical Skills L2', () => {
-    // Python appears in TECHNICAL SKILLS (L2 cap) AND PROFESSIONAL EXPERIENCE (L3 cap).
-    // The merger keeps the highest level, so the final entry is L3.
-    // This validates the highest-level-wins merge logic in parseResumeText().
     const python = resumeSkills.find((s) => s.name === 'Python');
     expect(python).toBeDefined();
     expect(python.level).toBe(3);
   });
 
   test('Machine Learning is level 3 sourced from Experience', () => {
-    // PROFESSIONAL EXPERIENCE has title "Machine Learning Engineer Intern".
-    // isTechRole() must approve the block and the ML pattern must match within it.
     const ml = resumeSkills.find((s) => s.name === 'Machine Learning');
     expect(ml).toBeDefined();
     expect(ml.level).toBe(3);
@@ -167,33 +219,118 @@ describe('parseResumeText() -- skill extraction from sample resume', () => {
   });
 
   test('Docker is level 2 sourced from Projects', () => {
-    // The PROJECTS section assigns a fixed L2 to all matched skills (project use
-    // = practical exposure). Docker appears in "containerized data pipeline using Docker".
     const docker = resumeSkills.find((s) => s.name === 'Docker');
     expect(docker).toBeDefined();
     expect(docker.level).toBe(2);
     expect(docker.source).toBe('Projects');
   });
 
-  test("React.js is level 1 -- 'learning' keyword triggers the cap in extractSkillsFromTechnicalSection", () => {
-    // TECHNICAL SKILLS says "Currently learning React.js as a side hobby".
-    // The function checks a 30-char context window for /learning|in progress|studying/
-    // and assigns L1 if found (instead of the normal L2 for listed tech skills).
-    // This test validates the learning-cap mechanism.
+  test("React.js is level 1 -- 'learning' keyword triggers the L1 cap", () => {
     const react = resumeSkills.find((s) => s.name === 'React');
     expect(react).toBeDefined();
     expect(react.level).toBe(1);
   });
 
-  test('results are sorted by descending level', () => {
-    // parseResumeText() returns skills sorted by descending level.
+  test('technicalSignals are sorted by descending level', () => {
     for (let i = 0; i < resumeSkills.length - 1; i++) {
       expect(resumeSkills[i].level).toBeGreaterThanOrEqual(resumeSkills[i + 1].level);
     }
   });
 });
 
+describe('parseResumeText() -- behavioralSignals extraction from sample resume', () => {
+  const { behavioralSignals } = parseResumeText(resumeText);
+
+  test('returns a non-empty behavioralSignals array', () => {
+    // Sample resume SUMMARY contains "problem-solving", "attention to detail", "teamwork".
+    expect(Array.isArray(behavioralSignals)).toBe(true);
+    expect(behavioralSignals.length).toBeGreaterThan(0);
+  });
+
+  test('every behavioral signal has name and category — no level field', () => {
+    for (const signal of behavioralSignals) {
+      expect(signal).toHaveProperty('name');
+      expect(signal).toHaveProperty('category');
+      expect(signal).not.toHaveProperty('level');
+    }
+  });
+
+  test('detects Problem-Solving from resume SUMMARY', () => {
+    const names = behavioralSignals.map((s) => s.name);
+    expect(names).toContain('Problem-Solving');
+  });
+
+  test('detects Teamwork from resume SUMMARY', () => {
+    const names = behavioralSignals.map((s) => s.name);
+    expect(names).toContain('Teamwork');
+  });
+});
+
 // ---------------------------------------------------------------------------
+// runBehavioralGap() -- synthetic arrays
+// ---------------------------------------------------------------------------
+
+describe('runBehavioralGap() -- synthetic arrays', () => {
+  test('returns null when either argument is null or undefined', () => {
+    expect(runBehavioralGap(null, [])).toBeNull();
+    expect(runBehavioralGap([], null)).toBeNull();
+    expect(runBehavioralGap(null, null)).toBeNull();
+  });
+
+  test('returns an object with matched and missing arrays', () => {
+    const result = runBehavioralGap([], []);
+    expect(result).toHaveProperty('matched');
+    expect(result).toHaveProperty('missing');
+    expect(Array.isArray(result.matched)).toBe(true);
+    expect(Array.isArray(result.missing)).toBe(true);
+  });
+
+  test('JD signal present on resume goes to matched[]', () => {
+    const jd     = [{ name: 'Communication', category: 'Communication' }];
+    const resume = [{ name: 'Communication', category: 'Communication' }];
+    const { matched, missing } = runBehavioralGap(jd, resume);
+    expect(matched).toHaveLength(1);
+    expect(matched[0].name).toBe('Communication');
+    expect(missing).toHaveLength(0);
+  });
+
+  test('JD signal absent from resume goes to missing[]', () => {
+    const jd     = [{ name: 'Leadership', category: 'Leadership' }];
+    const resume = [{ name: 'Communication', category: 'Communication' }];
+    const { matched, missing } = runBehavioralGap(jd, resume);
+    expect(missing).toHaveLength(1);
+    expect(missing[0].name).toBe('Leadership');
+    expect(matched).toHaveLength(0);
+  });
+
+  test('resume signals not in JD are ignored (no bonus for behavioral)', () => {
+    const jd     = [{ name: 'Teamwork', category: 'Teamwork' }];
+    const resume = [
+      { name: 'Teamwork',      category: 'Teamwork' },
+      { name: 'Adaptability',  category: 'Adaptability' },
+    ];
+    const { matched, missing } = runBehavioralGap(jd, resume);
+    expect(matched).toHaveLength(1);
+    expect(missing).toHaveLength(0);
+  });
+
+  test('combined scenario: mixed matched and missing', () => {
+    const jd = [
+      { name: 'Communication', category: 'Communication' },
+      { name: 'Problem-Solving', category: 'Problem-Solving' },
+      { name: 'Leadership', category: 'Leadership' },
+    ];
+    const resume = [
+      { name: 'Communication', category: 'Communication' },
+      { name: 'Problem-Solving', category: 'Problem-Solving' },
+    ];
+    const { matched, missing } = runBehavioralGap(jd, resume);
+    expect(matched.map(s => s.name)).toContain('Communication');
+    expect(matched.map(s => s.name)).toContain('Problem-Solving');
+    expect(missing.map(s => s.name)).toContain('Leadership');
+  });
+});
+
 // runGapAnalysis() -- synthetic arrays (isolates gap logic from extraction)
 // ---------------------------------------------------------------------------
 

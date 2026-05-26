@@ -1,58 +1,114 @@
 # CLAUDE.md — ResumeMatch
 
 ## Product Goal
-This app helps students and early-career job seekers decide whether to apply
-for a specific role based on how their resume aligns with a target job description.
 
-The end-user question the app answers:
-"Am I a competitive candidate for this role RIGHT NOW — and if not, what should I do?"
+This app helps students and entry-level job seekers quickly assess how well
+their resume matches a specific job description — and decide what to do next.
 
-Final output is a role readiness decision:
-  Apply Now | Apply With Edits | Build Skill First | Consider Adjacent Role
-Backed by a skills alignment map and a prioritized action list.
+The one question the app answers:
+**"Based on how my resume reads today, how well does it match this JD?"**
+
+The user decides what to do. The app shows them the signal clearly.
+The app does NOT make the decision for them.
+
+---
+
+## What Changed in v3 (read before touching any parser logic)
+
+The app no longer uses role templates for inference.
+The app no longer assigns a "role type" to a job description.
+The app no longer outputs Apply Now / Build Skill / Consider Adjacent Role.
+
+**Why:** Job descriptions are unique documents. Mapping them to a hardcoded role
+template adds noise. The parser's job is to read what the JD says and report it.
+The user provides all context about themselves and the company.
+
+**What replaced it:** Three signal types extracted from both documents.
+See "Three Signal Types" below.
 
 ---
 
 ## Stack
-- Frontend: JavaScript / HTML (deployed on Vercel)
-- Data: JSON (skill definitions, role maps, scoring rules)
-- No backend framework currently; logic runs client-side
+
+- Frontend: React + Vite + Tailwind CSS (deployed on Vercel)
+- Data: JSON files in /data — single source for both parsers
+- No backend; all logic runs client-side
+- Test runner: Vitest (122 tests passing as of 2026-05-26)
 
 ---
 
-## Architecture Target
+## Three Signal Types
 
-The app is a decision-centric pipeline. Each layer has clear inputs and outputs.
-No cross-layer logic mixing.
+Every signal extracted from a JD or resume belongs to one of three buckets.
+Both parsers use the same vocabulary source. The extraction method differs.
 
-  1. Ingest Layer      → Resume + JD text cleanup, section detection
-  2. Taxonomy Layer    → Skill extraction, normalization, alias resolution
-  3. Inference Layer   → Proficiency scoring (see docs/scoring-model.md), importance tier detection
-  4. Scoring Layer     → Role readiness score, gap severity map
-  5. Guidance Layer    → Decision output (Apply Now / Edits / Build / Redirect)
-  6. UX Layer          → User-facing explanations, strengths, weaknesses, next steps
+### 1. Technical Signals
+**What:** Skills, tools, technologies, methodologies
+**Examples:** Python, SQL, Git, React, Docker, Agile, TDD, REST APIs
+**Source file:** data/skills.json
+**Matched:** Yes — scored L1–L5 on resume side; requirement tier on JD side
+**This is the primary matching surface.**
+
+### 2. Behavioral Signals
+**What:** Soft skills, work traits, interpersonal behaviors
+**Examples:** communication, teamwork, attention to detail, problem-solving, leadership
+**Source file:** data/soft-skills.json
+**Matched:** Present / Absent only — no L1–L5 scoring
+**Show as a simple checklist panel, not a scored gap.**
+
+### 3. Job Duties
+**What:** What the role actually does day-to-day
+**Examples:** "develop backend microservices", "write technical documentation",
+             "participate in code reviews", "manage inventory systems"
+**Source file:** None — extracted as free text from JD only
+**Matched:** NOT matched against resume. Displayed as-is for the user to read.
+**The user interprets duties. The app does not score them.**
 
 ---
 
-## Skill Competency Scoring (CRITICAL — read docs/scoring-model.md)
+## Output Format (what the user sees)
 
-Proficiency is NOT inferred from keyword presence alone.
-Each skill is scored by a weighted composite of evidence found on the resume:
+```
+TECHNICAL MATCH
+  ✓ Python     — resume: L3 (internship + 2 projects)
+  ✓ SQL        — resume: L2 (coursework only) | JD asks for: Required
+  ✗ Docker     — not on resume | JD asks for: Required
+  ✗ React      — not on resume | JD asks for: Preferred
+
+BEHAVIORAL SIGNALS
+  ✓ Teamwork        — found on resume
+  ✓ Communication   — found on resume
+  — Attention to detail — not found on resume
+
+WHAT THIS ROLE DOES  (read and decide)
+  • Design and develop backend microservices
+  • Participate in Agile sprint planning and code reviews
+  • Write technical documentation
+  • Collaborate with frontend and data teams
+```
+
+The user reads this and decides: apply now, rewrite resume, or build a skill.
+
+---
+
+## Technical Signal Scoring (unchanged from v2 — see docs/scoring-model.md)
+
+Proficiency is scored by weighted evidence on the resume, not keyword presence.
 
   Skill Score = SUM(W_type × M_duration) × M_recurrence
 
-W_type (evidence type weight):
+W_type:
   Full-time job history  → 1.0
   Contract / internship  → 0.7
   Personal project       → 0.5
   Academic / coursework  → 0.4
   Skills section only    → 0.1
 
-M_duration (duration modifier):
-  4+ years   → 1.5 | 2–4 years → 1.3 | 1–2 years → 1.0
-  6–12 mo    → 0.8 | < 6 mo    → 0.6 | unknown   → 0.5
+M_duration:
+  4+ years → 1.5 | 2–4 years → 1.3 | 1–2 years → 1.0
+  6–12 mo  → 0.8 | < 6 mo    → 0.6 | unknown   → 0.5
 
-M_recurrence (distinct contexts):
+M_recurrence:
   1 context → 1.0 | 2 contexts → 1.2 | 3+ contexts → 1.4
 
 Score → Level:
@@ -63,67 +119,92 @@ Score → Level:
   1.80+     = L5 Expert
 
 Full spec: docs/scoring-model.md
+Behavioral signals use this scoring: NEVER. Present/absent only.
 
 ---
 
-## Proficiency Scale (OPM-inspired, app-level)
-L1 Awareness | L2 Novice | L3 Intermediate | L4 Advanced | L5 Expert
+## JD Requirement Tiers (extracted from section context)
 
-## Importance Tiers (inferred from JD)
-Critical > Required > Preferred > Nice-to-Have
+Only assign a tier if the JD explicitly signals it:
+  "required", "must have", "essential"     → Required
+  "preferred", "nice to have", "a plus"    → Preferred
+  "familiarity", "exposure to"             → Nice-to-Have
+  No signal found                          → Stated (no tier assigned)
 
----
-
-## Data Sources Target
-- Lightcast Open Skills Taxonomy: canonical skill IDs, aliases, categories (free download)
-- O*NET Web Services API: role profiles, required skills per occupation (free, no auth)
-- BLS Occupational Outlook: growth projections, education requirements (free public data)
+Do NOT default all skills to "Required" when no section headers exist.
+Do NOT infer a role type from the job title or skill set.
 
 ---
 
-## Current Known Issues
-- Skills.json has 122 skills — coverage gaps confirmed (JD2, JD7 return 0 skills)
-- Role database has 10 hardcoded templates — needs O*NET-backed expansion to 20–30 roles
-- Inference layer uses phrase signals only — weighted evidence scoring not yet implemented
-- No resume test bank yet (only JD test bank exists)
-- jobType detection bug for internship/contract JDs (Bug #2)
+## Architecture (updated)
+
+  1. Ingest Layer    → text cleanup, section detection (JD + resume)
+  2. Taxonomy Layer  → extract Technical Signals (skills.json)
+                       extract Behavioral Signals (soft-skills.json)
+                       extract Job Duties (free text, JD only)
+  3. Inference Layer → weighted evidence scoring for Technical Signals (resume only)
+                       present/absent detection for Behavioral Signals
+  4. Gap Layer       → compare JD signals vs resume signals per bucket
+  5. Display Layer   → render three-panel output (Technical / Behavioral / Duties)
+
+No role readiness score. No guidance layer. No decision output.
+The gap map IS the output.
+
+---
+
+## Data Files
+
+| File | Purpose | Status |
+|---|---|---|
+| data/skills.json | Technical Signal vocabulary — skills, tools, technologies, methodologies | 122 entries — expand to 300–500 |
+| data/soft-skills.json | Behavioral Signal vocabulary — soft skills, work traits | 49 entries |
+| data/roles.json | Role reference only — not used in inference | Keep, demote to reference panel |
+
+**roles.json is no longer used by any parser.**
+It may be displayed as an optional "what skills are typical for X role" reference panel.
+It must not influence skill extraction, gap scoring, or any output.
+
+---
+
+## Key Files
+
+- data/skills.json           ← Technical Signal source (expand)
+- data/soft-skills.json      ← Behavioral Signal source (49 terms, wired into registry)
+- data/roles.json            ← reference only (do not wire to parsers)
+- src/lib/registry.js        ← single data access point (serves skills + soft-skills)
+- src/jd-skill-parser.jsx    ← main parser (extracts 3 signal types from JD + resume)
+- tests/jd_test_bank/        ← 10 real JDs
+- tests/coverage-gaps.md     ← auto-generated gap report
+- docs/scoring-model.md      ← weighted evidence scoring spec (unchanged)
 
 ---
 
 ## Working Rules
+
 - Explore before editing. Read relevant files first.
-- Propose a plan with affected files and risks before making changes.
+- Propose a plan with affected files before making changes.
 - Scope each task to ONE layer at a time.
-- Write characterization tests before refactoring existing logic.
-- Run verification (npm run test:jd) after every change.
+- Write or update tests before changing parser logic.
+- Run `npm test` after every change. All 122 tests must still pass.
 - Do not add new dependencies without asking.
-- Do not mix inference logic with UX display logic.
-- Prefer clarity over cleverness in scoring and rule logic.
-- Flag any hardcoded skill or role data encountered — it belongs in /data.
-- Never raise a skill's proficiency level through phrase signals alone
+- Do not mix inference logic with display logic.
+- Prefer clarity over cleverness.
+- Flag any hardcoded skill or role data — it belongs in /data.
+- Never score Behavioral Signals with L1–L5. Present/absent only.
+- Never apply role templates to JD parsing. roles.json is reference only.
+- Never raise a Technical Signal level through phrase signals alone
   without structural evidence (job history or project) to support it.
 
 ---
 
 ## Definition of Done (per task)
-- Change is scoped to one layer
+
+- Change scoped to one layer
 - Behavior unchanged unless explicitly requested
-- Tests cover the changed logic
-- npm run test:jd passes
-- CLAUDE.md and/or docs/ updated if architecture changed
-- No new hardcoded skill/role data
-
----
-
-## Key Files
-- data/skills.json          ← skill taxonomy (expand to 300–500)
-- data/roles.json           ← role templates (expand to 20–30 via O*NET)
-- src/lib/registry.js       ← single access point for skill/role data
-- src/jd-skill-parser.jsx   ← main parser (rewired to registry)
-- tests/jd_test_bank/       ← 10 real JDs
-- tests/coverage-gaps.md    ← auto-generated gap report (run: npm run test:jd)
-- docs/scoring-model.md     ← weighted evidence scoring spec
-- docs/architecture.md      ← overall system design
+- Tests written for changed logic
+- `npm test` passes (all 122 + any new tests)
+- CLAUDE.md updated if architecture changed
+- No new hardcoded skill or role data added to source files
 
 ---
 
@@ -131,30 +212,54 @@ Critical > Required > Preferred > Nice-to-Have
 
 Phase 1 — Foundation (May–June 2026)
   ✅ 1. Registry refactor (SKILL_DICTIONARY → JSON)
-  ✅ 2. Test bank — 10 real JDs
-  🔄 3. Coverage gap report generation
-  ⬜ 4. Expand skills.json to 300–500 (Technology domain)
-  ⬜ 5. O*NET API integration for role definitions
-  ⬜ 6. Expand roles.json to 20–30 Technology roles
-  ⬜ 7. Resume test bank (10 real resumes)
-  ⬜ 8. Implement weighted evidence scoring (docs/scoring-model.md)
-  ⬜ 9. Entry-level calibration logic
-  ⬜ 10. End-to-end evaluation: JD + resume → decision output
+  ✅ 2. JD test bank — 10 real JDs
+  ✅ 3. Vitest suite — 122 tests passing
+  ✅ 4. Create data/soft-skills.json — behavioral signal vocabulary (49 terms)
+  ✅ 5. Wire soft-skills.json into registry.js
+  ✅ 6. Update JD parser — extract 3 signal types (Technical / Behavioral / Duties)
+  ✅ 7. Update resume parser — extract Technical (scored) + Behavioral (present/absent)
+  ✅ 8. Update gap output — 3-panel display
+  ⬜ 9. Expand skills.json to 300–500 entries (fix JD2 + JD7 zero-skills bug)
+  ⬜ 10. Resume test bank — 10 real resumes
+  ⬜ 11. Implement weighted evidence scoring (docs/scoring-model.md)
+  ⬜ 12. End-to-end: real JD + real resume → 3-panel gap output
 
-Phase 2 — Product Quality (June–July 2026)
-  Decision output UI | Gap suggestions | Resume rewrite hints
-  Adjacent role engine | Confidence scoring | Freemium cap logic
+Phase 2 — Output Quality (June–July 2026)
+  Per-skill suggestion text | Evidence transparency | Resume rewrite hints
+  Export gap as PDF/CSV | Shareable result links
 
-Phase 3 — Monetization (July–August 2026)
-  Free tier (3/day) | Monthly sub | One-time pack | Usage analytics
+Phase 3 — Scale (July–August 2026)
+  Skill database 500+ | Non-tech domain expansion | Usage analytics | Freemium tier
+
+---
+
+## What NOT to build (explicit out-of-scope)
+
+- Role type inference from JD content
+- "Apply Now / Build Skill / Consider Adjacent Role" decision output
+- Role template matching in any parser or scoring function
+- L1–L5 scoring for soft skills / behavioral signals
+- Salary data, company ratings, or external enrichment
 
 ---
 
 ## When Stuck — Run This Check
-1. Open tests/coverage-gaps.md — what is the top unmatched term? Add it to skills.json.
-2. Check the Phase Roadmap above — what is the next ⬜ task in Phase 1?
-3. Run npm run test:jd — are all tests still passing?
-4. Check known issues — is the 0-skills bug (JD2, JD7) fixed yet?
+
+1. Run `npm test` — are all tests still passing?
+2. Check Phase Roadmap — what is the next ⬜ task?
+3. Open tests/coverage-gaps.md — what is the top unmatched JD term? Add it to skills.json.
+4. Check known bugs below — is the zero-skills bug (JD2, JD7) fixed yet?
 
 If none are clear, stop and plan before coding.
 
+---
+
+## Known Bugs
+
+| # | Bug | Priority |
+|---|---|---|
+| 1 | JD2 + JD7 return 0 skills — vocabulary gaps in skills.json | High |
+| 2 | jobType detection fails for internship/contract JDs | ✅ Fixed (commit 395be96) |
+| 3 | Java suppressed when JavaScript present — expected behavior, document it | Low |
+| 4 | JD10 jobType returns null — no explicit "Full-time" text | Low |
+| 5 | Role template match fires during JD parse — remove this logic | High |
