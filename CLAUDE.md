@@ -33,7 +33,7 @@ See "Three Signal Types" below.
 - Frontend: React + Vite + Tailwind CSS (deployed on Vercel)
 - Data: JSON files in /data — single source for both parsers
 - No backend; all logic runs client-side
-- Test runner: Vitest (54 tests passing as of 2026-05-23)
+- Test runner: Vitest (122 tests passing as of 2026-05-26)
 
 ---
 
@@ -52,7 +52,7 @@ Both parsers use the same vocabulary source. The extraction method differs.
 ### 2. Behavioral Signals
 **What:** Soft skills, work traits, interpersonal behaviors
 **Examples:** communication, teamwork, attention to detail, problem-solving, leadership
-**Source file:** data/soft-skills.json (NEW — does not exist yet, must be created)
+**Source file:** data/soft-skills.json
 **Matched:** Present / Absent only — no L1–L5 scoring
 **Show as a simple checklist panel, not a scored gap.**
 
@@ -157,7 +157,7 @@ The gap map IS the output.
 | File | Purpose | Status |
 |---|---|---|
 | data/skills.json | Technical Signal vocabulary — skills, tools, technologies, methodologies | 122 entries — expand to 300–500 |
-| data/soft-skills.json | Behavioral Signal vocabulary — soft skills, work traits | DOES NOT EXIST — create next |
+| data/soft-skills.json | Behavioral Signal vocabulary — soft skills, work traits | 49 entries |
 | data/roles.json | Role reference only — not used in inference | Keep, demote to reference panel |
 
 **roles.json is no longer used by any parser.**
@@ -169,10 +169,10 @@ It must not influence skill extraction, gap scoring, or any output.
 ## Key Files
 
 - data/skills.json           ← Technical Signal source (expand)
-- data/soft-skills.json      ← Behavioral Signal source (create)
+- data/soft-skills.json      ← Behavioral Signal source (49 terms, wired into registry)
 - data/roles.json            ← reference only (do not wire to parsers)
-- src/lib/registry.js        ← single data access point (update to serve soft-skills)
-- src/jd-skill-parser.jsx    ← main parser (update extraction to 3 signal types)
+- src/lib/registry.js        ← single data access point (serves skills + soft-skills)
+- src/jd-skill-parser.jsx    ← main parser (extracts 3 signal types from JD + resume)
 - tests/jd_test_bank/        ← 10 real JDs
 - tests/coverage-gaps.md     ← auto-generated gap report
 - docs/scoring-model.md      ← weighted evidence scoring spec (unchanged)
@@ -185,7 +185,7 @@ It must not influence skill extraction, gap scoring, or any output.
 - Propose a plan with affected files before making changes.
 - Scope each task to ONE layer at a time.
 - Write or update tests before changing parser logic.
-- Run `npm test` after every change. All 54 tests must still pass.
+- Run `npm test` after every change. All 122 tests must still pass.
 - Do not add new dependencies without asking.
 - Do not mix inference logic with display logic.
 - Prefer clarity over cleverness.
@@ -202,7 +202,7 @@ It must not influence skill extraction, gap scoring, or any output.
 - Change scoped to one layer
 - Behavior unchanged unless explicitly requested
 - Tests written for changed logic
-- `npm test` passes (all 54 + any new tests)
+- `npm test` passes (all 122 + any new tests)
 - CLAUDE.md updated if architecture changed
 - No new hardcoded skill or role data added to source files
 
@@ -213,12 +213,12 @@ It must not influence skill extraction, gap scoring, or any output.
 Phase 1 — Foundation (May–June 2026)
   ✅ 1. Registry refactor (SKILL_DICTIONARY → JSON)
   ✅ 2. JD test bank — 10 real JDs
-  ✅ 3. Vitest suite — 54 tests passing
-  ⬜ 4. Create data/soft-skills.json — behavioral signal vocabulary (50–100 terms)
-  ⬜ 5. Wire soft-skills.json into registry.js
-  ⬜ 6. Update JD parser — extract 3 signal types (Technical / Behavioral / Duties)
-  ⬜ 7. Update resume parser — extract Technical (scored) + Behavioral (present/absent)
-  ⬜ 8. Update gap output — 3-panel display
+  ✅ 3. Vitest suite — 122 tests passing
+  ✅ 4. Create data/soft-skills.json — behavioral signal vocabulary (49 terms)
+  ✅ 5. Wire soft-skills.json into registry.js
+  ✅ 6. Update JD parser — extract 3 signal types (Technical / Behavioral / Duties)
+  ✅ 7. Update resume parser — extract Technical (scored) + Behavioral (present/absent)
+  ✅ 8. Update gap output — 3-panel display
   ⬜ 9. Expand skills.json to 300–500 entries (fix JD2 + JD7 zero-skills bug)
   ⬜ 10. Resume test bank — 10 real resumes
   ⬜ 11. Implement weighted evidence scoring (docs/scoring-model.md)
@@ -259,7 +259,7 @@ If none are clear, stop and plan before coding.
 | # | Bug | Priority |
 |---|---|---|
 | 1 | JD2 + JD7 return 0 skills — vocabulary gaps in skills.json | High |
-| 2 | jobType detection fails for internship/contract JDs | Medium |
+| 2 | jobType detection fails for internship/contract JDs | ✅ Fixed (commit 395be96) |
 | 3 | Java suppressed when JavaScript present — expected behavior, document it | Low |
 | 4 | JD10 jobType returns null — no explicit "Full-time" text | Low |
 | 5 | Role template match fires during JD parse — remove this logic | High |

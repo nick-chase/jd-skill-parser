@@ -18,6 +18,7 @@
 import { describe, test, expect } from 'vitest';
 import {
   getAllSkillEntries,
+  getSoftSkills,
   matchRole,
   listRoles,
   getVersion,
@@ -91,6 +92,62 @@ describe('getAllSkillEntries()', () => {
     const pythonEntry = entries.find(e => e.canonical === 'Python');
     expect(pythonEntry).toBeDefined();
     expect(pythonEntry.guardWords).toEqual([]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getSoftSkills()
+// ---------------------------------------------------------------------------
+
+describe('getSoftSkills()', () => {
+  test('returns a non-empty array', () => {
+    const entries = getSoftSkills();
+    expect(Array.isArray(entries)).toBe(true);
+    expect(entries.length).toBeGreaterThan(0);
+  });
+
+  test('entries are sorted by alias length descending (longest first)', () => {
+    const entries = getSoftSkills();
+    for (let i = 0; i < entries.length - 1; i++) {
+      expect(entries[i].alias.length).toBeGreaterThanOrEqual(
+        entries[i + 1].alias.length,
+        `Sort violated at index ${i}: "${entries[i].alias}" (len ${entries[i].alias.length}) ` +
+          `followed by "${entries[i + 1].alias}" (len ${entries[i + 1].alias.length})`
+      );
+    }
+  });
+
+  test('every entry has canonical, alias, category, guardWords shape', () => {
+    const entries = getSoftSkills();
+    for (const entry of entries) {
+      expect(entry).toHaveProperty('canonical');
+      expect(entry).toHaveProperty('alias');
+      expect(entry).toHaveProperty('category');
+      expect(entry).toHaveProperty('guardWords');
+      expect(Array.isArray(entry.guardWords)).toBe(true);
+    }
+  });
+
+  test('no entry has a level property — soft skills are present/absent only', () => {
+    // Regression guard: behavioral signals must never carry L1–L5 scoring fields.
+    const entries = getSoftSkills();
+    for (const entry of entries) {
+      expect(entry).not.toHaveProperty('level');
+    }
+  });
+
+  test('canonical names include Communication, Teamwork, and Leadership', () => {
+    const entries = getSoftSkills();
+    const canonicals = new Set(entries.map(e => e.canonical));
+    expect(canonicals.has('Communication')).toBe(true);
+    expect(canonicals.has('Teamwork')).toBe(true);
+    expect(canonicals.has('Leadership')).toBe(true);
+  });
+
+  test('has at least 49 pattern entries (one per skill × patterns)', () => {
+    // soft-skills.json has 49 terms each with 1–4 patterns; minimum is 49.
+    const entries = getSoftSkills();
+    expect(entries.length).toBeGreaterThanOrEqual(49);
   });
 });
 
@@ -246,5 +303,16 @@ describe('getVersion()', () => {
   test('roles version matches "2026.1"', () => {
     const { roles } = getVersion();
     expect(roles).toBe('2026.1');
+  });
+
+  test('returns a softSkills property after soft-skills.json was wired in', () => {
+    const version = getVersion();
+    expect(version).toHaveProperty('softSkills');
+    expect(typeof version.softSkills).toBe('string');
+  });
+
+  test('softSkills version matches "2026.1"', () => {
+    const { softSkills } = getVersion();
+    expect(softSkills).toBe('2026.1');
   });
 });

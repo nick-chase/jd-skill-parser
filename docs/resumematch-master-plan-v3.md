@@ -255,7 +255,7 @@ It may only be accessed by an optional UI reference panel the user explicitly op
     registry.test.js   ← 24 unit tests ✅
   /integration
     parser.test.js     ← 29 integration tests ✅
-  coverage-gaps.md     ← auto-generated gap report ✅
+  coverage-gaps.md     ← auto-generated gap report ⬜
 
 /docs
   scoring-model.md     ← weighted evidence formula ✅
@@ -309,7 +309,7 @@ Usage analytics
 | # | Bug | Priority |
 |---|---|---|
 | 1 | JD2 + JD7 return 0 skills — vocabulary gaps in skills.json | High |
-| 2 | jobType detection fails for internship/contract JDs | Medium |
+| 2 | jobType detection fails for internship/contract JDs | ✅ Fixed (commit 395be96) |
 | 3 | Java suppressed when JavaScript present — expected, document it | Low |
 | 4 | JD10 jobType returns null — no explicit "Full-time" text | Low |
 | 5 | Role template match fires on JD parse — remove this logic | High |

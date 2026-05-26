@@ -1,5 +1,6 @@
 import skillsData from '../../data/skills.json';
 import rolesData from '../../data/roles.json';
+import softSkillsData from '../../data/soft-skills.json';
 
 const skillsById = new Map(skillsData.skills.map(s => [s.id, s]));
 const rolesById  = new Map(rolesData.roles.map(r => [r.id, r]));
@@ -17,8 +18,23 @@ const _entries = skillsData.skills
     )
     .sort((a, b) => b.alias.length - a.alias.length);
 
+const _softSkillEntries = softSkillsData.softSkills
+    .flatMap(skill =>
+        skill.patterns.map(pat => ({
+            canonical:  skill.canonical,
+            alias:      pat,
+            category:   skill.category,
+            guardWords: skill.guardWords,
+        }))
+    )
+    .sort((a, b) => b.alias.length - a.alias.length);
+
 export function getAllSkillEntries() {
     return _entries;
+}
+
+export function getSoftSkills() {
+    return _softSkillEntries;
 }
 
 // Fuzzy-match a job role string and return the template with canonical skill names.
@@ -45,5 +61,5 @@ export function listRoles() {
 }
 
 export function getVersion() {
-    return { skills: skillsData.version, roles: rolesData.version };
+    return { skills: skillsData.version, roles: rolesData.version, softSkills: softSkillsData.version };
 }
