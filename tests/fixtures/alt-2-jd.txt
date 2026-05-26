@@ -1,0 +1,87 @@
+Company logo for, MS Shift, Inc..
+
+MS Shift, Inc.
+
+Quality Assurance Engineer (QAE)
+
+New York, NY · 1 year ago · Over 100 people clicked apply
+
+Responses managed off LinkedIn
+Full-time
+Apply
+
+Your profile and resume are missing some required qualifications
+
+    Show match details
+
+BETA • Is this information helpful?
+People you can reach out to
+
+Cody Thompson 
+
+• 3rd+
+
+Purchasing Coordinator | Supply Chain & Procurement Optimization | Industrial Engineering Background
+
+School alum from New Jersey Institute of Technology
+About the job
+
+Location: New York, NY 10007
+
+MS Shift is a fast-moving company seeking a highly motivated team player to join our QA team. The QAE is responsible for ensuring the quality and reliability of software products through systematic testing and validation processes. They work closely with developers, product managers, and other stakeholders to identify issues and improve product quality. The role involves designing and implementing tests, debugging, and defining corrective actions. QA Engineers play a crucial role in delivering high-quality software products that meet customer expectations and industry standards.
+
+To apply for the job, please submit a copy of your resume, a cover letter and your salary expectations to: careers@msshift-usa.com
+
+Responsibilities
+
+     Test Planning and Design:
+     Develop comprehensive test plans and test cases based on product requirements and specifications.
+     Identify and create appropriate testing environments, tools, and resources.
+     Collaborate with cross-functional teams to understand business requirements and technical specifications.
+     Test Execution:
+     Execute manual and automated tests to identify defects, ensure functionality, and validate performance.
+     Conduct regression testing to verify that new features do not adversely affect existing functionality.
+     Perform load and stress testing to assess system performance under various conditions.
+     Defect Management:
+     Identify, document, and track software defects using bug tracking tools.
+     Work with development teams to reproduce issues and verify bug fixes.
+     Prioritize and escalate critical issues as necessary to ensure timely resolution.
+     Automation and Continuous Improvement:
+     Develop, maintain, and execute automated test scripts using appropriate tools and frameworks.
+     Continuously improve testing processes and methodologies to enhance efficiency and effectiveness.
+     Stay updated with industry trends and emerging technologies to integrate best practices into the QA process.
+     Reporting and Documentation:
+     Create detailed and concise test reports, including test results, defects, and overall quality metrics.
+     Maintain comprehensive documentation of testing processes, procedures, and outcomes.
+     Provide feedback and recommendations for product improvements based on testing findings.
+     Collaboration and Communication:
+     Work closely with developers, product managers, and other stakeholders to ensure alignment on quality objectives.
+     Participate in design and code reviews to provide a QA perspective.
+     Communicate effectively with team members and stakeholders to report on project status, risks, and issues.
+
+Qualifications
+
+     Qualifications:
+     Bachelor’s degree in Computer Science, Engineering, or a related field.
+     5+ years proven experience as a QA Engineer or similar role in software development and quality assurance.
+     Experience with automated testing tools and frameworks.
+     Familiarity with bug tracking and test management tools.
+     Skills:
+     Strong understanding of software development lifecycle (SDLC) and QA methodologies.
+     Proficiency in programming languages such as C#, Java, Python, or similar.
+     Excellent analytical and problem-solving skills.
+     Attention to detail and a commitment to delivering high-quality work.
+     Strong communication and teamwork skills.
+
+Compensation
+
+Base salary: $60,000-$80,000/year
+
+Benefits
+
+     Medical insurance
+     Dental insurance
+     Vision insurance
+     401(k)
+
+We are an equal opportunity employer and value diversity at our company. We do not discriminate on the basis of race, religion, color, national origin, gender, sexual orientation, age, marital status, veteran status, or disability status.
