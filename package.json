@@ -13,6 +13,7 @@
     "report": "vitest run --config vitest.report.config.js"
   },
   "dependencies": {
+    "pdfjs-dist": "^6.0.227",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },

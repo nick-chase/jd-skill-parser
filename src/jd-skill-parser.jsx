@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import * as registry from './lib/registry.js';
+import { extractTextFromPdf } from './lib/pdfExtract.js';
 
 // ============================================================
 // CLASSIFICATION SYSTEM
@@ -373,7 +374,7 @@ export function parseJobDescription(text) {
 function parseResumeInput(input, inputType = 'text') {
     switch (inputType) {
         case 'text': return parseResumeText(input);
-        case 'pdf': return null; // stub for later
+        case 'pdf': return parseResumeText(input); // text already extracted from PDF
         case 'file': return null; // stub for later
         default: return parseResumeText(input);
     }
@@ -1367,6 +1368,9 @@ export default function App() {
     const [resumeInput, setResumeInput] = useState('');
     const [resumeResults, setResumeResults] = useState(null);
     const [jobMeta, setJobMeta] = useState(null);
+    const [pdfStatus, setPdfStatus] = useState('idle'); // idle | loading | done | error
+    const [pdfInfo, setPdfInfo] = useState(null);       // { name, numPages }
+    const fileInputRef = useRef(null);
 
     const parse = () => {
         const { companyName: extractedCompany, jobRole: extractedRole } = parseCompanyAndRole(input);
@@ -1387,6 +1391,21 @@ export default function App() {
         // Auto-switch to Gap Analysis if JD already parsed
         if (results?.technicalSignals?.length > 0) {
             setActiveTab('compare');
+        }
+    };
+
+    const handlePdfUpload = async (file) => {
+        if (!file || file.type !== 'application/pdf') return;
+        setPdfStatus('loading');
+        setPdfInfo(null);
+        try {
+            const { text, numPages } = await extractTextFromPdf(file);
+            setResumeInput(text);
+            setPdfStatus('done');
+            setPdfInfo({ name: file.name, numPages });
+        } catch (err) {
+            console.error('PDF extraction failed:', err);
+            setPdfStatus('error');
         }
     };
 
@@ -1525,20 +1544,47 @@ export default function App() {
                                 <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                                     Resume
                                 </h2>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 items-center">
+                                    {pdfStatus === 'loading' && (
+                                        <span style={{ fontSize: '11px', color: '#64748b' }}>Extracting…</span>
+                                    )}
+                                    {pdfStatus === 'done' && pdfInfo && (
+                                        <span style={{ fontSize: '11px', color: '#059669' }}>
+                                            {pdfInfo.name} · {pdfInfo.numPages}p
+                                        </span>
+                                    )}
+                                    {pdfStatus === 'error' && (
+                                        <span style={{ fontSize: '11px', color: '#dc2626' }}>Extraction failed</span>
+                                    )}
                                     <button
-                                        onClick={() => { setResumeInput(''); setResumeResults(null); }}
+                                        onClick={() => {
+                                            setResumeInput('');
+                                            setResumeResults(null);
+                                            setPdfStatus('idle');
+                                            setPdfInfo(null);
+                                            if (fileInputRef.current) fileInputRef.current.value = '';
+                                        }}
                                         className="text-xs px-2.5 py-1 border border-slate-300 rounded hover:bg-slate-100 transition"
                                     >
                                         Clear
                                     </button>
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept=".pdf"
+                                        style={{ display: 'none' }}
+                                        onChange={e => {
+                                            const file = e.target.files[0];
+                                            if (file) handlePdfUpload(file);
+                                        }}
+                                    />
                                     <button
-                                        disabled
-                                        style={{ opacity: 0.4, cursor: 'not-allowed' }}
-                                        className="text-xs px-2.5 py-1 border border-slate-300 rounded"
-                                        title="PDF upload coming soon"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        disabled={pdfStatus === 'loading'}
+                                        className="text-xs px-2.5 py-1 border border-slate-300 rounded hover:bg-slate-100 transition"
+                                        style={{ opacity: pdfStatus === 'loading' ? 0.5 : 1, cursor: pdfStatus === 'loading' ? 'not-allowed' : 'pointer' }}
                                     >
-                                        Upload PDF (soon)
+                                        Upload PDF
                                     </button>
                                 </div>
                             </div>
