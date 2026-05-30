@@ -1432,13 +1432,11 @@ export default function App() {
                         <span>·</span>
                         <span>Lightcast Skill Taxonomy</span>
                     </div>
-                    <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight">
-                        Tech Job Skill Parser
+                    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-center sm:text-left">
+                        Nat20
                     </h1>
-                    <p className="text-sm text-slate-600 mt-2 max-w-2xl leading-relaxed">
-                        Parses tech job descriptions into structured skill profiles with
-                        required proficiency levels and criticality. Best used for Software
-                        Engineering, ML/AI, and Data Science roles.
+                    <p className="text-sm sm:text-base text-slate-600 mt-2 text-center sm:text-left">
+                        Skill-based job matching, leveled.
                     </p>
                 </header>
 
