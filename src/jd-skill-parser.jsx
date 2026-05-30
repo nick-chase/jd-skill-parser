@@ -1459,10 +1459,10 @@ export default function App() {
 
                 {/* Header */}
                 <header className="mb-8">
-                    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-center sm:text-left">
+                    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-center">
                         Nat20
                     </h1>
-                    <p className="text-sm sm:text-base text-slate-600 mt-2 text-center sm:text-left">
+                    <p className="text-sm sm:text-base text-slate-600 mt-2 text-center">
                         Skill-based job matching, leveled.
                     </p>
                 </header>
@@ -1493,46 +1493,25 @@ export default function App() {
 
                 {/* JD Parser Tab */}
                 {activeTab === 'jd' && (
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                                    Job Description
-                                </h2>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => setInput(SAMPLE_JD)}
-                                        className="text-xs px-2.5 py-1 border border-slate-300 rounded hover:bg-slate-100 transition"
-                                    >
-                                        Sample
-                                    </button>
-                                    <button
-                                        onClick={() => { setInput(''); setResults(null); }}
-                                        className="text-xs px-2.5 py-1 border border-slate-300 rounded hover:bg-slate-100 transition"
-                                    >
-                                        Clear
-                                    </button>
-                                </div>
-                            </div>
-                            <textarea
-                                value={input}
-                                onChange={e => setInput(e.target.value)}
-                                className="w-full h-[220px] sm:h-[520px] p-4 border border-slate-200 rounded-lg font-mono text-[13px] leading-relaxed bg-white shadow-sm focus:ring-2 focus:ring-slate-400 focus:outline-none focus:border-slate-400 resize-none"
-                                placeholder="Paste a job description here..."
-                            />
-                            <button
-                                onClick={parse}
-                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-medium transition shadow-sm"
-                            >
-                                Parse Skills →
-                            </button>
-                        </div>
-
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                                    Required Skill Profile
-                                </h2>
+                    <div className="space-y-4">
+                        {/* Toolbar */}
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                                Job Description
+                            </h2>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setInput(SAMPLE_JD)}
+                                    className="text-xs px-2.5 py-1 border border-slate-300 rounded hover:bg-slate-100 transition"
+                                >
+                                    Sample
+                                </button>
+                                <button
+                                    onClick={() => { setInput(''); setResults(null); }}
+                                    className="text-xs px-2.5 py-1 border border-slate-300 rounded hover:bg-slate-100 transition"
+                                >
+                                    Clear
+                                </button>
                                 {results?.technicalSignals?.length > 0 && (
                                     <button
                                         onClick={exportJson}
@@ -1542,97 +1521,101 @@ export default function App() {
                                     </button>
                                 )}
                             </div>
-                            {results === null ? (
-                                <div className="text-sm text-slate-500 p-12 text-center border border-dashed border-slate-300 rounded-lg bg-white">
-                                    Paste a job description and click <b>Parse Skills</b> to see
-                                    the structured requirement profile.
-                                </div>
-                            ) : (
-                                <>
-                                    <ResultsView results={results.technicalSignals} companyName={companyName} jobRole={jobRole} jobMeta={jobMeta} />
-                                    <BehavioralSignalsPanel signals={results.behavioralSignals} title="Behavioral Signals" />
-                                    <JobDutiesPanel duties={results.jobDuties} />
-                                </>
-                            )}
                         </div>
+
+                        <textarea
+                            value={input}
+                            onChange={e => setInput(e.target.value)}
+                            className="w-full h-[200px] sm:h-[280px] p-4 border border-slate-200 rounded-lg font-mono text-[13px] leading-relaxed bg-white shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none focus:border-indigo-400 resize-none"
+                            placeholder="Paste a job description here..."
+                        />
+
+                        <button
+                            onClick={parse}
+                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-medium transition shadow-sm"
+                        >
+                            Parse Skills →
+                        </button>
+
+                        {results !== null && (
+                            <>
+                                <ResultsView results={results.technicalSignals} companyName={companyName} jobRole={jobRole} jobMeta={jobMeta} />
+                                <BehavioralSignalsPanel signals={results.behavioralSignals} title="Behavioral Signals" />
+                                <JobDutiesPanel duties={results.jobDuties} />
+                            </>
+                        )}
                     </div>
                 )}
 
                 {/* Resume Parser Tab */}
                 {activeTab === 'resume' && (
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                                    Resume
-                                </h2>
-                                <div className="flex gap-2 items-center">
-                                    {pdfStatus === 'loading' && (
-                                        <span style={{ fontSize: '11px', color: '#64748b' }}>Extracting…</span>
-                                    )}
-                                    {pdfStatus === 'done' && pdfInfo && (
-                                        <span style={{ fontSize: '11px', color: '#059669' }}>
-                                            {pdfInfo.name} · {pdfInfo.numPages}p
-                                        </span>
-                                    )}
-                                    {pdfStatus === 'error' && (
-                                        <span style={{ fontSize: '11px', color: '#dc2626' }}>Extraction failed</span>
-                                    )}
-                                    <button
-                                        onClick={() => {
-                                            setResumeInput('');
-                                            setResumeResults(null);
-                                            setPdfStatus('idle');
-                                            setPdfInfo(null);
-                                            if (fileInputRef.current) fileInputRef.current.value = '';
-                                        }}
-                                        className="text-xs px-2.5 py-1 border border-slate-300 rounded hover:bg-slate-100 transition"
-                                    >
-                                        Clear
-                                    </button>
-                                    <input
-                                        ref={fileInputRef}
-                                        type="file"
-                                        accept=".pdf"
-                                        style={{ display: 'none' }}
-                                        onChange={e => {
-                                            const file = e.target.files[0];
-                                            if (file) handlePdfUpload(file);
-                                        }}
-                                    />
-                                    <button
-                                        onClick={() => fileInputRef.current?.click()}
-                                        disabled={pdfStatus === 'loading'}
-                                        className="text-xs px-2.5 py-1 border border-slate-300 rounded hover:bg-slate-100 transition"
-                                        style={{ opacity: pdfStatus === 'loading' ? 0.5 : 1, cursor: pdfStatus === 'loading' ? 'not-allowed' : 'pointer' }}
-                                    >
-                                        Upload PDF
-                                    </button>
-                                </div>
+                    <div className="space-y-4">
+                        {/* Toolbar */}
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                                Resume
+                            </h2>
+                            <div className="flex gap-2 items-center">
+                                <button
+                                    onClick={() => {
+                                        setResumeInput('');
+                                        setResumeResults(null);
+                                        setPdfStatus('idle');
+                                        setPdfInfo(null);
+                                        if (fileInputRef.current) fileInputRef.current.value = '';
+                                    }}
+                                    className="text-xs px-2.5 py-1 border border-slate-300 rounded hover:bg-slate-100 transition"
+                                >
+                                    Clear
+                                </button>
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept=".pdf"
+                                    style={{ display: 'none' }}
+                                    onChange={e => {
+                                        const file = e.target.files[0];
+                                        if (file) handlePdfUpload(file);
+                                    }}
+                                />
+                                <button
+                                    onClick={() => fileInputRef.current?.click()}
+                                    disabled={pdfStatus === 'loading'}
+                                    className="text-xs px-2.5 py-1 border border-slate-300 rounded hover:bg-slate-100 transition"
+                                    style={{ opacity: pdfStatus === 'loading' ? 0.5 : 1, cursor: pdfStatus === 'loading' ? 'not-allowed' : 'pointer' }}
+                                >
+                                    Upload PDF
+                                </button>
                             </div>
-                            <textarea
-                                value={resumeInput}
-                                onChange={e => setResumeInput(e.target.value)}
-                                className="w-full h-[220px] sm:h-[520px] p-4 border border-slate-200 rounded-lg font-mono text-[13px] leading-relaxed bg-white shadow-sm focus:ring-2 focus:ring-slate-400 focus:outline-none focus:border-slate-400 resize-none"
-                                placeholder="Paste your resume text here..."
-                            />
-                            <button
-                                onClick={parseResume}
-                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-medium transition shadow-sm"
-                            >
-                                Parse Resume →
-                            </button>
                         </div>
 
-                        <div className="space-y-3">
-                            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                                Your Skill Profile
-                            </h2>
-                            {resumeResults === null ? (
-                                <div className="text-sm text-slate-500 p-12 text-center border border-dashed border-slate-300 rounded-lg bg-white">
-                                    Paste your resume and click <b>Parse Resume</b> to see your skill profile.
-                                </div>
-                            ) : resumeResults.technicalSignals.length === 0 ? (
+                        {/* PDF status — own row, truncated to prevent overflow */}
+                        {pdfStatus === 'loading' && (
+                            <p className="text-xs text-slate-500">Extracting text from PDF…</p>
+                        )}
+                        {pdfStatus === 'done' && pdfInfo && (
+                            <p className="text-xs text-emerald-600 truncate">{pdfInfo.name} · {pdfInfo.numPages}p</p>
+                        )}
+                        {pdfStatus === 'error' && (
+                            <p className="text-xs text-red-600">Extraction failed — try a different file.</p>
+                        )}
+
+                        <textarea
+                            value={resumeInput}
+                            onChange={e => setResumeInput(e.target.value)}
+                            className="w-full h-[200px] sm:h-[280px] p-4 border border-slate-200 rounded-lg font-mono text-[13px] leading-relaxed bg-white shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none focus:border-indigo-400 resize-none"
+                            placeholder="Paste your resume text here..."
+                        />
+
+                        <button
+                            onClick={parseResume}
+                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-medium transition shadow-sm"
+                        >
+                            Parse Resume →
+                        </button>
+
+                        {resumeResults !== null && (
+                            resumeResults.technicalSignals.length === 0 ? (
                                 <div className="text-sm text-slate-500 p-8 text-center border border-dashed border-slate-300 rounded-lg bg-white">
                                     No recognized skills detected. Make sure your resume has a TECHNICAL SKILLS or EDUCATION section.
                                 </div>
@@ -1641,8 +1624,8 @@ export default function App() {
                                     <ResumeResultsView results={resumeResults.technicalSignals} />
                                     <BehavioralSignalsPanel signals={resumeResults.behavioralSignals} title="Behavioral Signals" />
                                 </>
-                            )}
-                        </div>
+                            )
+                        )}
                     </div>
                 )}
 
