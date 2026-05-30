@@ -828,7 +828,7 @@ function ResultsViewSimple({ results, companyName, jobRole }) {
                         <div style={{ fontSize: '13px', fontWeight: '600', color: '#92400e', marginBottom: '10px' }}>
                             Role Template: {roleTemplate.role}
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', fontSize: '12px' }}>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                             <div>
                                 <div style={{ color: '#92400e', fontWeight: '600' }}>Critical</div>
                                 <div style={{ color: '#b45309' }}>{comparison.matched.critical.length}/{roleTemplate.critical.length} ({(comparison.coverage.critical * 100).toFixed(0)}%)</div>
@@ -859,7 +859,7 @@ function ResultsViewSimple({ results, companyName, jobRole }) {
                 {/* Stats Section - Using inline styles */}
                 <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px' }}>
                     <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#0f172a', marginBottom: '12px' }}>Overview</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '125px 125px 125px 125px', gap: '16px' }}>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                         <div>
                             <div style={{ fontSize: '12px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Total Skills</div>
                             <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#0f172a' }}>{total}</div>
@@ -881,7 +881,7 @@ function ResultsViewSimple({ results, companyName, jobRole }) {
                 </div>
 
                 {/* Skills Table - Using inline styles */}
-                <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '4px', overflowX: 'auto' }}>
                     <div style={{ padding: '10px 8px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: '140px 145px 145px 115px 100px', gap: '8px' }}>
                         <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Skill</div>
                         <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Category</div>
@@ -1016,7 +1016,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
 
             {/* Score Overview */}
             <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '125px 125px 125px 125px 125px', gap: '16px', alignItems: 'center' }}>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 items-center">
                     <div>
                         <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Match Score</div>
                         <div style={{ fontSize: '28px', fontWeight: 'bold', color: scoreColor }}>{score}%</div>
@@ -1043,7 +1043,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
 
             {/* Missing Skills */}
             {critical.length > 0 && (
-                <div style={{ backgroundColor: 'white', border: '1px solid #fecaca', borderRadius: '8px', overflow: 'hidden' }}>
+                <div style={{ backgroundColor: 'white', border: '1px solid #fecaca', borderRadius: '8px', overflowX: 'auto' }}>
                     <div style={{ padding: '10px 16px', backgroundColor: '#fef2f2', borderBottom: '1px solid #fecaca' }}>
                         <span style={{ fontSize: '12px', fontWeight: '700', color: '#dc2626', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                             ❌ Missing Skills ({critical.length})
@@ -1063,7 +1063,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
 
             {/* Level Gaps */}
             {levelGaps.length > 0 && (
-                <div style={{ backgroundColor: 'white', border: '1px solid #fed7aa', borderRadius: '8px', overflow: 'hidden' }}>
+                <div style={{ backgroundColor: 'white', border: '1px solid #fed7aa', borderRadius: '8px', overflowX: 'auto' }}>
                     <div style={{ padding: '10px 16px', backgroundColor: '#fff7ed', borderBottom: '1px solid #fed7aa' }}>
                         <span style={{ fontSize: '12px', fontWeight: '700', color: '#d97706', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                             ⚠️ Level Gaps ({levelGaps.length})
@@ -1085,7 +1085,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
 
             {/* Matched Skills */}
             {matched.length > 0 && (
-                <div style={{ backgroundColor: 'white', border: '1px solid #bbf7d0', borderRadius: '8px', overflow: 'hidden' }}>
+                <div style={{ backgroundColor: 'white', border: '1px solid #bbf7d0', borderRadius: '8px', overflowX: 'auto' }}>
                     <div style={{ padding: '10px 16px', backgroundColor: '#f0fdf4', borderBottom: '1px solid #bbf7d0' }}>
                         <span style={{ fontSize: '12px', fontWeight: '700', color: '#059669', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                             ✅ Matched Skills ({matched.length})
@@ -1174,7 +1174,7 @@ function ResumeResultsView({ results }) {
             {/* Stats */}
             <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#0f172a', marginBottom: '12px' }}>Your Profile</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px' }}>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div>
                         <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Total Skills</div>
                         <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#0f172a' }}>{results.length}</div>
@@ -1197,7 +1197,7 @@ function ResumeResultsView({ results }) {
             </div>
 
             {/* Skills Table */}
-            <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+            <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '4px', overflowX: 'auto' }}>
                 <div style={{ padding: '10px 8px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: '150px 150px 100px 120px', gap: '8px' }}>
                     <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Skill</div>
                     <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Category</div>
@@ -1423,7 +1423,7 @@ export default function App() {
 
     return (
         <div className="min-h-screen bg-stone-50 text-slate-900">
-            <div className="max-w-7xl mx-auto px-4 py-8 md:py-10">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-10 pb-24 md:pb-10">
 
                 {/* Header */}
                 <header className="mb-8">
@@ -1432,7 +1432,7 @@ export default function App() {
                         <span>·</span>
                         <span>Lightcast Skill Taxonomy</span>
                     </div>
-                    <h1 className="text-2xl md:text-3xl font-semibold tracking-tight">
+                    <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold tracking-tight">
                         Tech Job Skill Parser
                     </h1>
                     <p className="text-sm text-slate-600 mt-2 max-w-2xl leading-relaxed">
@@ -1443,7 +1443,7 @@ export default function App() {
                 </header>
 
                 {/* Tabs */}
-                <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', borderBottom: '2px solid #e2e8f0' }}>
+                <div className="hidden md:flex" style={{ gap: '8px', marginBottom: '24px', borderBottom: '2px solid #e2e8f0' }}>
                     {[
                         { key: 'jd', label: 'Parse JD' },
                         { key: 'resume', label: 'Parse Resume' },
@@ -1471,7 +1471,7 @@ export default function App() {
 
                 {/* JD Parser Tab */}
                 {activeTab === 'jd' && (
-                    <div className="grid lg:grid-cols-2 gap-6">
+                    <div className="grid md:grid-cols-2 gap-6">
                         <div className="space-y-3">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
@@ -1495,7 +1495,7 @@ export default function App() {
                             <textarea
                                 value={input}
                                 onChange={e => setInput(e.target.value)}
-                                className="w-full h-[520px] p-4 border border-slate-200 rounded-lg font-mono text-[13px] leading-relaxed bg-white shadow-sm focus:ring-2 focus:ring-slate-400 focus:outline-none focus:border-slate-400 resize-none"
+                                className="w-full h-[220px] sm:h-[520px] p-4 border border-slate-200 rounded-lg font-mono text-[13px] leading-relaxed bg-white shadow-sm focus:ring-2 focus:ring-slate-400 focus:outline-none focus:border-slate-400 resize-none"
                                 placeholder="Paste a job description here..."
                             />
                             <button
@@ -1538,7 +1538,7 @@ export default function App() {
 
                 {/* Resume Parser Tab */}
                 {activeTab === 'resume' && (
-                    <div className="grid lg:grid-cols-2 gap-6">
+                    <div className="grid md:grid-cols-2 gap-6">
                         <div className="space-y-3">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
@@ -1591,7 +1591,7 @@ export default function App() {
                             <textarea
                                 value={resumeInput}
                                 onChange={e => setResumeInput(e.target.value)}
-                                className="w-full h-[520px] p-4 border border-slate-200 rounded-lg font-mono text-[13px] leading-relaxed bg-white shadow-sm focus:ring-2 focus:ring-slate-400 focus:outline-none focus:border-slate-400 resize-none"
+                                className="w-full h-[220px] sm:h-[520px] p-4 border border-slate-200 rounded-lg font-mono text-[13px] leading-relaxed bg-white shadow-sm focus:ring-2 focus:ring-slate-400 focus:outline-none focus:border-slate-400 resize-none"
                                 placeholder="Paste your resume text here..."
                             />
                             <button
@@ -1651,6 +1651,30 @@ export default function App() {
                         )}
                     </div>
                 )}
+
+                {/* Mobile bottom nav — hidden on md+ where top tabs are shown */}
+                <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200">
+                    <div className="flex">
+                        {[
+                            { key: 'jd',      label: 'JD',     icon: '📋' },
+                            { key: 'resume',  label: 'Resume', icon: '📝' },
+                            { key: 'compare', label: 'Match',  icon: '🎯' },
+                        ].map(({ key, label, icon }) => (
+                            <button
+                                key={key}
+                                onClick={() => setActiveTab(key)}
+                                className={`flex-1 flex flex-col items-center justify-center py-3 gap-0.5 transition ${
+                                    activeTab === key
+                                        ? 'text-slate-900 border-t-2 border-slate-900 -mt-px'
+                                        : 'text-slate-400'
+                                }`}
+                            >
+                                <span className="text-lg leading-none">{icon}</span>
+                                <span className="text-[10px] font-semibold uppercase tracking-wider">{label}</span>
+                            </button>
+                        ))}
+                    </div>
+                </nav>
 
                 <Legend />
 
