@@ -26,7 +26,7 @@ const TEST_CASES = [
     minSkills:      3,
     assertJobType:  true,
     jobType:        'Full-time',
-    expectedSkills: ['Java', 'Object-Oriented Programming', 'Testing'],
+    expectedSkills: ['Java', 'Object-Oriented Programming', 'Regression Testing'],
   },
   {
     file:           'alt-2-jd.txt',

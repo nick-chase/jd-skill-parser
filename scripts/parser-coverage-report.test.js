@@ -39,7 +39,8 @@ const today = () => new Date().toISOString().split('T')[0]
 test('generate parser coverage report', () => {
   const results = JD_FILES.map((filename, i) => {
     const text   = readFileSync(resolve(JD_DIR, filename), 'utf-8')
-    const skills = parseJobDescription(text)
+    const parsed = parseJobDescription(text)
+    const skills = Array.isArray(parsed) ? parsed : (parsed.technicalSignals ?? [])
     const meta   = parseJobMeta(text)
     return { index: i + 1, filename, skills, meta }
   })
