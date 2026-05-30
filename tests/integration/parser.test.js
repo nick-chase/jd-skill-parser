@@ -157,6 +157,7 @@ describe('parseJobDescription() -- jobDuties extraction from sample JD', () => {
 // ---------------------------------------------------------------------------
 
 describe('parseJobDescription() -- guardWords suppress false positives', () => {
+  // --- Spring Boot ---
   test("does NOT extract Spring Boot when 'spring season' appears in the JD", () => {
     // The sample JD says "We love the spring season here in Austin."
     // Spring Boot's guardWords include "spring season". If guardWords logic breaks,
@@ -170,6 +171,88 @@ describe('parseJobDescription() -- guardWords suppress false positives', () => {
     const synthetic = 'We love the spring season here and fresh ideas from the team.';
     const { technicalSignals } = parseJobDescription(synthetic);
     expect(technicalSignals.map((s) => s.name)).not.toContain('Spring Boot');
+  });
+
+  test("DOES extract Spring Boot from 'Spring framework for enterprise apps'", () => {
+    const synthetic = 'Must have experience with the Spring framework for enterprise Java applications.';
+    const { technicalSignals } = parseJobDescription(synthetic);
+    expect(technicalSignals.map((s) => s.name)).toContain('Spring Boot');
+  });
+
+  // --- Flask ---
+  test("does NOT extract Flask from 'water flask' non-tech phrase", () => {
+    const synthetic = 'Bring a water flask to our outdoor team-building events.';
+    const { technicalSignals } = parseJobDescription(synthetic);
+    expect(technicalSignals.map((s) => s.name)).not.toContain('Flask');
+  });
+
+  test("DOES extract Flask from 'Flask framework for Python backend'", () => {
+    const synthetic = 'Build REST endpoints using the Flask framework for Python backend services.';
+    const { technicalSignals } = parseJobDescription(synthetic);
+    expect(technicalSignals.map((s) => s.name)).toContain('Flask');
+  });
+
+  // --- Express.js ---
+  test("does NOT extract Express.js from 'express written consent'", () => {
+    const synthetic = 'You must provide express written consent to proceed with the application.';
+    const { technicalSignals } = parseJobDescription(synthetic);
+    expect(technicalSignals.map((s) => s.name)).not.toContain('Express.js');
+  });
+
+  test("does NOT extract Express.js from 'express delivery' logistics context", () => {
+    const synthetic = 'Ship hardware components via express delivery to our warehouse.';
+    const { technicalSignals } = parseJobDescription(synthetic);
+    expect(technicalSignals.map((s) => s.name)).not.toContain('Express.js');
+  });
+
+  test("DOES extract Express.js from 'Express.js REST API server'", () => {
+    const synthetic = 'Build RESTful routes using Express.js for the Node.js API server.';
+    const { technicalSignals } = parseJobDescription(synthetic);
+    expect(technicalSignals.map((s) => s.name)).toContain('Express.js');
+  });
+
+  // --- Next.js ---
+  test("does NOT extract Next.js from 'next steps' hiring language", () => {
+    const synthetic = 'The next steps in our hiring process will be communicated by next week.';
+    const { technicalSignals } = parseJobDescription(synthetic);
+    expect(technicalSignals.map((s) => s.name)).not.toContain('Next.js');
+  });
+
+  test("DOES extract Next.js from 'Next.js' explicit tech mention", () => {
+    const synthetic = 'We build our frontend with Next.js and deploy to Vercel.';
+    const { technicalSignals } = parseJobDescription(synthetic);
+    expect(technicalSignals.map((s) => s.name)).toContain('Next.js');
+  });
+
+  // --- Swift vs SWIFT ---
+  test("does NOT extract Swift (language) from 'Knowledge on SWIFT preferred' banking context", () => {
+    // JD7 false positive: SWIFT the financial messaging protocol was matched as
+    // Swift the Apple programming language. guardWords on Swift entry now prevent this.
+    const synthetic = 'Domain: Core Banking, Payment domain, Knowledge on SWIFT preferred.';
+    const { technicalSignals } = parseJobDescription(synthetic);
+    const names = technicalSignals.map((s) => s.name);
+    expect(names).not.toContain('Swift');
+  });
+
+  test("DOES extract SWIFT (Financial) from banking SWIFT context", () => {
+    const synthetic = 'Domain: Core Banking, Payment domain, Knowledge on SWIFT preferred.';
+    const { technicalSignals } = parseJobDescription(synthetic);
+    expect(technicalSignals.map((s) => s.name)).toContain('SWIFT (Financial)');
+  });
+
+  test("DOES extract Swift (language) from iOS/Apple development context", () => {
+    const synthetic = 'Build native iOS applications using Swift and Xcode.';
+    const { technicalSignals } = parseJobDescription(synthetic);
+    expect(technicalSignals.map((s) => s.name)).toContain('Swift');
+  });
+
+  // --- React pattern fix (A4 regression) ---
+  test("DOES extract React from 'React-based applications'", () => {
+    // Pattern was previously too restrictive (required lookahead for .js/framework/etc).
+    // Now matches React as a standalone word.
+    const synthetic = 'Design and maintain features across C#, Java, and React-based applications.';
+    const { technicalSignals } = parseJobDescription(synthetic);
+    expect(technicalSignals.map((s) => s.name)).toContain('React');
   });
 });
 
