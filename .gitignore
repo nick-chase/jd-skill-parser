@@ -12,8 +12,9 @@ dist
 dist-ssr
 *.local
 
-# Generated reports
+# Generated reports (auto-generated, do not commit)
 reports/
+tests/coverage-gaps.md
 
 # Editor directories and files
 .vscode/*

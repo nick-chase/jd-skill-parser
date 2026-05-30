@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "report": "vitest run --config vitest.report.config.js"
+    "report": "vitest run --config vitest.report.config.js",
+    "test:coverage-gaps": "vitest run --config vitest.coverage-gaps.config.js"
   },
   "dependencies": {
     "pdfjs-dist": "^6.0.227",
