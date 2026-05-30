@@ -279,36 +279,48 @@ describe('parseResumeText() -- technicalSignals extraction from sample resume', 
     expect(resumeSkills.length).toBeGreaterThan(0);
   });
 
-  test('every technical signal has shape: name, category, level (number), source (string)', () => {
+  test('every technical signal has shape: name, category, level (number), score (number), source (string), suggestion (string)', () => {
     for (const skill of resumeSkills) {
       expect(skill).toHaveProperty('name');
       expect(skill).toHaveProperty('category');
       expect(typeof skill.level).toBe('number');
+      expect(typeof skill.score).toBe('number');
       expect(skill).toHaveProperty('source');
+      expect(typeof skill.suggestion).toBe('string');
     }
   });
 
-  test('Python is level 3 -- Experience section wins over Technical Skills L2', () => {
+  // B4 weighted scoring: Python appears in Technical Skills (wType=0.1) + intern Experience
+  // (wType=0.7, unknown duration). Sum = 0.39, M_rec(2) = 1.2 → score ≈ 0.47 → L2 Novice.
+  test('Python is level 2 -- weighted scoring: skills-section + intern experience (unknown duration)', () => {
     const python = resumeSkills.find((s) => s.name === 'Python');
     expect(python).toBeDefined();
-    expect(python.level).toBe(3);
+    expect(python.level).toBe(2);
+    expect(python.score).toBeGreaterThan(0.30);
+    expect(python.source).toMatch(/experience/i);
   });
 
-  test('Machine Learning is level 3 sourced from Experience', () => {
+  // Machine Learning appears only in intern Experience (wType=0.7, unknown duration).
+  // Score = 0.7 × 0.5 × 1.0 = 0.35 → L2 Novice.
+  test('Machine Learning is level 2 -- intern experience, unknown duration', () => {
     const ml = resumeSkills.find((s) => s.name === 'Machine Learning');
     expect(ml).toBeDefined();
-    expect(ml.level).toBe(3);
-    expect(ml.source).toBe('Experience');
+    expect(ml.level).toBe(2);
+    expect(ml.source).toMatch(/experience/i);
   });
 
-  test('Docker is level 2 sourced from Projects', () => {
+  // Docker appears only in Projects (wType=0.5, no duration stated).
+  // Score = 0.5 × 0.4 × 1.0 = 0.20 → L1 Awareness.
+  test('Docker is level 1 -- projects section only, no duration stated', () => {
     const docker = resumeSkills.find((s) => s.name === 'Docker');
     expect(docker).toBeDefined();
-    expect(docker.level).toBe(2);
-    expect(docker.source).toBe('Projects');
+    expect(docker.level).toBe(1);
+    expect(docker.source).toMatch(/project/i);
   });
 
-  test("React.js is level 1 -- 'learning' keyword triggers the L1 cap", () => {
+  // React appears only in Technical Skills (wType=0.1, no duration).
+  // Score = 0.1 × 0.4 × 1.0 = 0.04 → L1 Awareness. "Learning" phrase is expected future work.
+  test('React is level 1 -- skills-section-only, no project or experience evidence', () => {
     const react = resumeSkills.find((s) => s.name === 'React');
     expect(react).toBeDefined();
     expect(react.level).toBe(1);
