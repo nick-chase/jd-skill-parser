@@ -4,6 +4,7 @@ import { extractTextFromPdf } from './lib/pdfExtract.js';
 import { parseDateRange, classifyEvidenceType, scoreSkillEvidence } from './lib/parser/inference.js';
 import { getDecision } from './lib/parser/decision.js';
 import DecisionCard from './components/DecisionCard.jsx';
+import SkillRow from './components/SkillRow.jsx';
 
 // ============================================================
 // CLASSIFICATION SYSTEM
@@ -954,12 +955,13 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                         <span style={{ fontSize: '11px', color: '#991b1b', marginLeft: '8px' }}>Not found in your resume</span>
                     </div>
                     {critical.map((skill, idx) => (
-                        <div key={skill.name} style={{ padding: '8px 16px', borderBottom: idx < critical.length - 1 ? '1px solid #fef2f2' : 'none', display: 'grid', gridTemplateColumns: '140px 140px 140px 140px', gap: '8px', alignItems: 'center', backgroundColor: idx % 2 === 0 ? 'white' : '#fff5f5' }}>
-                            <div style={{ fontWeight: '600', color: '#0f172a', fontSize: '13px' }}>{skill.name}</div>
-                            <div style={{ fontSize: '12px', color: '#475569' }}>{skill.category}</div>
-                            <div style={{ fontSize: '12px', color: '#475569' }}>Required: L{skill.level}</div>
-                            <div><ImportanceBadge importance={skill.importance} /></div>
-                        </div>
+                        <SkillRow
+                            key={skill.name}
+                            skill={skill}
+                            variant="missing"
+                            idx={idx}
+                            isLast={idx === critical.length - 1}
+                        />
                     ))}
                 </div>
             )}
@@ -974,14 +976,13 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                         <span style={{ fontSize: '11px', color: '#92400e', marginLeft: '8px' }}>You have these but need more depth</span>
                     </div>
                     {levelGaps.map((skill, idx) => (
-                        <div key={skill.name} style={{ padding: '8px 16px', borderBottom: idx < levelGaps.length - 1 ? '1px solid #fff7ed' : 'none', display: 'grid', gridTemplateColumns: '140px 140px 140px 140px', gap: '8px', alignItems: 'center', backgroundColor: idx % 2 === 0 ? 'white' : '#fffbeb' }}>
-                            <div style={{ fontWeight: '600', color: '#0f172a', fontSize: '13px' }}>{skill.name}</div>
-                            <div style={{ fontSize: '12px', color: '#475569' }}>{skill.category}</div>
-                            <div style={{ fontSize: '12px', color: '#d97706' }}>
-                                Your L{skill.resumeLevel} → Need L{skill.level}
-                            </div>
-                            <div><ImportanceBadge importance={skill.importance} /></div>
-                        </div>
+                        <SkillRow
+                            key={skill.name}
+                            skill={skill}
+                            variant="gap"
+                            idx={idx}
+                            isLast={idx === levelGaps.length - 1}
+                        />
                     ))}
                 </div>
             )}
@@ -996,14 +997,13 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                         <span style={{ fontSize: '11px', color: '#065f46', marginLeft: '8px' }}>You meet or exceed the requirement</span>
                     </div>
                     {matched.map((skill, idx) => (
-                        <div key={skill.name} style={{ padding: '8px 16px', borderBottom: idx < matched.length - 1 ? '1px solid #f0fdf4' : 'none', display: 'grid', gridTemplateColumns: '140px 140px 140px 140px', gap: '8px', alignItems: 'center', backgroundColor: idx % 2 === 0 ? 'white' : '#f0fdf4' }}>
-                            <div style={{ fontWeight: '600', color: '#0f172a', fontSize: '13px' }}>{skill.name}</div>
-                            <div style={{ fontSize: '12px', color: '#475569' }}>{skill.category}</div>
-                            <div style={{ fontSize: '12px', color: '#059669' }}>
-                                Your L{skill.resumeLevel} · {LEVEL_NAMES[skill.resumeLevel]}
-                            </div>
-                            <div><ImportanceBadge importance={skill.importance} /></div>
-                        </div>
+                        <SkillRow
+                            key={skill.name}
+                            skill={skill}
+                            variant="matched"
+                            idx={idx}
+                            isLast={idx === matched.length - 1}
+                        />
                     ))}
                 </div>
             )}
