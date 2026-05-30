@@ -1423,7 +1423,7 @@ export default function App() {
 
     return (
         <div className="min-h-screen bg-stone-50 text-slate-900">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-10 pb-24 md:pb-10">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
 
                 {/* Header */}
                 <header className="mb-8">
@@ -1442,31 +1442,28 @@ export default function App() {
                     </p>
                 </header>
 
-                {/* Tabs */}
-                <div className="hidden md:flex" style={{ gap: '8px', marginBottom: '24px', borderBottom: '2px solid #e2e8f0' }}>
-                    {[
-                        { key: 'jd', label: 'Parse JD' },
-                        { key: 'resume', label: 'Parse Resume' },
-                        { key: 'compare', label: 'Gap Analysis' },
-                    ].map(tab => (
-                        <button
-                            key={tab.key}
-                            onClick={() => setActiveTab(tab.key)}
-                            style={{
-                                padding: '8px 20px',
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                border: 'none',
-                                borderBottom: activeTab === tab.key ? '2px solid #0f172a' : '2px solid transparent',
-                                background: 'none',
-                                color: activeTab === tab.key ? '#0f172a' : '#64748b',
-                                cursor: 'pointer',
-                                marginBottom: '-2px',
-                            }}
-                        >
-                            {tab.label}
-                        </button>
-                    ))}
+                {/* Tabs — single nav, all screen sizes, sticky */}
+                <div className="sticky top-0 z-10 bg-stone-50 border-b border-slate-200 mb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
+                    <div className="flex">
+                        {[
+                            { key: 'jd',      short: 'JD',     full: 'Parse JD' },
+                            { key: 'resume',  short: 'Resume', full: 'Parse Resume' },
+                            { key: 'compare', short: 'Match',  full: 'Gap Analysis' },
+                        ].map(({ key, short, full }) => (
+                            <button
+                                key={key}
+                                onClick={() => setActiveTab(key)}
+                                className={`flex-1 sm:flex-none py-3 px-4 sm:px-5 text-xs sm:text-sm font-semibold border-b-2 -mb-px transition-colors ${
+                                    activeTab === key
+                                        ? 'border-slate-900 text-slate-900'
+                                        : 'border-transparent text-slate-500 hover:text-slate-700'
+                                }`}
+                            >
+                                <span className="sm:hidden">{short}</span>
+                                <span className="hidden sm:inline">{full}</span>
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 {/* JD Parser Tab */}
@@ -1651,30 +1648,6 @@ export default function App() {
                         )}
                     </div>
                 )}
-
-                {/* Mobile bottom nav — hidden on md+ where top tabs are shown */}
-                <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200">
-                    <div className="flex">
-                        {[
-                            { key: 'jd',      label: 'JD',     icon: '📋' },
-                            { key: 'resume',  label: 'Resume', icon: '📝' },
-                            { key: 'compare', label: 'Match',  icon: '🎯' },
-                        ].map(({ key, label, icon }) => (
-                            <button
-                                key={key}
-                                onClick={() => setActiveTab(key)}
-                                className={`flex-1 flex flex-col items-center justify-center py-3 gap-0.5 transition ${
-                                    activeTab === key
-                                        ? 'text-slate-900 border-t-2 border-slate-900 -mt-px'
-                                        : 'text-slate-400'
-                                }`}
-                            >
-                                <span className="text-lg leading-none">{icon}</span>
-                                <span className="text-[10px] font-semibold uppercase tracking-wider">{label}</span>
-                            </button>
-                        ))}
-                    </div>
-                </nav>
 
                 <Legend />
 
