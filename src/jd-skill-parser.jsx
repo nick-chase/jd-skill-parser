@@ -2,6 +2,8 @@ import { useState, useRef } from 'react';
 import * as registry from './lib/registry.js';
 import { extractTextFromPdf } from './lib/pdfExtract.js';
 import { parseDateRange, classifyEvidenceType, scoreSkillEvidence } from './lib/parser/inference.js';
+import { getDecision } from './lib/parser/decision.js';
+import DecisionCard from './components/DecisionCard.jsx';
 
 // ============================================================
 // CLASSIFICATION SYSTEM
@@ -851,7 +853,7 @@ function JobDutiesPanel({ duties }) {
     );
 }
 
-function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, jobMeta }) {
+function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, jobMeta, decisionResult }) {
     if (!gap) return null;
 
     const { critical, levelGaps, matched, bonus } = gap;
@@ -861,12 +863,11 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
     const scoreColor = score >= 70 ? '#059669' : score >= 40 ? '#d97706' : '#dc2626';
     const scoreLabel = score >= 70 ? 'Strong Match' : score >= 40 ? 'Partial Match' : 'Weak Match';
 
-
-
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-            {/* Header */}
+            {/* Decision Card — top of the Match tab */}
+            {decisionResult && <DecisionCard decisionResult={decisionResult} />}
 
             {/* Zero match warning */}
             {
@@ -1554,6 +1555,7 @@ export default function App() {
                                 companyName={companyName}
                                 jobRole={jobRole}
                                 jobMeta={jobMeta}
+                                decisionResult={getDecision(results, resumeResults)}
                             />
                         )}
                     </div>
