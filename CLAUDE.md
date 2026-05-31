@@ -1,5 +1,71 @@
 # CLAUDE.md — ResumeMatch
 
+## Two-Repo Workflow
+
+**Claude Code: read this section in full at the start of every session.
+The repo split is enforced by a pre-commit hook — bypassing it is
+never acceptable.**
+
+This project uses two repos:
+
+- **Public:** `jd-skill-parser` (this repo) — code, tests, public docs, sample data
+- **Private:** `../nat20-private/` — master plan, research, scoring weights, strategy
+
+### Rules
+
+- Never add private filenames to this repo. The pre-commit hook enforces this.
+- Pricing, monetization strategy, and launch plans live in `nat20-private` only.
+- `data/skills.json` and `data/soft-skills.json` are public and contain the
+  launch-ready dataset. If a private extended dataset is ever introduced, it
+  will live in `nat20-private/data/` and merge at build time — but this does
+  not exist today. Treat the public files as the source of truth.
+- `docs/scoring-model.md` has been moved to `nat20-private/docs/`. Do not
+  recreate it here.
+
+### Hook installation (required on each fresh clone)
+
+The pre-commit hook lives in `.git/hooks/pre-commit` which is NOT
+tracked by git. After cloning this repo, the hook will be missing
+and commits will be unprotected.
+
+To install: copy `.git/hooks/pre-commit` from a working clone, or
+recreate it from `docs/pre-commit-template.md` (a reference copy
+kept in this repo for that purpose).
+
+After installing:
+
+    chmod +x .git/hooks/pre-commit
+
+Verify with:
+
+    bash -n .git/hooks/pre-commit    # syntax check
+    bash scripts/verify-gitignore.sh # full validation
+
+### Adding a new private file
+
+1. Create it in `../nat20-private/`
+2. Add its pattern to `.gitignore` in this repo
+3. Add the same pattern to `.git/hooks/pre-commit` BANNED_PATTERNS
+4. Run `bash scripts/verify-gitignore.sh` to confirm
+
+### Moving a file from private to public
+
+Sometimes a doc starts private and is later cleared for public release
+(e.g., the README, a public architecture doc).
+
+To move private → public:
+1. Copy (don't move) the file from `../nat20-private/` to this repo
+2. Verify it contains no pricing, strategy, or operational content
+3. Verify the pre-commit hook does NOT match its filename pattern
+4. Commit to the public repo
+5. After confirming the public commit, delete from the private repo
+   and commit the deletion there
+
+Never move a file between repos in a single step. Always: copy →
+verify → commit public → then delete private.
+
+---
+
 ## Product Goal
 
 This app helps students and entry-level job seekers quickly assess how well
