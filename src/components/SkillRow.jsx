@@ -70,18 +70,22 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
       ? gapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level)
       : null
 
+  const confidenceSuffix = skill.confidence
+    ? <span style={{ color: '#94a3b8', fontWeight: '400' }}> ({skill.confidence} confidence)</span>
+    : null
+
   // Level cell text
   let levelCell
   if (isMatched) {
     levelCell = (
       <div style={{ fontSize: '12px', color: '#059669' }}>
-        Your L{skill.resumeLevel} · {LEVEL_NAMES[skill.resumeLevel]}
+        Your L{skill.resumeLevel} · {LEVEL_NAMES[skill.resumeLevel]}{confidenceSuffix}
       </div>
     )
   } else if (isGap) {
     levelCell = (
       <div style={{ fontSize: '12px', color: '#d97706' }}>
-        Your L{skill.resumeLevel} → Need L{skill.level}
+        Your L{skill.resumeLevel} → Need L{skill.level}{confidenceSuffix}
       </div>
     )
   } else {

@@ -5,7 +5,8 @@
       "Bash(New-Item -ItemType File -Path \"C:\\\\Users\\\\nikec\\\\Desktop\\\\jd-skill-parser\\\\tests\\\\unit\\\\registry.test.js\" -Force)",
       "Bash(Out-Null)",
       "Bash(node --input-type=module)",
-      "Bash(Select-Object FullName)"
+      "Bash(Select-Object FullName)",
+      "Bash(npm test *)"
     ]
   }
 }
