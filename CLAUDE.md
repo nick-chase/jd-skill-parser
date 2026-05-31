@@ -274,6 +274,27 @@ It must not influence skill extraction, gap scoring, or any output.
 
 ---
 
+## Task Completion Protocol
+
+When a Phase task (e.g., B8, B9) reaches Definition of Done, the
+session must perform these steps in order before declaring complete:
+
+1. Run `npm test` — all tests pass
+2. Commit code changes in public repo with `feat(TASK_ID): description`
+3. Push public repo
+4. cd ../nat20-private/
+5. Open docs/master-plan-v3.md
+6. Mark the task ✅ with today's date and any notes
+7. Commit private repo with `docs(plan): mark TASK_ID complete`
+8. Push private repo  
+9. cd back to public repo
+10. State to the user: "Task TASK_ID complete and recorded in both repos."
+
+Do NOT skip steps 4–8. The plan is the source of truth and falls 
+out of date silently if not updated immediately.
+
+---
+
 ## Phase Roadmap (Current: Phase 1)
 
 Phase 1 — Foundation (May–June 2026)
