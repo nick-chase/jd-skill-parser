@@ -25,31 +25,6 @@ const IMPORTANCE_STYLES = {
     1: 'bg-slate-50 text-slate-500 border-slate-200',
 };
 
-function compareSkillsToRole(results, roleTemplate) {
-    if (!roleTemplate) return null;
-
-    const detectedSkills = new Set(results.map(s => s.name));
-
-    const missing = {
-        critical: roleTemplate.critical.filter(s => !detectedSkills.has(s)),
-        required: roleTemplate.required.filter(s => !detectedSkills.has(s)),
-        preferred: roleTemplate.preferred.filter(s => !detectedSkills.has(s))
-    };
-
-    const matched = {
-        critical: roleTemplate.critical.filter(s => detectedSkills.has(s)),
-        required: roleTemplate.required.filter(s => detectedSkills.has(s)),
-        preferred: roleTemplate.preferred.filter(s => detectedSkills.has(s))
-    };
-
-    const coverage = {
-        critical: matched.critical.length / roleTemplate.critical.length,
-        required: matched.required.length / roleTemplate.required.length,
-        preferred: matched.preferred.length / roleTemplate.preferred.length
-    };
-
-    return { missing, matched, coverage };
-}
 
 // ============================================================
 // PARSER
@@ -171,12 +146,6 @@ function parseCompanyAndRole(text) {
             jobRole = line.split(/\s+·|\s+\(|\s+,/)[0]; // Stop at LinkedIn separators
             break;
         }
-    }
-
-    // Match against role templates
-    const matched = registry.matchRole(jobRole);
-    if (matched) {
-        jobRole = matched.role; // Replace with canonical role name
     }
 
     return { companyName, jobRole };
@@ -720,45 +689,6 @@ function ResultsViewSimple({ results, companyName, jobRole }) {
                 </div>
             )}
 
-            {/* Role Template Comparison */}
-            {(() => {
-                const roleTemplate = registry.matchRole(jobRole);
-                if (!roleTemplate) return null;
-
-                const comparison = compareSkillsToRole(results, roleTemplate);
-                if (!comparison) return null;
-
-                return (
-                    <div style={{ backgroundColor: '#fef3c7', border: '1px solid #f59e0b', borderRadius: '8px', padding: '12px 16px' }}>
-                        <div style={{ fontSize: '13px', fontWeight: '600', color: '#92400e', marginBottom: '10px' }}>
-                            Role Template: {roleTemplate.role}
-                        </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                            <div>
-                                <div style={{ color: '#92400e', fontWeight: '600' }}>Critical</div>
-                                <div style={{ color: '#b45309' }}>{comparison.matched.critical.length}/{roleTemplate.critical.length} ({(comparison.coverage.critical * 100).toFixed(0)}%)</div>
-                                {comparison.missing.critical.length > 0 && (
-                                    <div style={{ fontSize: '11px', color: '#dc2626', marginTop: '4px' }}>Missing: {comparison.missing.critical.join(', ')}</div>
-                                )}
-                            </div>
-                            <div>
-                                <div style={{ color: '#92400e', fontWeight: '600' }}>Required</div>
-                                <div style={{ color: '#b45309' }}>{comparison.matched.required.length}/{roleTemplate.required.length} ({(comparison.coverage.required * 100).toFixed(0)}%)</div>
-                                {comparison.missing.required.length > 0 && (
-                                    <div style={{ fontSize: '11px', color: '#dc2626', marginTop: '4px' }}>Missing: {comparison.missing.required.join(', ')}</div>
-                                )}
-                            </div>
-                            <div>
-                                <div style={{ color: '#92400e', fontWeight: '600' }}>Preferred</div>
-                                <div style={{ color: '#b45309' }}>{comparison.matched.preferred.length}/{roleTemplate.preferred.length} ({(comparison.coverage.preferred * 100).toFixed(0)}%)</div>
-                                {comparison.missing.preferred.length > 0 && (
-                                    <div style={{ fontSize: '11px', color: '#b45309', marginTop: '4px' }}>Missing: {comparison.missing.preferred.join(', ')}</div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                );
-            })()}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {/* Stats Section - Using inline styles */}
@@ -858,9 +788,9 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
     if (!gap) return null;
 
     const { critical, levelGaps, matched, bonus } = gap;
-    const totalJD = critical.length + levelGaps.length + matched.length;
-    const score = totalJD > 0 ? Math.round((matched.length / totalJD) * 100) : 0;
 
+    // Use the decision engine's matchScore as the single source of truth (fixes B-FIX-01).
+    const score = decisionResult?.matchScore ?? 0;
     const scoreColor = score >= 70 ? '#059669' : score >= 40 ? '#d97706' : '#dc2626';
     const scoreLabel = score >= 70 ? 'Strong Match' : score >= 40 ? 'Partial Match' : 'Weak Match';
 

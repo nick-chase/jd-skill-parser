@@ -349,5 +349,5 @@ If none are clear, stop and plan before coding.
 | 2 | jobType detection fails for internship/contract JDs | ✅ Fixed (commit 395be96) |
 | 3 | Java suppressed when JavaScript present — expected behavior, document it | Low |
 | 4 | JD10 jobType returns null — no explicit "Full-time" text | Low |
-| 5 | Role template match fires during JD parse — remove this logic | High |
-| B-FIX-01 | Match score discrepancy — same parse returns 8% in one place and 15% in another; score and decision must agree before Phase C validation | High |
+| 5 | Role template match fires during JD parse — remove this logic | ✅ Fixed — removed compareSkillsToRole(), template panel, and matchRole() canonicalization |
+| B-FIX-01 | Match score discrepancy — same parse returns 8% in one place and 15% in another | ✅ Fixed — GapAnalysisView now uses decisionResult.matchScore as single source of truth |
