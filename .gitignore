@@ -1,28 +1,51 @@
-# Logs
-logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+# Environment & secrets
+.env
+.env.local
+.env.production
+.env.development
+*.pem
+*.key
+*.secret
 
-node_modules
-dist
-dist-ssr
-*.local
+# Personal & operational docs (kept in private repo)
+docs/master-plan*.md
+docs/research-dive*.md
+docs/scoring-model-v2*.md
+docs/scoring-weights*.json
+docs/backlog.md
+docs/launch-strategy.md
+docs/pricing*.md
+operations/
+data-private/
+tests-private/
 
-# Generated reports (auto-generated, do not commit)
-reports/
-tests/coverage-gaps.md
+# Personal files
+*resume*.pdf
+*Resume*.pdf
+software_inventory.txt
+User-Agent-Protocol.txt
+Universal_Signal_Vocabulary*.md
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# Build artifacts
+node_modules/
+dist/
+build/
+.vite/
+*.tsbuildinfo
+
+# Editor & OS
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.log
+*.swp
+.cache/
+
+# Test outputs
+coverage/
+.nyc_output/
+
+# Package manager
+package-lock.json.backup
+yarn-error.log
