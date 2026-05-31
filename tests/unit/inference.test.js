@@ -2,6 +2,7 @@ import { describe, test, expect } from 'vitest'
 import {
   parseDateRange,
   classifyEvidenceType,
+  classifyBloomLevel,
   scoreSkillEvidence,
 } from '../../src/lib/parser/inference.js'
 
@@ -99,21 +100,21 @@ describe('classifyEvidenceType()', () => {
     expect(classifyEvidenceType('experience', '')).toBe(1.0)
   })
 
-  // Contract / internship → 0.7
-  test('experience + "intern" in title → 0.7', () => {
-    expect(classifyEvidenceType('experience', 'Software Engineering Intern')).toBe(0.7)
+  // Contract / internship → 0.65
+  test('experience + "intern" in title → 0.65', () => {
+    expect(classifyEvidenceType('experience', 'Software Engineering Intern')).toBe(0.65)
   })
 
-  test('experience + "contract" in title → 0.7', () => {
-    expect(classifyEvidenceType('experience', 'Contract Developer')).toBe(0.7)
+  test('experience + "contract" in title → 0.65', () => {
+    expect(classifyEvidenceType('experience', 'Contract Developer')).toBe(0.65)
   })
 
-  test('experience + "co-op" in title → 0.7', () => {
-    expect(classifyEvidenceType('experience', 'Co-op Engineer')).toBe(0.7)
+  test('experience + "co-op" in title → 0.65', () => {
+    expect(classifyEvidenceType('experience', 'Co-op Engineer')).toBe(0.65)
   })
 
-  test('experience + "temp" in title → 0.7', () => {
-    expect(classifyEvidenceType('experience', 'Temp Data Analyst')).toBe(0.7)
+  test('experience + "temp" in title → 0.65', () => {
+    expect(classifyEvidenceType('experience', 'Temp Data Analyst')).toBe(0.65)
   })
 
   // Personal project → 0.5
@@ -126,13 +127,27 @@ describe('classifyEvidenceType()', () => {
     expect(classifyEvidenceType('education', '')).toBe(0.4)
   })
 
-  // Skills section only → 0.1
-  test('skills section → 0.1', () => {
-    expect(classifyEvidenceType('skills', '')).toBe(0.1)
+  // Skills section only → 0.05
+  test('skills section → 0.05', () => {
+    expect(classifyEvidenceType('skills', '')).toBe(0.05)
   })
 
-  test('summary section → 0.1', () => {
-    expect(classifyEvidenceType('summary', '')).toBe(0.1)
+  test('summary section → 0.05', () => {
+    expect(classifyEvidenceType('summary', '')).toBe(0.05)
+  })
+
+  // Bootcamp / verifiable cert → 0.55
+  test('certifications section → 0.55', () => {
+    expect(classifyEvidenceType('certifications', '')).toBe(0.55)
+  })
+
+  test('bootcamp section → 0.55', () => {
+    expect(classifyEvidenceType('bootcamp', '')).toBe(0.55)
+  })
+
+  // Project with no-outcome marker → 0.30
+  test('projects section, no-outcome marker → 0.30', () => {
+    expect(classifyEvidenceType('projects', 'no-outcome')).toBe(0.30)
   })
 
   // Case-insensitive section names
@@ -142,6 +157,77 @@ describe('classifyEvidenceType()', () => {
 
   test('Projects (capitalised) → 0.5', () => {
     expect(classifyEvidenceType('Projects', '')).toBe(0.5)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// classifyBloomLevel
+// ---------------------------------------------------------------------------
+
+describe('classifyBloomLevel()', () => {
+  test('Create verb "led" → 1.40', () => {
+    expect(classifyBloomLevel('led the development of a new API')).toBe(1.40)
+  })
+
+  test('Create verb "architected" → 1.40', () => {
+    expect(classifyBloomLevel('architected the microservices layer')).toBe(1.40)
+  })
+
+  test('Create verb "designed" → 1.40', () => {
+    expect(classifyBloomLevel('designed the database schema')).toBe(1.40)
+  })
+
+  test('Create verb "owned" → 1.40', () => {
+    expect(classifyBloomLevel('owned the full deployment pipeline')).toBe(1.40)
+  })
+
+  test('Evaluate verb "optimized" → 1.20', () => {
+    expect(classifyBloomLevel('optimized query performance by 40%')).toBe(1.20)
+  })
+
+  test('Evaluate verb "validated" → 1.20', () => {
+    expect(classifyBloomLevel('validated model outputs against ground truth')).toBe(1.20)
+  })
+
+  test('Analyze verb "debugged" → 1.10', () => {
+    expect(classifyBloomLevel('debugged production memory leaks')).toBe(1.10)
+  })
+
+  test('Analyze verb "refactored" → 1.10', () => {
+    expect(classifyBloomLevel('refactored the authentication module')).toBe(1.10)
+  })
+
+  test('Apply verb "built" → 1.00', () => {
+    expect(classifyBloomLevel('built a REST API using FastAPI')).toBe(1.00)
+  })
+
+  test('Apply verb "implemented" → 1.00', () => {
+    expect(classifyBloomLevel('implemented pagination and filtering')).toBe(1.00)
+  })
+
+  test('Understand verb "learned" → 0.70', () => {
+    expect(classifyBloomLevel('learned React during coursework')).toBe(0.70)
+  })
+
+  test('Understand verb "familiar" → 0.70', () => {
+    expect(classifyBloomLevel('familiar with Docker basics')).toBe(0.70)
+  })
+
+  test('Remember verb "listed" → 0.50', () => {
+    expect(classifyBloomLevel('listed as a proficiency on resume')).toBe(0.50)
+  })
+
+  test('empty string → 1.00 (Apply default)', () => {
+    expect(classifyBloomLevel('')).toBe(1.00)
+  })
+
+  test('null / undefined → 1.00 (Apply default)', () => {
+    expect(classifyBloomLevel(null)).toBe(1.00)
+    expect(classifyBloomLevel(undefined)).toBe(1.00)
+  })
+
+  test('unrecognised text → 1.00 (Apply default)', () => {
+    expect(classifyBloomLevel('various contributions to the team')).toBe(1.00)
   })
 })
 
@@ -254,12 +340,12 @@ describe('scoreSkillEvidence()', () => {
   })
 
   test('project <6 months → M=0.5', () => {
-    // W=0.5 × M=0.5 = 0.25 × 1.0 = 0.25 → L1
+    // E=0.5 × C=1.0 × D=0.5 = 0.25 × 1.0 = 0.25 → L2 (new threshold: ≥0.25)
     const result = scoreSkillEvidence([
       { wType: 0.5, durationMonths: 3, sectionName: 'projects' },
     ])
     expect(result.score).toBeCloseTo(0.25, 2)
-    expect(result.level).toBe('L1')
+    expect(result.level).toBe('L2')
   })
 
   test('project 6–12 months → M=0.6', () => {
@@ -315,16 +401,18 @@ describe('scoreSkillEvidence()', () => {
   })
 
   // Return shape
-  test('returns score, level, primarySignal, suggestion', () => {
+  test('returns score, level, confidence, primarySignal, suggestion', () => {
     const result = scoreSkillEvidence([
       { wType: 1.0, durationMonths: 24, sectionName: 'experience' },
     ])
     expect(result).toHaveProperty('score')
     expect(result).toHaveProperty('level')
+    expect(result).toHaveProperty('confidence')
     expect(result).toHaveProperty('primarySignal')
     expect(result).toHaveProperty('suggestion')
     expect(typeof result.score).toBe('number')
     expect(typeof result.level).toBe('string')
+    expect(['high', 'medium', 'low']).toContain(result.confidence)
     expect(typeof result.suggestion).toBe('string')
   })
 
@@ -333,5 +421,74 @@ describe('scoreSkillEvidence()', () => {
     const result = scoreSkillEvidence([])
     expect(result.score).toBe(0)
     expect(result.level).toBe('L1')
+  })
+
+  // Bloom multiplier flows through scoring formula
+  test('Create verb (C=1.40) raises score above default Apply (C=1.00)', () => {
+    const withCreate = scoreSkillEvidence([
+      { wType: 1.0, durationMonths: 12, sectionName: 'experience', bulletText: 'led the team' },
+    ])
+    const withDefault = scoreSkillEvidence([
+      { wType: 1.0, durationMonths: 12, sectionName: 'experience' },
+    ])
+    expect(withCreate.score).toBeGreaterThan(withDefault.score)
+  })
+
+  test('Understand verb (C=0.70) lowers score below default Apply (C=1.00)', () => {
+    const withUnderstand = scoreSkillEvidence([
+      { wType: 1.0, durationMonths: 12, sectionName: 'experience', bulletText: 'familiar with the technology' },
+    ])
+    const withDefault = scoreSkillEvidence([
+      { wType: 1.0, durationMonths: 12, sectionName: 'experience' },
+    ])
+    expect(withUnderstand.score).toBeLessThan(withDefault.score)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Confidence indicator
+// ---------------------------------------------------------------------------
+
+describe('scoreSkillEvidence() — confidence', () => {
+  test('skills-section-only → low confidence', () => {
+    const result = scoreSkillEvidence([
+      { wType: 0.05, durationMonths: null, sectionName: 'skills' },
+    ])
+    expect(result.confidence).toBe('low')
+    expect(result.level).toBe('L1')
+  })
+
+  test('3-year FT job + Create verb → high confidence', () => {
+    const result = scoreSkillEvidence([
+      { wType: 1.0, durationMonths: 36, sectionName: 'experience', bulletText: 'led the development' },
+    ])
+    expect(result.confidence).toBe('high')
+    expect(['L4', 'L5']).toContain(result.level)
+  })
+
+  test('two instances, no duration → medium confidence', () => {
+    const result = scoreSkillEvidence([
+      { wType: 0.5, durationMonths: null, sectionName: 'projects' },
+      { wType: 0.5, durationMonths: null, sectionName: 'projects' },
+    ])
+    expect(result.confidence).toBe('medium')
+  })
+
+  test('one project instance with duration and outcome verb → medium confidence', () => {
+    const result = scoreSkillEvidence([
+      { wType: 0.5, durationMonths: 6, sectionName: 'projects', bulletText: 'built a full-stack app' },
+    ])
+    expect(result.confidence).toBe('medium')
+  })
+
+  test('single short instance, no verbs → low confidence', () => {
+    const result = scoreSkillEvidence([
+      { wType: 0.5, durationMonths: 2, sectionName: 'projects' },
+    ])
+    expect(result.confidence).toBe('low')
+  })
+
+  test('empty instances → low confidence', () => {
+    expect(scoreSkillEvidence([]).confidence).toBe('low')
   })
 })

@@ -1,10 +1,15 @@
 /**
- * Weighted evidence scoring — see docs/scoring-model.md
+ * Weighted evidence scoring — v2
  *
  * Exports:
- *   parseDateRange(text)          → months (integer) | null
- *   classifyEvidenceType(section, roleTitle) → W_type weight
- *   scoreSkillEvidence(instances[])          → { score, level, primarySignal, suggestion }
+ *   parseDateRange(text)                     → months (integer) | null
+ *   classifyEvidenceType(section, roleTitle) → E weight
+ *   classifyBloomLevel(bulletText)           → C multiplier
+ *   scoreSkillEvidence(instances[])          → { score, level, confidence, primarySignal, suggestion }
+ *
+ * Formula: Skill Score = SUM(E × C × D) × R
+ *   E = evidence type weight  C = Bloom complexity multiplier
+ *   D = duration modifier     R = recurrence multiplier
  */
 
 // ---------------------------------------------------------------------------
@@ -120,26 +125,55 @@ export function parseDateRange(text) {
 // B2 — classifyEvidenceType
 // ---------------------------------------------------------------------------
 
-const CONTRACT_RE = /\b(intern|internship|contract|contractor|temp|temporary|co-?op)\b/i
+const CONTRACT_RE   = /\b(intern|internship|contract|contractor|temp|temporary|co-?op)\b/i
+const NO_OUTCOME_RE = /\bno[- ]?outcome\b/i
 
 /**
- * Returns the W_type weight for a resume evidence instance.
+ * Returns the E weight for a resume evidence instance.
  */
 export function classifyEvidenceType(sectionName, roleTitle = '') {
   const section = (sectionName || '').toLowerCase().trim()
 
   switch (section) {
     case 'experience':
-      return CONTRACT_RE.test(roleTitle) ? 0.7 : 1.0
+      return CONTRACT_RE.test(roleTitle) ? 0.65 : 1.0
     case 'projects':
-      return 0.5
+      return NO_OUTCOME_RE.test(roleTitle) ? 0.30 : 0.50
     case 'education':
       return 0.4
+    case 'certifications':
+    case 'bootcamp':
+      return 0.55
     case 'skills':
     case 'summary':
     default:
-      return 0.1
+      return 0.05
   }
+}
+
+// ---------------------------------------------------------------------------
+// classifyBloomLevel — Bloom Complexity Multiplier (C)
+// ---------------------------------------------------------------------------
+
+const BLOOM_LEVELS = [
+  { multiplier: 1.40, pattern: /\b(led|architected|designed|owned|spearheaded|founded|established|launched)\b/i },
+  { multiplier: 1.20, pattern: /\b(reviewed|validated|optimized|evaluated|assessed|audited)\b/i },
+  { multiplier: 1.10, pattern: /\b(analyzed|debugged|refactored|diagnosed|investigated)\b/i },
+  { multiplier: 1.00, pattern: /\b(built|used|implemented|developed|deployed|configured|wrote|created)\b/i },
+  { multiplier: 0.70, pattern: /\b(learned|studied|familiar|exposure|understanding|training)\b/i },
+  { multiplier: 0.50, pattern: /\b(listed|named)\b/i },
+]
+
+/**
+ * Returns the Bloom complexity multiplier for the strongest action verb in a bullet.
+ * Defaults to 1.00 (Apply level) when no verb is detected.
+ */
+export function classifyBloomLevel(bulletText) {
+  if (!bulletText) return 1.0
+  for (const { pattern, multiplier } of BLOOM_LEVELS) {
+    if (pattern.test(bulletText)) return multiplier
+  }
+  return 1.0
 }
 
 // ---------------------------------------------------------------------------
@@ -147,11 +181,11 @@ export function classifyEvidenceType(sectionName, roleTitle = '') {
 // ---------------------------------------------------------------------------
 
 /**
- * Duration modifier lookup per scoring-model.md.
- * wType >= 0.7 → Job History column; wType < 0.7 → Project column.
+ * Duration modifier lookup.
+ * wType >= 0.6 → Job History column (full-time + internship); below → Project column.
  */
 function getDurationModifier(wType, durationMonths) {
-  const isJobHistory = wType >= 0.7
+  const isJobHistory = wType >= 0.6
 
   if (durationMonths === null || durationMonths === undefined) {
     return isJobHistory ? 0.5 : 0.4
@@ -174,8 +208,8 @@ function getDurationModifier(wType, durationMonths) {
 const LEVEL_MAP = [
   { min: 1.80, level: 'L5', label: 'Expert' },
   { min: 1.10, level: 'L4', label: 'Advanced' },
-  { min: 0.60, level: 'L3', label: 'Intermediate' },
-  { min: 0.30, level: 'L2', label: 'Novice' },
+  { min: 0.55, level: 'L3', label: 'Intermediate' },
+  { min: 0.25, level: 'L2', label: 'Novice' },
   { min: 0.00, level: 'L1', label: 'Awareness' },
 ]
 
@@ -194,39 +228,74 @@ const SUGGESTIONS = {
   L5: 'Strong evidence. Focus on clarity and specific outcomes in your descriptions.',
 }
 
+// ---------------------------------------------------------------------------
+// Confidence indicator
+// ---------------------------------------------------------------------------
+
+function computeConfidence(instances, bloomCs) {
+  const count = instances.length
+  if (count === 0) return 'low'
+
+  const allSkillsSection = instances.every(i =>
+    ['skills', 'summary'].includes((i.sectionName || '').toLowerCase())
+  )
+  if (allSkillsSection) return 'low'
+
+  const avgC              = bloomCs.reduce((s, c) => s + c, 0) / bloomCs.length
+  const hasLongDur        = instances.some(i => (i.durationMonths ?? 0) >= 12)
+  const hasVeryLongFT     = instances.some(i => (i.wType ?? 0) >= 1.0 && (i.durationMonths ?? 0) >= 24)
+  const hasMeaningfulDur  = instances.some(i => (i.durationMonths ?? 0) >= 6)
+  const hasExplicitVerb   = instances.some(i => !!i.bulletText)
+
+  // high: strong structural evidence (≥2 contexts or dominant FT role) + Bloom quality
+  if ((count >= 2 || hasVeryLongFT) && hasLongDur && avgC >= 1.0) return 'high'
+
+  // medium: one instance with meaningful duration (≥6 mo) and an explicit bullet
+  if (count === 1 && hasMeaningfulDur && hasExplicitVerb) return 'medium'
+  // medium: ≥2 instances regardless of duration
+  if (count >= 2) return 'medium'
+
+  return 'low'
+}
+
+// ---------------------------------------------------------------------------
+// B3 — scoreSkillEvidence
+// ---------------------------------------------------------------------------
+
 /**
  * Scores an array of skill evidence instances.
  *
- * Each instance: { wType: number, durationMonths: number|null, sectionName: string }
+ * Each instance: { wType, durationMonths, sectionName, bulletText? }
  *
- * Returns: { score, level, primarySignal, suggestion }
+ * Returns: { score, level, confidence, primarySignal, suggestion }
  */
 export function scoreSkillEvidence(instances) {
   if (!instances || instances.length === 0) {
-    return { score: 0, level: 'L1', primarySignal: null, suggestion: SUGGESTIONS.L1 }
+    return { score: 0, level: 'L1', confidence: 'low', primarySignal: null, suggestion: SUGGESTIONS.L1 }
   }
 
-  // Compute per-instance contribution
-  const contributions = instances.map(inst => {
-    const m = getDurationModifier(inst.wType, inst.durationMonths)
-    return { inst, contribution: inst.wType * m }
+  // Bloom multiplier per instance (C); defaults to 1.0 when no bulletText
+  const bloomCs = instances.map(inst => classifyBloomLevel(inst.bulletText || ''))
+
+  // Per-instance contribution: E × C × D
+  const contributions = instances.map((inst, i) => {
+    const d = getDurationModifier(inst.wType, inst.durationMonths)
+    return { inst, contribution: inst.wType * bloomCs[i] * d }
   })
 
-  // Sum contributions
   const sum = contributions.reduce((acc, { contribution }) => acc + contribution, 0)
 
-  // Recurrence multiplier
   const count = instances.length
   const mRecurrence = count >= 3 ? 1.4 : count === 2 ? 1.2 : 1.0
 
-  const score = parseFloat((sum * mRecurrence).toFixed(4))
-  const level = mapLevel(score)
+  const score      = parseFloat((sum * mRecurrence).toFixed(4))
+  const level      = mapLevel(score)
+  const confidence = computeConfidence(instances, bloomCs)
 
-  // Primary signal = instance with highest individual contribution
   const primary = contributions.reduce((best, cur) =>
     cur.contribution > best.contribution ? cur : best
   ).inst
   const primarySignal = primary.sectionName
 
-  return { score, level, primarySignal, suggestion: SUGGESTIONS[level] }
+  return { score, level, confidence, primarySignal, suggestion: SUGGESTIONS[level] }
 }

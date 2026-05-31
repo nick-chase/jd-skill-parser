@@ -14,12 +14,19 @@
  */
 
 const REQUIRED_IMPORTANCE = 4
+const CRITICAL_IMPORTANCE = 5
 
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-function computeGap(jdSkills, resumeSkills) {
+function isEntryLevelResume(resumeSkills) {
+  if (!resumeSkills || resumeSkills.length === 0) return true
+  const maxLevel = Math.max(...resumeSkills.map(s => s.level ?? 0))
+  return maxLevel <= 2
+}
+
+function computeGap(jdSkills, resumeSkills, entryLevel = false) {
   const resumeMap = new Map(resumeSkills.map(s => [s.name, s]))
 
   const missing  = []  // required JD skills absent from resume
@@ -30,11 +37,27 @@ function computeGap(jdSkills, resumeSkills) {
   for (const jd of jdSkills) {
     const resume = resumeMap.get(jd.name)
     const isRequired = jd.importance >= REQUIRED_IMPORTANCE
+    const isCritical = jd.importance >= CRITICAL_IMPORTANCE
 
     if (!resume) {
-      if (isRequired) missing.push(jd)
+      if (isRequired) {
+        // Entry-level calibration: relax required (non-critical) missing → treat as gapped
+        if (entryLevel && !isCritical) {
+          gapped.push({ ...jd, resumeLevel: 0 })
+        } else {
+          missing.push(jd)
+        }
+      }
     } else if (resume.level < jd.level) {
-      if (isRequired) gapped.push({ ...jd, resumeLevel: resume.level })
+      if (isRequired) {
+        const gap = jd.level - resume.level
+        // Entry-level calibration: relax required (non-critical) 1-level gap → treat as matched
+        if (entryLevel && !isCritical && gap === 1) {
+          matched.push({ ...jd, resumeLevel: resume.level })
+        } else {
+          gapped.push({ ...jd, resumeLevel: resume.level })
+        }
+      }
     } else {
       matched.push({ ...jd, resumeLevel: resume.level })
     }
@@ -143,7 +166,8 @@ export function getDecision(jdProfile, resumeProfile) {
   const jdSkills     = jdProfile?.technicalSignals     ?? []
   const resumeSkills = resumeProfile?.technicalSignals ?? []
 
-  const gap = computeGap(jdSkills, resumeSkills)
+  const entryLevel = isEntryLevelResume(resumeSkills)
+  const gap = computeGap(jdSkills, resumeSkills, entryLevel)
 
   let decision
   let content
@@ -165,8 +189,9 @@ export function getDecision(jdProfile, resumeProfile) {
 
   return {
     decision,
-    rationale:  content.rationale,
-    actions:    content.actions,
-    matchScore: gap.matchScore,
+    rationale:   content.rationale,
+    actions:     content.actions,
+    matchScore:  gap.matchScore,
+    isEntryLevel: entryLevel,
   }
 }

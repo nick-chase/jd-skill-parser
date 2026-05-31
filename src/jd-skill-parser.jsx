@@ -580,10 +580,10 @@ export function parseResumeText(text) {
     }
 
     const technicalSignals = [...skillMap.entries()].map(([name, { category, instances }]) => {
-        const { score, level: levelStr, primarySignal, suggestion } = scoreSkillEvidence(instances);
+        const { score, level: levelStr, confidence, primarySignal, suggestion } = scoreSkillEvidence(instances);
         const level = parseInt(levelStr.slice(1), 10); // 'L2' → 2
         const source = SECTION_SOURCE_LABEL[primarySignal] ?? primarySignal;
-        return { name, category, level, score, source, suggestion };
+        return { name, category, level, score, confidence, source, suggestion };
     }).sort((a, b) => {
         if (b.level !== a.level) return b.level - a.level;
         if (b.score !== a.score) return b.score - a.score;

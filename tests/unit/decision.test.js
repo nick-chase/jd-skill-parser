@@ -249,3 +249,144 @@ describe('getDecision() — edge cases', () => {
     expect(result).toHaveProperty('decision')
   })
 })
+
+// ---------------------------------------------------------------------------
+// B8 — Entry-level calibration
+// ---------------------------------------------------------------------------
+
+describe('getDecision() — isEntryLevel detection', () => {
+  test('returns isEntryLevel field', () => {
+    const result = getDecision(makeJD([]), makeResume([]))
+    expect(result).toHaveProperty('isEntryLevel')
+    expect(typeof result.isEntryLevel).toBe('boolean')
+  })
+
+  test('isEntryLevel true when all resume skills are L1', () => {
+    const resume = makeResume([
+      resumeSkill('Python', { level: 1 }),
+      resumeSkill('SQL',    { level: 1 }),
+    ])
+    expect(getDecision(makeJD([]), resume).isEntryLevel).toBe(true)
+  })
+
+  test('isEntryLevel true when all resume skills are L2', () => {
+    const resume = makeResume([
+      resumeSkill('Python', { level: 2 }),
+      resumeSkill('Docker', { level: 2 }),
+    ])
+    expect(getDecision(makeJD([]), resume).isEntryLevel).toBe(true)
+  })
+
+  test('isEntryLevel true when resume is empty', () => {
+    expect(getDecision(makeJD([]), makeResume([])).isEntryLevel).toBe(true)
+  })
+
+  test('isEntryLevel false when any skill is L3', () => {
+    const resume = makeResume([
+      resumeSkill('Python', { level: 3 }),
+      resumeSkill('SQL',    { level: 1 }),
+    ])
+    expect(getDecision(makeJD([]), resume).isEntryLevel).toBe(false)
+  })
+
+  test('isEntryLevel false when any skill is L4 or L5', () => {
+    const resume = makeResume([resumeSkill('Python', { level: 4 })])
+    expect(getDecision(makeJD([]), resume).isEntryLevel).toBe(false)
+  })
+})
+
+describe("getDecision() — B8 entry-level calibration thresholds", () => {
+  // ---- Required (importance=4) missing ----
+
+  test('entry-level + required skill missing → edits, not build', () => {
+    const jd = makeJD([
+      jdSkill('Python', { importance: 5, level: 2 }), // critical — met
+      jdSkill('Docker', { importance: 4, level: 2 }), // required — missing
+    ])
+    const resume = makeResume([
+      resumeSkill('Python', { level: 2 }), // L2 resume → entry-level
+    ])
+    const result = getDecision(jd, resume)
+    expect(result.isEntryLevel).toBe(true)
+    expect(result.decision).toBe('edits')
+  })
+
+  test('non-entry-level + required skill missing → build', () => {
+    const jd = makeJD([
+      jdSkill('Python', { importance: 5, level: 2 }),
+      jdSkill('Docker', { importance: 4, level: 2 }), // required — missing
+    ])
+    const resume = makeResume([
+      resumeSkill('Python', { level: 3 }), // L3 resume → NOT entry-level
+    ])
+    const result = getDecision(jd, resume)
+    expect(result.isEntryLevel).toBe(false)
+    expect(result.decision).toBe('build')
+  })
+
+  // ---- Critical (importance=5) missing — always strict ----
+
+  test('entry-level + critical skill missing → still build', () => {
+    const jd = makeJD([jdSkill('Python', { importance: 5, level: 2 })])
+    const resume = makeResume([resumeSkill('SQL', { level: 2 })]) // Python absent
+    const result = getDecision(jd, resume)
+    expect(result.isEntryLevel).toBe(true)
+    expect(result.decision).toBe('build')
+  })
+
+  // ---- Required (importance=4) 1-level gap ----
+
+  test('entry-level + required skill 1-level gap → apply, not edits', () => {
+    const jd = makeJD([
+      jdSkill('Python', { importance: 4, level: 3 }), // required, need L3
+    ])
+    const resume = makeResume([
+      resumeSkill('Python', { level: 2 }), // L2 — 1-level below, entry-level resume
+    ])
+    const result = getDecision(jd, resume)
+    expect(result.isEntryLevel).toBe(true)
+    expect(result.decision).toBe('apply')
+  })
+
+  test('non-entry-level + required skill 1-level gap → edits', () => {
+    const jd = makeJD([jdSkill('Python', { importance: 4, level: 3 })])
+    const resume = makeResume([
+      resumeSkill('Python', { level: 3 }), // one L3 skill makes it non-entry-level
+      resumeSkill('SQL',    { level: 2 }), // Python is L2 in this scenario...
+    ])
+    // For this test: Python needs to be below required level
+    // Use a fresh scenario where the L3 skill is a different one
+    const jd2 = makeJD([jdSkill('Docker', { importance: 4, level: 3 })])
+    const resume2 = makeResume([
+      resumeSkill('Python', { level: 3 }), // makes resume non-entry-level
+      resumeSkill('Docker', { level: 2 }), // Docker: L2 < required L3
+    ])
+    const result = getDecision(jd2, resume2)
+    expect(result.isEntryLevel).toBe(false)
+    expect(result.decision).toBe('edits')
+  })
+
+  // ---- Required (importance=4) 2-level gap — strict even for entry-level ----
+
+  test('entry-level + required skill 2-level gap → edits (not apply)', () => {
+    const jd = makeJD([jdSkill('Python', { importance: 4, level: 3 })])
+    const resume = makeResume([
+      resumeSkill('Python', { level: 1 }), // L1 vs required L3 — 2-level gap
+    ])
+    const result = getDecision(jd, resume)
+    expect(result.isEntryLevel).toBe(true)
+    expect(result.decision).toBe('edits')
+  })
+
+  // ---- Critical (importance=5) 1-level gap — always strict ----
+
+  test('entry-level + critical skill 1-level gap → edits (not apply)', () => {
+    const jd = makeJD([jdSkill('Python', { importance: 5, level: 3 })])
+    const resume = makeResume([
+      resumeSkill('Python', { level: 2 }), // L2 vs critical L3
+    ])
+    const result = getDecision(jd, resume)
+    expect(result.isEntryLevel).toBe(true)
+    expect(result.decision).toBe('edits')
+  })
+})
