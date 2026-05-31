@@ -8,6 +8,20 @@
  *   idx        row index — used for alternating background
  */
 
+import ResourceLink from './ResourceLink.jsx'
+import resourceData from '../../data/resources.json'
+
+function nameToResourceId(name) {
+  return (name || '')
+    .toLowerCase()
+    .replace(/\./g, '')
+    .replace(/[/\s]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+}
+
+const RESOURCE_MAP = resourceData.resources
+
 const LEVEL_NAMES  = ['—', 'Awareness', 'Novice', 'Intermediate', 'Advanced', 'Expert']
 
 const IMPORTANCE_NAMES = ['—', 'Optional', 'Nice-to-have', 'Preferred', 'Required', 'Critical']
@@ -58,6 +72,10 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
   const isGap     = variant === 'gap'
   const isMissing = variant === 'missing'
   const isMatched = variant === 'matched'
+
+  const skillResources = (isMissing || isGap)
+    ? (RESOURCE_MAP[nameToResourceId(skill.name)] ?? [])
+    : []
 
   // Row-level background tints
   const rowBg = isOdd
@@ -126,7 +144,7 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
       {/* Suggestion line — missing and gap rows only */}
       {suggestion && (
         <div style={{
-          padding:    '0 16px 8px 16px',
+          padding:    '0 16px 4px 16px',
           fontSize:   '11px',
           color:      isGap ? '#92400e' : '#991b1b',
           lineHeight: '1.5',
@@ -138,6 +156,8 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
           <span>{suggestion}</span>
         </div>
       )}
+
+      <ResourceLink resources={skillResources} />
     </div>
   )
 }
