@@ -13,18 +13,13 @@ gaps, proficiency levels, and decision-readiness for tech roles.
 
 Nat20 answers one question for tech job seekers:
 
-> **Am I a competitive candidate for this role right now — and if not,
-> what should I do?**
+> **Based on how my resume reads today, how well does it match this job description?**
 
-Instead of a vague "match percentage," it produces an actionable
-decision based on evidence found in your resume:
+Instead of a vague "match percentage," it shows you the signal clearly across three panels:
 
-- ✅ **Apply Now** — your resume demonstrates the required level
-- ✏️ **Apply With Edits** — skills exist but evidence is weak; rewrite hints provided
-- 📚 **Build Skill First** — one or more critical skills are absent
-- 🔀 **Consider Adjacent Role** — strong match for a related role
-
-*(Decision output UI shipping in Phase 2.)*
+- **Technical Match** — skills scored by weighted evidence (L1–L5 proficiency)
+- **Behavioral Signals** — soft skills found or missing on your resume
+- **What This Role Does** — duties listed as-is, for you to interpret
 
 ---
 
@@ -117,54 +112,11 @@ npm run build      # production build
 | 11 | Weighted evidence scoring (see `docs/scoring-model.md`) | ⬜ |
 | 12 | Entry-level calibration logic | ⬜ |
 
-**Phase 2 — Product Quality** (June–July 2026)
-Decision output UI · adjacent role engine · confidence scoring
+**Phase 2 — Output Quality** (June–July 2026)
+Per-skill action suggestions · evidence transparency · resume rewrite hints · export to PDF/CSV
 
-**Phase 3 — Monetization** (July–August 2026)
-Freemium tier · subscription ($12–19/mo) · domain expansion
-
----
-
-## The Scoring Model
-
-Standard resume parsers match keywords and treat all evidence equally —
-a skill listed in a summary weighs the same as a skill used for 3 years
-across two jobs.
-
-Nat20 treats skill evidence as a **weighted composite**:
-
-```
-Skill Score = SUM(W_type × M_duration) × M_recurrence
-```
-
-| Factor | What it captures |
-|---|---|
-| `W_type` | Type of evidence (job history, project, coursework, etc.) |
-| `M_duration` | How long the skill was used in that context |
-| `M_recurrence` | How many distinct contexts the skill appears in |
-
-### Evidence Type Weights
-
-| Evidence Type | Weight |
-|---|---|
-| Full-time job history | 1.0 |
-| Contract / internship | 0.7 |
-| Personal project | 0.5 |
-| Academic / coursework | 0.4 |
-| Skills section only | 0.1 |
-
-### Score → Proficiency Level
-
-| Score | Level | Label |
-|---|---|---|
-| 0.00–0.30 | L1 | Awareness |
-| 0.30–0.60 | L2 | Novice |
-| 0.60–1.10 | L3 | Intermediate |
-| 1.10–1.80 | L4 | Advanced |
-| 1.80+ | L5 | Expert |
-
-Full spec with duration modifiers, recurrence multipliers, and worked
-examples: [`docs/scoring-model.md`](docs/scoring-model.md)
+**Phase 3 — Scale** (July–August 2026)
+Skill database 500+ · non-tech domain expansion
 
 ---
 
