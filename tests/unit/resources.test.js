@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import resourceData from '../../data/resources.json'
+import resourceData from '@data/resources.json'
 
 const { resources } = resourceData
 

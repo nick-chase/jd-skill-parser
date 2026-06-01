@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import { getDecision } from '../../src/lib/parser/decision.js'
+import { getDecision } from '@core/parser/decision.js'
 
 // ---------------------------------------------------------------------------
 // Helpers — minimal synthetic profiles so tests don't depend on the parser

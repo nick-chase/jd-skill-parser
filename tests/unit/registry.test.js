@@ -22,7 +22,7 @@ import {
   matchRole,
   listRoles,
   getVersion,
-} from '../../src/lib/registry.js';
+} from '@core/registry.js';
 
 // ---------------------------------------------------------------------------
 // getAllSkillEntries()

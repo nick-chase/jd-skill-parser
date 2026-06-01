@@ -9,7 +9,7 @@
  */
 
 import ResourceLink from './ResourceLink.jsx'
-import resourceData from '../../data/resources.json'
+import resourceData from '@data/resources.json'
 
 function nameToResourceId(name) {
   return (name || '')

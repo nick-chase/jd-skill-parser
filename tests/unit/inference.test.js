@@ -4,7 +4,7 @@ import {
   classifyEvidenceType,
   classifyBloomLevel,
   scoreSkillEvidence,
-} from '../../src/lib/parser/inference.js'
+} from '@core/parser/inference.js'
 
 // ---------------------------------------------------------------------------
 // B1 — parseDateRange
