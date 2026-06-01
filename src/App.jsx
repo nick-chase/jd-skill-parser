@@ -1,6 +1,16 @@
-import JDSkillParser from './jd-skill-parser'
-import './App.css'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import JdSkillParser from './jd-skill-parser.jsx'
+import AccountPage from './pages/AccountPage.jsx'
+import PricingPage from './pages/PricingPage.jsx'
 
 export default function App() {
-    return <JDSkillParser />
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<JdSkillParser />} />
+        <Route path="/account" element={<AccountPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+      </Routes>
+    </BrowserRouter>
+  )
 }
