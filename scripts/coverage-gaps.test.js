@@ -157,7 +157,7 @@ const today = () => new Date().toISOString().split('T')[0]
 test('generate coverage gap report', () => {
   // Load skills.json directly for pattern-level coverage checking
   const skillsData = JSON.parse(
-    readFileSync(resolve(__dirname, '../data/skills.json'), 'utf-8')
+    readFileSync(resolve(__dirname, '../../nat20-core/data/skills.json'), 'utf-8')
   )
   const isCovered = buildCoverageChecker(skillsData)
 

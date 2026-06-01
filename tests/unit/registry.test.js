@@ -293,11 +293,11 @@ describe('getVersion()', () => {
     expect(typeof roles).toBe('string');
   });
 
-  test('skills version matches "2026.2"', () => {
+  test('skills version matches "2026.3"', () => {
     // Pinning the exact version string catches accidental data file swaps or
     // forgotten version bumps after editing skills.json.
     const { skills } = getVersion();
-    expect(skills).toBe('2026.2');
+    expect(skills).toBe('2026.3');
   });
 
   test('roles version matches "2026.1"', () => {
