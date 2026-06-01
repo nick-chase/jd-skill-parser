@@ -16,8 +16,13 @@ export default defineConfig({
     },
     test: {
         include: ['tests/**/*.test.js'],
+        env: {
+            VITE_SUPABASE_URL: 'https://test.supabase.co',
+            VITE_SUPABASE_ANON_KEY: 'test-anon-key',
+        },
         resolve: {
             alias: {
+                '@': path.resolve(__dirname, 'src'),
                 '@core': path.resolve(__dirname, '../nat20-core/src'),
                 '@data': path.resolve(__dirname, '../nat20-core/data'),
             }
