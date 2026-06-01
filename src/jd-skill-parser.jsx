@@ -9,6 +9,7 @@ import { getOrCreateUser, onAuthStateChange } from './lib/auth.js';
 import { saveResumeProfile, loadResumeProfile } from './lib/supabase.js';
 import SignInButton from './components/SignInButton.jsx';
 import UserMenu from './components/UserMenu.jsx';
+import ProfilePage from './pages/ProfilePage.jsx';
 
 // ============================================================
 // CLASSIFICATION SYSTEM
@@ -1352,6 +1353,7 @@ export default function App() {
                             { key: 'resume',    label: 'Resume' },
                             { key: 'compare',   label: 'Match' },
                             { key: 'reference', label: 'Reference' },
+                            { key: 'profile',   label: '⚔ Profile' },
                         ].map(({ key, label }) => (
                             <button
                                 key={key}
@@ -1537,6 +1539,9 @@ export default function App() {
 
                 {/* Reference Tab */}
                 {activeTab === 'reference' && <ReferenceTab />}
+
+                {/* Profile Tab */}
+                {activeTab === 'profile' && <ProfilePage user={user} />}
 
             </div>
         </div>
