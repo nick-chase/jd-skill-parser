@@ -1,10 +1,13 @@
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import * as registry from '@core/registry.js';
 import { extractTextFromPdf } from './lib/pdfExtract.js';
 import { parseDateRange, classifyEvidenceType, scoreSkillEvidence } from '@core/parser/inference.js';
 import { getDecision } from '@core/parser/decision.js';
 import DecisionCard from './components/DecisionCard.jsx';
 import SkillRow from './components/SkillRow.jsx';
+import { onAuthStateChange } from './lib/auth.js';
+import SignInButton from './components/SignInButton.jsx';
+import UserMenu from './components/UserMenu.jsx';
 
 // ============================================================
 // CLASSIFICATION SYSTEM
@@ -1225,6 +1228,7 @@ export function runBehavioralGap(jdBehavioral, resumeBehavioral) {
 // ============================================================
 
 export default function App() {
+    const [user, setUser] = useState(null);
     const [activeTab, setActiveTab] = useState('jd');
     const [input, setInput] = useState(SAMPLE_JD);
     const [companyName, setCompanyName] = useState('');
@@ -1236,6 +1240,11 @@ export default function App() {
     const [pdfStatus, setPdfStatus] = useState('idle'); // idle | loading | done | error
     const [pdfInfo, setPdfInfo] = useState(null);       // { name, numPages }
     const fileInputRef = useRef(null);
+
+    useEffect(() => {
+        const { data: { subscription } } = onAuthStateChange(setUser);
+        return () => subscription.unsubscribe();
+    }, []);
 
     const parse = () => {
         const { companyName: extractedCompany, jobRole: extractedRole } = parseCompanyAndRole(input);
@@ -1299,6 +1308,11 @@ export default function App() {
                         Skill-based job matching, leveled.
                     </p>
                 </header>
+
+                {/* Auth bar */}
+                <div className="flex justify-end px-4 py-2">
+                    {user ? <UserMenu user={user} /> : <SignInButton />}
+                </div>
 
                 {/* Tabs — single nav, all screen sizes, sticky */}
                 <div className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 mb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
