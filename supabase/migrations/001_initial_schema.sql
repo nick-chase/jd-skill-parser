@@ -30,19 +30,9 @@ create policy "Users can update own profile"
   on public.users for update
   using (auth.uid() = id);
 
--- Auto-create user row on sign-up (via trigger)
-create or replace function public.handle_new_user()
-returns trigger as $$
-begin
-  insert into public.users (id, email)
-  values (new.id, new.email);
-  return new;
-end;
-$$ language plpgsql security definer;
-
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
+-- Note: new user rows are created in app code (src/lib/auth.js)
+-- via upsert on sign-in rather than a database trigger.
+-- Supabase free tier Auth Hooks are not used.
 
 -- ============================================================
 -- RESUME PROFILES
