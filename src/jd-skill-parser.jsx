@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react';
-import * as registry from './lib/registry.js';
+import * as registry from '@core/registry.js';
 import { extractTextFromPdf } from './lib/pdfExtract.js';
-import { parseDateRange, classifyEvidenceType, scoreSkillEvidence } from './lib/parser/inference.js';
-import { getDecision } from './lib/parser/decision.js';
+import { parseDateRange, classifyEvidenceType, scoreSkillEvidence } from '@core/parser/inference.js';
+import { getDecision } from '@core/parser/decision.js';
 import DecisionCard from './components/DecisionCard.jsx';
 import SkillRow from './components/SkillRow.jsx';
 

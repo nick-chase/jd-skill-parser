@@ -1,12 +1,26 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-// https://vite.dev/config/
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
 export default defineConfig({
-  plugins: [tailwindcss(), react()],
-  test: {
-    // Scope normal test runs to tests/ — scripts/ contains report generators, not test suites.
-    include: ['tests/**/*.test.js'],
-  },
+    plugins: [tailwindcss(), react()],
+    resolve: {
+        alias: {
+            '@core': path.resolve(__dirname, '../nat20-core/src'),
+            '@data': path.resolve(__dirname, '../nat20-core/data'),
+        }
+    },
+    test: {
+        include: ['tests/**/*.test.js'],
+        resolve: {
+            alias: {
+                '@core': path.resolve(__dirname, '../nat20-core/src'),
+                '@data': path.resolve(__dirname, '../nat20-core/data'),
+            }
+        }
+    },
 })
