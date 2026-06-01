@@ -6,10 +6,11 @@ import { getDecision } from '@core/parser/decision.js';
 import DecisionCard from './components/DecisionCard.jsx';
 import SkillRow from './components/SkillRow.jsx';
 import { getOrCreateUser, onAuthStateChange } from './lib/auth.js';
-import { saveResumeProfile, loadResumeProfile } from './lib/supabase.js';
+import { saveResumeProfile, loadResumeProfile, getUserPlanStatus } from './lib/supabase.js';
 import SignInButton from './components/SignInButton.jsx';
 import UserMenu from './components/UserMenu.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
+import AccountPage from './pages/AccountPage.jsx';
 
 // ============================================================
 // CLASSIFICATION SYSTEM
@@ -1231,6 +1232,7 @@ export function runBehavioralGap(jdBehavioral, resumeBehavioral) {
 
 export default function App() {
     const [user, setUser] = useState(null);
+    const [isPaid, setIsPaid] = useState(false);
     const [activeTab, setActiveTab] = useState('jd');
     const [input, setInput] = useState(SAMPLE_JD);
     const [companyName, setCompanyName] = useState('');
@@ -1251,8 +1253,12 @@ export default function App() {
                 // Ensure user row exists in public.users
                 await getOrCreateUser({ user: authUser })
 
-                // Load saved resume profile if exists
-                const profile = await loadResumeProfile(authUser.id)
+                // Fetch plan status and load saved resume profile in parallel
+                const [planStatus, profile] = await Promise.all([
+                    getUserPlanStatus(authUser.id),
+                    loadResumeProfile(authUser.id),
+                ])
+                setIsPaid(planStatus)
                 if (profile?.parsed_skills) {
                     setResumeResults({
                         technicalSignals: profile.parsed_skills,
@@ -1260,8 +1266,9 @@ export default function App() {
                     })
                 }
             } else {
-                // Signed out — clear resume results so next user starts fresh
+                // Signed out — clear state so next user starts fresh
                 setResumeResults(null)
+                setIsPaid(false)
             }
         })
 
@@ -1354,6 +1361,7 @@ export default function App() {
                             { key: 'compare',   label: 'Match' },
                             { key: 'reference', label: 'Reference' },
                             { key: 'profile',   label: '⚔ Profile' },
+                            { key: 'account',   label: 'Account' },
                         ].map(({ key, label }) => (
                             <button
                                 key={key}
@@ -1542,6 +1550,9 @@ export default function App() {
 
                 {/* Profile Tab */}
                 {activeTab === 'profile' && <ProfilePage user={user} />}
+
+                {/* Account Tab */}
+                {activeTab === 'account' && <AccountPage user={user} isPaid={isPaid} />}
 
             </div>
         </div>

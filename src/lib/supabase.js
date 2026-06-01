@@ -25,6 +25,23 @@ export async function saveResumeProfile(userId, parsedSkills, parsedSoftSkills, 
   if (error) console.error('Resume profile save error:', error.message)
 }
 
+export async function getUserPlanStatus(userId) {
+  if (!userId) return false
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('is_paid')
+    .eq('id', userId)
+    .single()
+
+  if (error) {
+    console.error('Plan status fetch error:', error.message)
+    return false
+  }
+
+  return data?.is_paid ?? false
+}
+
 export async function loadResumeProfile(userId) {
   if (!userId) return null
 
