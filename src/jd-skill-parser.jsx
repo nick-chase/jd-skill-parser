@@ -5,7 +5,8 @@ import { parseDateRange, classifyEvidenceType, scoreSkillEvidence } from '@core/
 import { getDecision } from '@core/parser/decision.js';
 import DecisionCard from './components/DecisionCard.jsx';
 import SkillRow from './components/SkillRow.jsx';
-import { onAuthStateChange } from './lib/auth.js';
+import { getOrCreateUser, onAuthStateChange } from './lib/auth.js';
+import { saveResumeProfile, loadResumeProfile } from './lib/supabase.js';
 import SignInButton from './components/SignInButton.jsx';
 import UserMenu from './components/UserMenu.jsx';
 
@@ -1242,8 +1243,28 @@ export default function App() {
     const fileInputRef = useRef(null);
 
     useEffect(() => {
-        const { data: { subscription } } = onAuthStateChange(setUser);
-        return () => subscription.unsubscribe();
+        const { data: { subscription } } = onAuthStateChange(async (authUser) => {
+            setUser(authUser)
+
+            if (authUser) {
+                // Ensure user row exists in public.users
+                await getOrCreateUser({ user: authUser })
+
+                // Load saved resume profile if exists
+                const profile = await loadResumeProfile(authUser.id)
+                if (profile?.parsed_skills) {
+                    setResumeResults({
+                        technicalSignals: profile.parsed_skills,
+                        behavioralSignals: profile.parsed_soft_skills ?? []
+                    })
+                }
+            } else {
+                // Signed out — clear resume results so next user starts fresh
+                setResumeResults(null)
+            }
+        })
+
+        return () => subscription.unsubscribe()
     }, []);
 
     const parse = () => {
@@ -1259,12 +1280,21 @@ export default function App() {
         }
     }
 
-    const parseResume = () => {
+    const parseResume = async () => {
         const parsed = parseResumeInput(resumeInput, 'text');
         setResumeResults(parsed);
         // Auto-switch to Gap Analysis if JD already parsed
         if (results?.technicalSignals?.length > 0) {
             setActiveTab('compare');
+        }
+        // Save to Supabase if signed in — silent, never blocks the parse
+        if (user?.id) {
+            await saveResumeProfile(
+                user.id,
+                parsed.technicalSignals,
+                parsed.behavioralSignals,
+                resumeInput
+            )
         }
     };
 
