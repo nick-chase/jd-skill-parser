@@ -31,8 +31,14 @@ serve(async (req) => {
     const userId = session.client_reference_id
     const customerId = session.customer
 
+    console.log('Processing checkout.session.completed')
+    console.log('userId:', userId)
+    console.log('customerId:', customerId)
+    console.log('SUPABASE_URL present:', !!Deno.env.get('SUPABASE_URL'))
+    console.log('SERVICE_ROLE_KEY present:', !!Deno.env.get('SERVICE_ROLE_KEY'))
+
     if (userId) {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('users')
         .update({
           is_paid: true,
@@ -41,10 +47,15 @@ serve(async (req) => {
         })
         .eq('id', userId)
 
+      console.log('Update result data:', JSON.stringify(data))
+      console.log('Update result error:', JSON.stringify(error))
+
       if (error) {
         console.error('Failed to update user:', error.message)
         return new Response('Database Error', { status: 500 })
       }
+    } else {
+      console.log('ERROR: No userId found in session')
     }
   }
 
