@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { onAuthStateChange, signOut } from '../lib/auth.js'
+import { redirectToPortal } from '../lib/stripe.js'
 import { getUserPlanStatus, loadResumeProfile } from '../lib/supabase.js'
 import SignInButton from '../components/SignInButton.jsx'
 import StatBlock from '../components/StatBlock.jsx'
@@ -229,10 +230,10 @@ export default function AccountPage() {
                   PDF upload, resume persistence, and no ads — all included.
                 </div>
                 <button
-                  disabled
-                  className="text-xs text-slate-400 underline cursor-not-allowed"
+                  onClick={() => redirectToPortal(user.id)}
+                  className="text-sm px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition text-slate-700"
                 >
-                  Manage billing (coming soon)
+                  Manage billing →
                 </button>
               </div>
             ) : (
