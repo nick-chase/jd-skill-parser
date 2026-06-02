@@ -1238,6 +1238,7 @@ export default function App() {
     const [parseCount, setParseCount] = useState(null);
     const [showParseLimit, setShowParseLimit] = useState(false);
     const [showPdfLimit, setShowPdfLimit] = useState(false);
+    const [jdInputError, setJdInputError] = useState(false);
     const [resumeInputError, setResumeInputError] = useState(false);
     const [activeTab, setActiveTab] = useState('jd');
     const [input, setInput] = useState('');
@@ -1282,6 +1283,11 @@ export default function App() {
     }, []);
 
     const parse = async () => {
+        if (!input.trim()) {
+            setJdInputError(true);
+            return;
+        }
+        setJdInputError(false);
         const { allowed, remaining } = await checkAndIncrementParseCount(user, isPaid(user, isPaidStatus));
         if (!allowed) {
             setShowParseLimit(true);
@@ -1431,7 +1437,7 @@ export default function App() {
 
                         <textarea
                             value={input}
-                            onChange={e => setInput(e.target.value)}
+                            onChange={e => { setInput(e.target.value); setJdInputError(false); }}
                             className="w-full h-[200px] sm:h-[280px] p-4 border border-slate-200 rounded-lg font-mono text-[13px] leading-relaxed bg-white shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none focus:border-indigo-400 resize-none"
                             placeholder="Paste a job description here..."
                         />
@@ -1442,6 +1448,12 @@ export default function App() {
                         >
                             Parse Skills →
                         </button>
+
+                        {jdInputError && (
+                            <p className="text-xs text-red-500 text-center">
+                                Paste a job description before parsing.
+                            </p>
+                        )}
 
                         {parseCount !== null && !isPaid(user, isPaidStatus) && (
                             <div className="text-xs text-slate-400 text-right">
@@ -1560,15 +1572,15 @@ export default function App() {
                 {/* Gap Analysis Tab */}
                 {activeTab === 'compare' && (
                     <div>
-                        {(!results || !resumeResults) ? (
+                        {(!results?.technicalSignals || !resumeResults?.technicalSignals) ? (
                             <div className="text-sm text-slate-500 p-12 text-center border border-dashed border-slate-300 rounded-lg bg-white">
                                 <div style={{ marginBottom: '12px' }}>Complete both steps first:</div>
                                 <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
-                                    <div style={{ color: results ? '#059669' : '#dc2626' }}>
-                                        {results ? '✅' : '❌'} Job Description
+                                    <div style={{ color: results?.technicalSignals ? '#059669' : '#dc2626' }}>
+                                        {results?.technicalSignals ? '✅' : '❌'} Job Description
                                     </div>
-                                    <div style={{ color: resumeResults ? '#059669' : '#dc2626' }}>
-                                        {resumeResults ? '✅' : '❌'} Resume
+                                    <div style={{ color: resumeResults?.technicalSignals ? '#059669' : '#dc2626' }}>
+                                        {resumeResults?.technicalSignals ? '✅' : '❌'} Resume
                                     </div>
                                 </div>
                             </div>
