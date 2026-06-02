@@ -1,34 +1,31 @@
-import { loadStripe } from '@stripe/stripe-js'
-
-const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-const priceId = import.meta.env.VITE_STRIPE_PRICE_ID
-
-if (!stripePublishableKey) {
-  console.warn('Missing VITE_STRIPE_PUBLISHABLE_KEY')
-}
-
-let stripePromise = null
-
-export function getStripe() {
-  if (!stripePromise) {
-    stripePromise = loadStripe(stripePublishableKey)
-  }
-  return stripePromise
-}
-
 export async function redirectToCheckout(userId, userEmail) {
-  const stripe = await getStripe()
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        },
+        body: JSON.stringify({
+          userId,
+          userEmail,
+          priceId: import.meta.env.VITE_STRIPE_PRICE_ID
+        })
+      }
+    )
 
-  const { error } = await stripe.redirectToCheckout({
-    lineItems: [{ price: priceId, quantity: 1 }],
-    mode: 'subscription',
-    successUrl: `${window.location.origin}/account?upgraded=true`,
-    cancelUrl: `${window.location.origin}/pricing`,
-    clientReferenceId: userId,
-    customerEmail: userEmail,
-  })
+    const { url, error } = await response.json()
 
-  if (error) {
-    console.error('Stripe Checkout error:', error.message)
+    if (error) {
+      console.error('Checkout session error:', error)
+      return
+    }
+
+    window.location.href = url
+
+  } catch (err) {
+    console.error('Failed to create checkout session:', err)
   }
 }
