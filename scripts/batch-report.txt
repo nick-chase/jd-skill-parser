@@ -17,21 +17,24 @@ Behavioral: Communication
 
 ══════════════════════════════════
 FILE: dataentryclerk2.txt
-Skills detected: 0
-  ⚠️  NO SKILLS DETECTED
+Skills detected: 1
+  Data Entry — L5 — Experience (unknown duration)
 Behavioral: Accuracy
 
 ══════════════════════════════════
 FILE: datatentryclerk1.txt
-Skills detected: 1
+Skills detected: 2
+  Data Entry — L5 — Experience (unknown duration)
   Monitoring — L1 — Technical Skills (unknown duration)
 Behavioral: Accuracy, Adaptability, Attention to Detail, Organization
 ⚠️  1 skill(s) possibly misclassified
 
 ══════════════════════════════════
 FILE: desktopsupport1.txt
-Skills detected: 0
-  ⚠️  NO SKILLS DETECTED
+Skills detected: 3
+  Desktop Support — L5 — Experience (unknown duration)
+  Data Entry — L3 — Experience (unknown duration)
+  Technical Support — L3 — Experience (unknown duration)
 Behavioral: Communication, Troubleshooting
 
 ══════════════════════════════════
@@ -123,7 +126,8 @@ Behavioral: none
 
 ══════════════════════════════════
 FILE: supportspecialist.txt
-Skills detected: 1
+Skills detected: 2
+  Helpdesk — L3 — Experience (unknown duration)
   Cybersecurity — L1 — Education (unknown duration)
 Behavioral: Communication
 
@@ -137,15 +141,17 @@ Behavioral: Attention to Detail, Collaboration, Communication, Problem-Solving
 
 ══════════════════════════════════
 FILE: swe2.txt
-Skills detected: 2
+Skills detected: 3
   Algorithms — L5 — Experience (unknown duration)
+  Technical Writing — L4 — Experience (unknown duration)
   Data Structures — L1 — Technical Skills (unknown duration)
 Behavioral: Critical Thinking, Leadership, Technical Writing, Troubleshooting
 ⚠️  1 skill(s) possibly misclassified
 
 ══════════════════════════════════
 FILE: sysadmin1.txt
-Skills detected: 3
+Skills detected: 4
+  Active Directory — L2 — Experience (unknown duration)
   Jenkins — L2 — Experience (unknown duration)
   HTML — L1 — Technical Skills (unknown duration)
   JavaScript — L1 — Technical Skills (unknown duration)
@@ -154,15 +160,17 @@ Behavioral: none
 
 ══════════════════════════════════
 FILE: sysadmin2.txt
-Skills detected: 2
+Skills detected: 3
   Linux — L3 — Experience (unknown duration)
   Monitoring — L3 — Experience (unknown duration)
+  Firewall — L2 — Experience (unknown duration)
 Behavioral: Reliability, Troubleshooting
 
 ══════════════════════════════════
 FILE: sysegineer2.txt
-Skills detected: 3
+Skills detected: 4
   Encryption — L4 — Experience (unknown duration)
+  Technical Support — L4 — Experience (unknown duration)
   Azure — L1 — Technical Skills (unknown duration)
   Project Management — L1 — Technical Skills (unknown duration)
 Behavioral: Communication, Reliability, Technical Writing, Troubleshooting
@@ -170,20 +178,25 @@ Behavioral: Communication, Reliability, Technical Writing, Troubleshooting
 
 ══════════════════════════════════
 FILE: sysengineer1.txt
-Skills detected: 2
+Skills detected: 4
   Testing — L4 — Experience (unknown duration)
   C — L3 — Experience (unknown duration)
+  Technical Writing — L3 — Experience (unknown duration)
+  Systems Analysis — L1 — Technical Skills (unknown duration)
 Behavioral: Collaboration, Communication, Cross-Functional Collaboration, Problem-Solving, Technical Writing
+⚠️  1 skill(s) possibly misclassified
 
 ══════════════════════════════════
 FILE: systemanalyst1.txt
-Skills detected: 0
-  ⚠️  NO SKILLS DETECTED
+Skills detected: 2
+  Business Analysis — L2 — Experience (unknown duration)
+  Functional Analysis — L2 — Experience (unknown duration)
 Behavioral: Attention to Detail, Collaboration, Troubleshooting
 
 ══════════════════════════════════
 FILE: systemanalyst2.txt
-Skills detected: 4
+Skills detected: 5
+  Business Analysis — L2 — Experience (unknown duration)
   Jenkins — L2 — Experience (unknown duration)
   Statistics — L1 — Education (unknown duration)
   HTML — L1 — Technical Skills (unknown duration)
@@ -193,7 +206,8 @@ Behavioral: Communication
 
 ══════════════════════════════════
 FILE: technicalprogrammanager.txt
-Skills detected: 3
+Skills detected: 4
+  Documentation — L2 — Experience (unknown duration)
   Jenkins — L2 — Experience (unknown duration)
   Microsoft Office — L1 — Technical Skills (unknown duration)
   Microsoft Project — L1 — Technical Skills (unknown duration)
@@ -202,15 +216,14 @@ Behavioral: Collaboration
 
 ══════════════════════════════════
 FILE: technicalwriter.txt
-Skills detected: 0
-  ⚠️  NO SKILLS DETECTED
+Skills detected: 1
+  Technical Writing — L5 — Experience (unknown duration)
 Behavioral: Attention to Detail, Collaboration, Communication, Time Management
 
 ══════════════════════════════════
 SUMMARY
 Total resumes: 24
-Total skills detected: 67
-Avg skills per resume: 2.8
-Resumes with 0 skills: 4
-Resumes with misclassified evidence: 15
-Files with no skills: dataentryclerk2.txt, desktopsupport1.txt, systemanalyst1.txt, technicalwriter.txt
+Total skills detected: 84
+Avg skills per resume: 3.5
+Resumes with 0 skills: 0
+Resumes with misclassified evidence: 16
