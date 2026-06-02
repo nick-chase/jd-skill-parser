@@ -1236,6 +1236,7 @@ export default function App() {
     const [parseCount, setParseCount] = useState(null);
     const [showParseLimit, setShowParseLimit] = useState(false);
     const [showPdfLimit, setShowPdfLimit] = useState(false);
+    const [resumeInputError, setResumeInputError] = useState(false);
     const [activeTab, setActiveTab] = useState('jd');
     const [input, setInput] = useState(SAMPLE_JD);
     const [companyName, setCompanyName] = useState('');
@@ -1300,14 +1301,19 @@ export default function App() {
     }
 
     const parseResume = async () => {
+        if (!resumeInput.trim()) {
+            setResumeInputError(true);
+            return;
+        }
+        setResumeInputError(false);
         const parsed = parseResumeInput(resumeInput, 'text');
         setResumeResults(parsed);
         // Auto-switch to Gap Analysis if JD already parsed
         if (results?.technicalSignals?.length > 0) {
             setActiveTab('compare');
         }
-        // Save to Supabase if signed in — silent, never blocks the parse
-        if (user?.id) {
+        // Save to Supabase only for paid users — free users don't accumulate stored data
+        if (user?.id && isPaidStatus) {
             await saveResumeProfile(
                 user.id,
                 parsed.technicalSignals,
@@ -1514,7 +1520,7 @@ export default function App() {
 
                         <textarea
                             value={resumeInput}
-                            onChange={e => setResumeInput(e.target.value)}
+                            onChange={e => { setResumeInput(e.target.value); setResumeInputError(false); }}
                             className="w-full h-[200px] sm:h-[280px] p-4 border border-slate-200 rounded-lg font-mono text-[13px] leading-relaxed bg-white shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none focus:border-indigo-400 resize-none"
                             placeholder="Paste your resume text here..."
                         />
@@ -1525,6 +1531,12 @@ export default function App() {
                         >
                             Parse Resume →
                         </button>
+
+                        {resumeInputError && (
+                            <p className="text-xs text-red-500 text-center">
+                                Paste your resume text before parsing.
+                            </p>
+                        )}
 
                         {resumeResults !== null && (
                             resumeResults.technicalSignals.length === 0 ? (
