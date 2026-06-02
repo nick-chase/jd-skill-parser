@@ -130,15 +130,16 @@ function matchSkillsInText(text) {
     if (!text) return matches
     const entries = registry.getAllSkillEntries()
     const used = new Set()
-    for (const { canonical, alias, category, guardWords } of entries) {
+    for (const { canonical, alias, category, guardWords, caseSensitive } of entries) {
         const isRegex = alias.includes('\\b') || alias.includes('(?')
+        const flags = caseSensitive ? 'g' : 'gi'
         let pattern
         if (alias.toLowerCase().includes('c#')) {
-            pattern = new RegExp(escapeRegex(alias), 'gi')
+            pattern = new RegExp(escapeRegex(alias), flags)
         } else {
             pattern = isRegex
-                ? new RegExp(alias, 'gi')
-                : new RegExp(`\\b${escapeRegex(alias)}\\b`, 'gi')
+                ? new RegExp(alias, flags)
+                : new RegExp(`\\b${escapeRegex(alias)}\\b`, flags)
         }
         let m
         while ((m = pattern.exec(text)) !== null) {
@@ -200,6 +201,33 @@ function extractSkillsFromProjects(text) {
     }))
 }
 
+// Matches the last uppercase acronym in parentheses immediately before a comma or year.
+// e.g. "(ISC)² Certified Secure Software Lifecycle (CSSLP), 2022" → "CSSLP"
+const CERT_ACRONYM_RE = /\(([A-Z][A-Z0-9\-]+)\)(?:,|\s*\d{4})/
+
+function matchCertificationLine(line) {
+    const acronymMatch = CERT_ACRONYM_RE.exec(line)
+    if (acronymMatch) {
+        const acronymHits = matchSkillsInText(acronymMatch[1])
+        if (acronymHits.length > 0) return acronymHits
+    }
+    return matchSkillsInText(line)
+}
+
+function extractSkillsFromCertifications(text) {
+    if (!text) return []
+    const wType = classifyEvidenceType('certifications', '')
+    const instances = []
+    for (const line of text.split('\n')) {
+        const trimmed = line.trim().replace(/&nbsp;/g, ' ').trim()
+        if (!trimmed) continue
+        for (const { canonical, category } of matchCertificationLine(trimmed)) {
+            instances.push({ canonical, category, wType, durationMonths: null, sectionName: 'certifications' })
+        }
+    }
+    return instances
+}
+
 const MONTH_PATTERN = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|January|February|March|April|June|July|August|September|October|November|December)\.?\s/i
 const YEAR_PATTERN  = /^\d{4}/
 
@@ -249,18 +277,19 @@ function extractSkillsFromExperience(text) {
         const wType = classifyEvidenceType('experience', roleTitle)
 
         for (const { canonical, category } of matchSkillsInText(block)) {
-            instances.push({ canonical, category, wType, durationMonths, sectionName: 'experience' })
+            instances.push({ canonical, category, wType, durationMonths, sectionName: 'experience', bulletText: block })
         }
     }
     return instances
 }
 
 const SECTION_SOURCE_LABEL = {
-    experience: 'Experience',
-    projects:   'Projects',
-    education:  'Education',
-    skills:     'Technical Skills',
-    summary:    'Summary',
+    experience:     'Experience',
+    projects:       'Projects',
+    education:      'Education',
+    skills:         'Technical Skills',
+    summary:        'Summary',
+    certifications: 'Certifications',
 }
 
 // ---------------------------------------------------------------------------
@@ -277,11 +306,12 @@ export function parseResume(text) {
         ...extractSkillsFromTechnicalSection(sections.technicalSkills),
         ...extractSkillsFromProjects(sections.projects),
         ...extractSkillsFromExperience(sections.experience),
+        ...extractSkillsFromCertifications(sections.additionalInfo),
     ]
 
     const skillMap = new Map()
 
-    for (const { canonical, category, wType, durationMonths, sectionName } of allInstances) {
+    for (const { canonical, category, wType, durationMonths, sectionName, bulletText } of allInstances) {
         if (!skillMap.has(canonical)) {
             skillMap.set(canonical, { category, instances: [] })
         }
@@ -290,7 +320,7 @@ export function parseResume(text) {
             i => i.sectionName === sectionName && i.wType === wType && i.durationMonths === durationMonths
         )
         if (!duplicate) {
-            entry.instances.push({ wType, durationMonths, sectionName })
+            entry.instances.push({ wType, durationMonths, sectionName, bulletText })
         }
     }
 

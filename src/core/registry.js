@@ -10,10 +10,11 @@ const rolesById  = new Map(rolesData.roles.map(r => [r.id, r]));
 const _entries = skillsData.skills
     .flatMap(skill =>
         skill.patterns.map(pat => ({
-            canonical:  skill.canonical,
-            alias:      pat,
-            category:   skill.category,
-            guardWords: skill.guardWords,
+            canonical:     skill.canonical,
+            alias:         pat,
+            category:      skill.category,
+            guardWords:    skill.guardWords,
+            caseSensitive: skill.caseSensitive ?? false,
         }))
     )
     .sort((a, b) => b.alias.length - a.alias.length);

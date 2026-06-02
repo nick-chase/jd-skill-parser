@@ -235,17 +235,18 @@ export function parseJobDescription(text) {
 
     for (const section of sections) {
         const used = new Set();
-        for (const { canonical, alias, category, guardWords } of entries) {
+        for (const { canonical, alias, category, guardWords, caseSensitive } of entries) {
             const isRegex = alias.includes('\\b') || alias.includes('(?');
+            const flags = caseSensitive ? 'g' : 'gi';
             let pattern;
 
             // Special handling for C# since # breaks word boundaries
             if (alias.toLowerCase().includes('c#')) {
-                pattern = new RegExp(escapeRegex(alias), 'gi');
+                pattern = new RegExp(escapeRegex(alias), flags);
             } else {
                 pattern = isRegex
-                    ? new RegExp(alias, 'gi')
-                    : new RegExp(`\\b${escapeRegex(alias)}\\b`, 'gi');
+                    ? new RegExp(alias, flags)
+                    : new RegExp(`\\b${escapeRegex(alias)}\\b`, flags);
             }
 
             let m;
