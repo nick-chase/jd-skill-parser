@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { onAuthStateChange, signOut } from '../lib/auth.js'
 import { getUserPlanStatus, loadResumeProfile } from '../lib/supabase.js'
 import SignInButton from '../components/SignInButton.jsx'
@@ -30,6 +30,8 @@ export default function AccountPage() {
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('profile')
+  const [searchParams] = useSearchParams()
+  const justUpgraded = searchParams.get('upgraded') === 'true'
 
   useEffect(() => {
     const { data: { subscription } } = onAuthStateChange(async (authUser) => {
@@ -109,6 +111,15 @@ export default function AccountPage() {
           </button>
         ))}
       </div>
+
+      {/* Upgrade success banner — shown once after returning from Stripe */}
+      {justUpgraded && (
+        <div className="border border-emerald-200 rounded-xl p-4 bg-emerald-50 text-center">
+          <div className="text-emerald-700 font-medium">
+            ⚔️ Welcome to Pro! Your character sheet is unlocked.
+          </div>
+        </div>
+      )}
 
       {/* Profile tab */}
       {activeTab === 'profile' && !isPaid && (
