@@ -102,7 +102,7 @@ export default function LandingPage() {
               {
                 icon: '⚔️',
                 title: 'Character sheet',
-                body: 'Your resume becomes a leveled stat block. Track skill progression across job searches with XP-style proficiency bars.'
+                body: 'Your resume becomes a leveled stat block — skill proficiency mapped by category, evidence, and context. See where you stand at a glance, not just what keywords you have.'
               },
               {
                 icon: '📋',
@@ -140,6 +140,7 @@ export default function LandingPage() {
                 'Unlimited resume parses',
                 'Full gap map every time',
                 'No account required',
+                'Ad-supported (upgrade to remove)',
               ].map(f => (
                 <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
                   <span className="text-slate-400">✓</span> {f}
@@ -203,8 +204,8 @@ export default function LandingPage() {
               a: "Free users: nothing is stored — results disappear when you close the tab. Pro users: your parsed resume profile is saved so you don't have to re-paste on return visits."
             },
             {
-              q: 'How is this different from Jobscan?',
-              a: "Jobscan gives you a keyword match score. Nat20 gives you a skill proficiency map — it tells you not just what's missing, but how far behind you are and what to do about it. And it's 5× cheaper."
+              q: 'How is this different from other resume tools?',
+              a: "Most resume scanners give you a keyword match score and a list of missing words. Nat20 gives you a skill proficiency map — it tells you not just what's missing, but how far behind you are and what to do about it. And at $9.99/mo, it's a fraction of the cost of premium alternatives."
             },
             {
               q: 'What does the character sheet do?',
