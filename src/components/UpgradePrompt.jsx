@@ -12,7 +12,7 @@ const MESSAGES = {
   },
   profile: {
     title: "Character sheet is a Pro feature",
-    body: "Upgrade to Pro to unlock your skill XP bars, class, and progress tracking.",
+    body: "Upgrade to Pro to unlock your character sheet — skill proficiency mapped by category, evidence, and context.",
   },
 }
 

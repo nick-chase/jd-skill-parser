@@ -53,6 +53,14 @@ export default function AccountPage() {
     return () => subscription.unsubscribe()
   }, [])
 
+  // Re-fetch plan status immediately on return from Stripe — the webhook may have
+  // just flipped is_paid and the cached value from onAuthStateChange would be stale.
+  useEffect(() => {
+    if (justUpgraded && user) {
+      getUserPlanStatus(user.id).then(status => setIsPaid(status))
+    }
+  }, [justUpgraded, user])
+
   if (loading) {
     return (
       <div className="text-center py-16 text-slate-400 text-sm">
@@ -245,7 +253,7 @@ export default function AccountPage() {
                 </div>
                 <Link to="/pricing">
                   <button className="w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition">
-                    Upgrade to Pro — $4.99/mo
+                    Upgrade to Pro — $9.99/mo
                   </button>
                 </Link>
               </div>
