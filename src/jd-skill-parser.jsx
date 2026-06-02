@@ -6,9 +6,11 @@ import { getDecision } from '@core/parser/decision.js';
 import DecisionCard from './components/DecisionCard.jsx';
 import SkillRow from './components/SkillRow.jsx';
 import { getOrCreateUser, onAuthStateChange } from './lib/auth.js';
-import { saveResumeProfile, loadResumeProfile } from './lib/supabase.js';
+import { saveResumeProfile, loadResumeProfile, getUserPlanStatus } from './lib/supabase.js';
+import { checkAndIncrementParseCount, FREE_DAILY_LIMIT, isPaid } from './lib/limits.js';
 import SignInButton from './components/SignInButton.jsx';
 import UserMenu from './components/UserMenu.jsx';
+import UpgradePrompt from './components/UpgradePrompt.jsx';
 
 // ============================================================
 // CLASSIFICATION SYSTEM
@@ -1230,6 +1232,10 @@ export function runBehavioralGap(jdBehavioral, resumeBehavioral) {
 
 export default function App() {
     const [user, setUser] = useState(null);
+    const [isPaidStatus, setIsPaidStatus] = useState(false);
+    const [parseCount, setParseCount] = useState(null);
+    const [showParseLimit, setShowParseLimit] = useState(false);
+    const [showPdfLimit, setShowPdfLimit] = useState(false);
     const [activeTab, setActiveTab] = useState('jd');
     const [input, setInput] = useState(SAMPLE_JD);
     const [companyName, setCompanyName] = useState('');
@@ -1250,8 +1256,12 @@ export default function App() {
                 // Ensure user row exists in public.users
                 await getOrCreateUser({ user: authUser })
 
-                // Load saved resume profile if exists
-                const profile = await loadResumeProfile(authUser.id)
+                // Load plan status and saved resume profile in parallel
+                const [planStatus, profile] = await Promise.all([
+                    getUserPlanStatus(authUser.id),
+                    loadResumeProfile(authUser.id),
+                ])
+                setIsPaidStatus(planStatus)
                 if (profile?.parsed_skills) {
                     setResumeResults({
                         technicalSignals: profile.parsed_skills,
@@ -1259,15 +1269,24 @@ export default function App() {
                     })
                 }
             } else {
-                // Signed out — clear resume results so next user starts fresh
+                // Signed out — clear user-specific state
                 setResumeResults(null)
+                setIsPaidStatus(false)
             }
         })
 
         return () => subscription.unsubscribe()
     }, []);
 
-    const parse = () => {
+    const parse = async () => {
+        const { allowed, remaining } = await checkAndIncrementParseCount(user, isPaid(user, isPaidStatus));
+        if (!allowed) {
+            setShowParseLimit(true);
+            return;
+        }
+        setParseCount(remaining);
+        setShowParseLimit(false);
+
         const { companyName: extractedCompany, jobRole: extractedRole } = parseCompanyAndRole(input);
         const meta = parseJobMeta(input);
         setCompanyName(extractedCompany);
@@ -1414,6 +1433,14 @@ export default function App() {
                             Parse Skills →
                         </button>
 
+                        {parseCount !== null && !isPaid(user, isPaidStatus) && (
+                            <div className="text-xs text-slate-400 text-right">
+                                {parseCount} of {FREE_DAILY_LIMIT} parses remaining today
+                            </div>
+                        )}
+
+                        {showParseLimit && <UpgradePrompt reason="parse_limit" />}
+
                         {results !== null && (
                             <>
                                 <ResultsView results={results.technicalSignals} companyName={companyName} jobRole={jobRole} jobMeta={jobMeta} />
@@ -1456,12 +1483,18 @@ export default function App() {
                                     }}
                                 />
                                 <button
-                                    onClick={() => fileInputRef.current?.click()}
+                                    onClick={() => {
+                                        if (!isPaid(user, isPaidStatus)) {
+                                            setShowPdfLimit(true);
+                                            return;
+                                        }
+                                        fileInputRef.current?.click();
+                                    }}
                                     disabled={pdfStatus === 'loading'}
                                     className="text-xs px-2.5 py-1 border border-slate-300 rounded hover:bg-slate-100 transition"
                                     style={{ opacity: pdfStatus === 'loading' ? 0.5 : 1, cursor: pdfStatus === 'loading' ? 'not-allowed' : 'pointer' }}
                                 >
-                                    Upload PDF
+                                    Upload PDF {!isPaid(user, isPaidStatus) ? '🔒' : ''}
                                 </button>
                             </div>
                         </div>
@@ -1476,6 +1509,8 @@ export default function App() {
                         {pdfStatus === 'error' && (
                             <p className="text-xs text-red-600">Extraction failed — try a different file.</p>
                         )}
+
+                        {showPdfLimit && <UpgradePrompt reason="pdf" />}
 
                         <textarea
                             value={resumeInput}

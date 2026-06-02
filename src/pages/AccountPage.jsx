@@ -4,6 +4,7 @@ import { onAuthStateChange, signOut } from '../lib/auth.js'
 import { getUserPlanStatus, loadResumeProfile } from '../lib/supabase.js'
 import SignInButton from '../components/SignInButton.jsx'
 import StatBlock from '../components/StatBlock.jsx'
+import UpgradePrompt from '../components/UpgradePrompt.jsx'
 
 function deriveClass(skills) {
   if (!skills?.length) return 'Adventurer'
@@ -110,7 +111,11 @@ export default function AccountPage() {
       </div>
 
       {/* Profile tab */}
-      {activeTab === 'profile' && (
+      {activeTab === 'profile' && !isPaid && (
+        <UpgradePrompt reason="profile" />
+      )}
+
+      {activeTab === 'profile' && isPaid && (
         <div className="space-y-6">
           {/* Header */}
           <div className="border border-slate-200 rounded-xl p-5 bg-white shadow-sm">
