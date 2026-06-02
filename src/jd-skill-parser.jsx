@@ -1239,7 +1239,7 @@ export default function App() {
     const [showPdfLimit, setShowPdfLimit] = useState(false);
     const [resumeInputError, setResumeInputError] = useState(false);
     const [activeTab, setActiveTab] = useState('jd');
-    const [input, setInput] = useState(SAMPLE_JD);
+    const [input, setInput] = useState('');
     const [companyName, setCompanyName] = useState('');
     const [jobRole, setJobRole] = useState('');
     const [results, setResults] = useState(null);
