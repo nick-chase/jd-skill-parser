@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { onAuthStateChange, signOut } from '../lib/auth.js'
+import { redirectToPortal } from '../lib/stripe.js'
 import { getUserPlanStatus, loadResumeProfile } from '../lib/supabase.js'
 import SignInButton from '../components/SignInButton.jsx'
 import StatBlock from '../components/StatBlock.jsx'
+import UpgradePrompt from '../components/UpgradePrompt.jsx'
 
 function deriveClass(skills) {
   if (!skills?.length) return 'Adventurer'
@@ -29,6 +31,8 @@ export default function AccountPage() {
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('profile')
+  const [searchParams] = useSearchParams()
+  const justUpgraded = searchParams.get('upgraded') === 'true'
 
   useEffect(() => {
     const { data: { subscription } } = onAuthStateChange(async (authUser) => {
@@ -109,8 +113,21 @@ export default function AccountPage() {
         ))}
       </div>
 
+      {/* Upgrade success banner — shown once after returning from Stripe */}
+      {justUpgraded && (
+        <div className="border border-emerald-200 rounded-xl p-4 bg-emerald-50 text-center">
+          <div className="text-emerald-700 font-medium">
+            ⚔️ Welcome to Pro! Your character sheet is unlocked.
+          </div>
+        </div>
+      )}
+
       {/* Profile tab */}
-      {activeTab === 'profile' && (
+      {activeTab === 'profile' && !isPaid && (
+        <UpgradePrompt reason="profile" />
+      )}
+
+      {activeTab === 'profile' && isPaid && (
         <div className="space-y-6">
           {/* Header */}
           <div className="border border-slate-200 rounded-xl p-5 bg-white shadow-sm">
@@ -213,10 +230,10 @@ export default function AccountPage() {
                   PDF upload, resume persistence, and no ads — all included.
                 </div>
                 <button
-                  disabled
-                  className="text-xs text-slate-400 underline cursor-not-allowed"
+                  onClick={() => redirectToPortal(user.id)}
+                  className="text-sm px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition text-slate-700"
                 >
-                  Manage billing (coming soon)
+                  Manage billing →
                 </button>
               </div>
             ) : (

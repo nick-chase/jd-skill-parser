@@ -6,7 +6,8 @@
       "Bash(Out-Null)",
       "Bash(node --input-type=module)",
       "Bash(Select-Object FullName)",
-      "Bash(npm test *)"
+      "Bash(npm test *)",
+      "Bash(npm install *)"
     ]
   }
 }
