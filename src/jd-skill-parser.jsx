@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import * as registry from '@core/registry.js';
 import { extractTextFromPdf } from './lib/pdfExtract.js';
-import { parseDateRange, classifyEvidenceType, scoreSkillEvidence } from '@core/parser/inference.js';
+import { parseResume, extractBehavioralSignals } from './core/parser/parseResume.js';
 import { getDecision } from '@core/parser/decision.js';
 import DecisionCard from './components/DecisionCard.jsx';
 import SkillRow from './components/SkillRow.jsx';
@@ -195,48 +195,6 @@ export function parseJobMeta(text) {
     return meta;
 }
 
-// Scan full JD text for behavioral signal vocabulary. Returns only found signals.
-// No level assigned — behavioral signals are present/absent only.
-function extractBehavioralSignals(text) {
-    if (!text || !text.trim()) return [];
-
-    const entries = registry.getSoftSkills();
-    const found = new Map();
-    const used = new Set();
-
-    for (const { canonical, alias, category, guardWords } of entries) {
-        const isRegex = alias.includes('\\b') || alias.includes('(?');
-        let pattern;
-        try {
-            pattern = isRegex
-                ? new RegExp(alias, 'gi')
-                : new RegExp(`\\b${escapeRegex(alias)}\\b`, 'gi');
-        } catch { continue; }
-
-        let m;
-        while ((m = pattern.exec(text)) !== null) {
-            let alreadyUsed = false;
-            for (let i = m.index; i < m.index + m[0].length; i++) {
-                if (used.has(i)) { alreadyUsed = true; break; }
-            }
-            if (alreadyUsed) continue;
-            if (guardWords?.length) {
-                const wStart = Math.max(0, m.index - 150);
-                const wEnd   = Math.min(text.length, m.index + m[0].length + 150);
-                const win    = text.substring(wStart, wEnd).toLowerCase();
-                if (guardWords.some(gw => win.includes(gw.toLowerCase()))) continue;
-            }
-            for (let i = m.index; i < m.index + m[0].length; i++) used.add(i);
-
-            if (!found.has(canonical)) {
-                found.set(canonical, { name: canonical, category });
-            }
-        }
-    }
-
-    return Array.from(found.values()).sort((a, b) => a.name.localeCompare(b.name));
-}
-
 // Duty section header patterns — ordered most-specific first.
 const DUTY_HEADER_RE = /(?:^|\n)\s*(?:what\s+you(?:'ll|(?:\s+will))\s+(?:do|be\s+doing)|key\s+responsibilities|primary\s+responsibilities|responsibilities|in\s+this\s+role|your\s+responsibilities|day[- ]to[- ]day|what\s+the\s+role\s+(?:involves|entails)|role\s+overview)\s*:?\s*(?:\n|$)/gi;
 
@@ -351,226 +309,16 @@ export function parseJobDescription(text) {
 // RESUME PARSER
 // ============================================================
 
-// Generic input handler - extensible for PDF/file later
+// Re-export under legacy name so existing tests and callers keep working.
+export const parseResumeText = parseResume
+
 function parseResumeInput(input, inputType = 'text') {
     switch (inputType) {
-        case 'text': return parseResumeText(input);
-        case 'pdf': return parseResumeText(input); // text already extracted from PDF
-        case 'file': return null; // stub for later
-        default: return parseResumeText(input);
+        case 'text': return parseResume(input)
+        case 'pdf':  return parseResume(input)
+        case 'file': return null
+        default:     return parseResume(input)
     }
-}
-
-// Extract a named section from resume text
-function extractSection(text, sectionName) {
-    const sectionHeaders = [
-        'PROFESSIONAL SUMMARY',
-        'EDUCATION',
-        'TECHNICAL SKILLS',
-        'PROJECTS',
-        'PROFESSIONAL EXPERIENCE',
-        'ADDITIONAL INFORMATION',
-        'CERTIFICATIONS',
-        'SKILLS',
-        'EXPERIENCE',
-        'WORK EXPERIENCE',
-    ];
-
-    const upperText = text.toUpperCase();
-    const startIdx = upperText.indexOf(sectionName.toUpperCase());
-    if (startIdx === -1) return '';
-
-    // Find where next section starts
-    let endIdx = text.length;
-    for (const header of sectionHeaders) {
-        if (header === sectionName.toUpperCase()) continue;
-        const idx = upperText.indexOf(header, startIdx + sectionName.length);
-        if (idx !== -1 && idx < endIdx) endIdx = idx;
-    }
-
-    return text.substring(startIdx + sectionName.length, endIdx).trim();
-}
-
-// Split resume into named sections
-function extractResumeSections(text) {
-    return {
-        summary: extractSection(text, 'PROFESSIONAL SUMMARY'),
-        education: extractSection(text, 'EDUCATION'),
-        technicalSkills: extractSection(text, 'TECHNICAL SKILLS'),
-        projects: extractSection(text, 'PROJECTS'),
-        experience: extractSection(text, 'PROFESSIONAL EXPERIENCE'),
-        additionalInfo: extractSection(text, 'ADDITIONAL INFORMATION'),
-    };
-}
-
-// Shared pattern-matching helper — returns [{canonical, category}] for all skills found in text.
-// Uses a per-call `used` Set to prevent substring overlaps.
-function matchSkillsInText(text) {
-    const matches = [];
-    if (!text) return matches;
-    const entries = registry.getAllSkillEntries();
-    const used = new Set();
-    for (const { canonical, alias, category, guardWords } of entries) {
-        const isRegex = alias.includes('\\b') || alias.includes('(?');
-        let pattern;
-        if (alias.toLowerCase().includes('c#')) {
-            pattern = new RegExp(escapeRegex(alias), 'gi');
-        } else {
-            pattern = isRegex
-                ? new RegExp(alias, 'gi')
-                : new RegExp(`\\b${escapeRegex(alias)}\\b`, 'gi');
-        }
-        let m;
-        while ((m = pattern.exec(text)) !== null) {
-            let alreadyUsed = false;
-            for (let i = m.index; i < m.index + m[0].length; i++) {
-                if (used.has(i)) { alreadyUsed = true; break; }
-            }
-            if (alreadyUsed) continue;
-            if (guardWords?.length) {
-                const wStart = Math.max(0, m.index - 150);
-                const wEnd   = Math.min(text.length, m.index + m[0].length + 150);
-                const win    = text.substring(wStart, wEnd).toLowerCase();
-                if (guardWords.some(gw => win.includes(gw.toLowerCase()))) continue;
-            }
-            for (let i = m.index; i < m.index + m[0].length; i++) used.add(i);
-            matches.push({ canonical, category });
-        }
-    }
-    return matches;
-}
-
-// Try to extract a parseable date range from a pipe-delimited title line.
-// Returns months (integer) or null. Checks each segment after the first.
-function extractDateFromTitleLine(titleLine) {
-    const parts = titleLine.split('|');
-    for (const part of parts.slice(1)) {
-        const months = parseDateRange(part.trim());
-        if (months !== null) return months;
-    }
-    return null;
-}
-
-// Returns evidence instances [{canonical, category, wType, durationMonths, sectionName}]
-function extractSkillsFromTechnicalSection(text) {
-    return matchSkillsInText(text).map(({ canonical, category }) => ({
-        canonical, category,
-        wType: classifyEvidenceType('skills', ''),
-        durationMonths: null,
-        sectionName: 'skills',
-    }));
-}
-
-// Returns evidence instances for the EDUCATION section.
-function extractSkillsFromEducation(text) {
-    return matchSkillsInText(text).map(({ canonical, category }) => ({
-        canonical, category,
-        wType: classifyEvidenceType('education', ''),
-        durationMonths: null,
-        sectionName: 'education',
-    }));
-}
-
-// Returns evidence instances for the PROJECTS section.
-function extractSkillsFromProjects(text) {
-    return matchSkillsInText(text).map(({ canonical, category }) => ({
-        canonical, category,
-        wType: classifyEvidenceType('projects', ''),
-        durationMonths: null,
-        sectionName: 'projects',
-    }));
-}
-
-// Returns evidence instances for PROFESSIONAL EXPERIENCE.
-// Skips non-tech job blocks. Extracts wType and durationMonths per block.
-const TECH_ROLE_KEYWORDS = [
-    'engineer', 'developer', 'programmer', 'analyst',
-    'data', 'software', 'machine learning', 'ai', 'ml',
-    'architect', 'devops', 'backend', 'frontend', 'fullstack'
-];
-
-function isTechRole(jobTitle) {
-    const lower = jobTitle.toLowerCase();
-    return TECH_ROLE_KEYWORDS.some(kw => lower.includes(kw));
-}
-
-function extractSkillsFromExperience(text) {
-    const instances = [];
-    if (!text) return instances;
-
-    const jobBlocks = text.split(/\n(?=[A-Z][a-z].*\|)/);
-
-    for (const block of jobBlocks) {
-        const titleLine = block.split('\n')[0];
-        if (!isTechRole(titleLine)) continue;
-
-        const roleTitle = titleLine.split('|')[0].trim();
-        const durationMonths = extractDateFromTitleLine(titleLine);
-        const wType = classifyEvidenceType('experience', roleTitle);
-
-        for (const { canonical, category } of matchSkillsInText(block)) {
-            instances.push({ canonical, category, wType, durationMonths, sectionName: 'experience' });
-        }
-    }
-    return instances;
-}
-
-const SECTION_SOURCE_LABEL = {
-    experience: 'Experience',
-    projects:   'Projects',
-    education:  'Education',
-    skills:     'Technical Skills',
-    summary:    'Summary',
-};
-
-// Main resume parser — collects evidence instances per skill across all sections,
-// then scores each skill with the weighted formula from inference.js.
-export function parseResumeText(text) {
-    if (!text || !text.trim()) return [];
-
-    const sections = extractResumeSections(text);
-
-    const allInstances = [
-        ...extractSkillsFromEducation(sections.education),
-        ...extractSkillsFromTechnicalSection(sections.technicalSkills),
-        ...extractSkillsFromProjects(sections.projects),
-        ...extractSkillsFromExperience(sections.experience),
-    ];
-
-    // Aggregate instances per canonical skill name.
-    // One entry per (canonical, sectionName, wType) group — deduplicates multiple
-    // mentions of the same skill within the same section/job block.
-    const skillMap = new Map(); // canonical → { category, instances: [] }
-
-    for (const { canonical, category, wType, durationMonths, sectionName } of allInstances) {
-        if (!skillMap.has(canonical)) {
-            skillMap.set(canonical, { category, instances: [] });
-        }
-        const entry = skillMap.get(canonical);
-        // Deduplicate: one evidence instance per (sectionName, wType, durationMonths) tuple.
-        const duplicate = entry.instances.some(
-            i => i.sectionName === sectionName && i.wType === wType && i.durationMonths === durationMonths
-        );
-        if (!duplicate) {
-            entry.instances.push({ wType, durationMonths, sectionName });
-        }
-    }
-
-    const technicalSignals = [...skillMap.entries()].map(([name, { category, instances }]) => {
-        const { score, level: levelStr, confidence, primarySignal, suggestion } = scoreSkillEvidence(instances);
-        const level = parseInt(levelStr.slice(1), 10); // 'L2' → 2
-        const source = SECTION_SOURCE_LABEL[primarySignal] ?? primarySignal;
-        return { name, category, level, score, confidence, source, suggestion };
-    }).sort((a, b) => {
-        if (b.level !== a.level) return b.level - a.level;
-        if (b.score !== a.score) return b.score - a.score;
-        return a.name.localeCompare(b.name);
-    });
-
-    return {
-        technicalSignals,
-        behavioralSignals: extractBehavioralSignals(text),
-    };
 }
 
 

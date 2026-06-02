@@ -1,6 +1,6 @@
-import skillsData from '../../data/skills.json';
-import rolesData from '../../data/roles.json';
-import softSkillsData from '../../data/soft-skills.json';
+import skillsData from '../../data/skills.json' with { type: 'json' };
+import rolesData from '../../data/roles.json' with { type: 'json' };
+import softSkillsData from '../../data/soft-skills.json' with { type: 'json' };
 
 const skillsById = new Map(skillsData.skills.map(s => [s.id, s]));
 const rolesById  = new Map(rolesData.roles.map(r => [r.id, r]));
