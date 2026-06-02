@@ -48,7 +48,7 @@ export default function TermsPage() {
           </p>
           <p className="text-sm text-slate-600 leading-relaxed">
             We do not offer refunds for partial billing periods. If you believe you were charged
-            in error, contact <a href="mailto:nick@nat20.app" className="text-indigo-600 hover:underline">nick@nat20.app</a> within
+            in error, contact <a href="mailto:nick@nat20app.com" className="text-indigo-600 hover:underline">nick@nat20app.com</a> within
             14 days and we will review it.
           </p>
         </section>
@@ -122,7 +122,7 @@ export default function TermsPage() {
           <h2 className="text-lg font-semibold text-slate-800">Contact</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
             Questions about these terms?
-            Email <a href="mailto:nick@nat20.app" className="text-indigo-600 hover:underline">nick@nat20.app</a>.
+            Email <a href="mailto:nick@nat20app.com" className="text-indigo-600 hover:underline">nick@nat20app.com</a>.
           </p>
         </section>
       </main>
