@@ -233,6 +233,8 @@ export default function LandingPage() {
           <div className="flex items-center gap-6 text-sm text-slate-400">
             <Link to="/pricing" className="hover:text-slate-600 transition">Pricing</Link>
             <Link to="/app" className="hover:text-slate-600 transition">App</Link>
+            <Link to="/privacy" className="hover:text-slate-600 transition">Privacy</Link>
+            <Link to="/terms" className="hover:text-slate-600 transition">Terms</Link>
             <a href="mailto:nick@nat20.app"
                className="hover:text-slate-600 transition">Contact</a>
           </div>
