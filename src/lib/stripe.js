@@ -1,12 +1,22 @@
+import { supabase } from './supabase.js'
+
 export async function redirectToCheckout(userId, userEmail) {
   try {
+    const { data: { session } } = await supabase.auth.getSession()
+    const token = session?.access_token
+
+    if (!token) {
+      console.error('No active session — user must be signed in')
+      return
+    }
+
     const response = await fetch(
       `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-checkout`,
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           userId,
@@ -18,8 +28,8 @@ export async function redirectToCheckout(userId, userEmail) {
 
     const { url, error } = await response.json()
 
-    if (error) {
-      console.error('Checkout session error:', error)
+    if (error || !url) {
+      console.error('Checkout session error:', error ?? 'no URL returned')
       return
     }
 
