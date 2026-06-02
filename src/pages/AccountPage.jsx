@@ -72,7 +72,7 @@ export default function AccountPage() {
         <div className="flex justify-center pt-2">
           <SignInButton />
         </div>
-        <Link to="/" className="block text-xs text-slate-400 hover:underline">
+        <Link to="/app" className="block text-xs text-slate-400 hover:underline">
           ← Back to parser
         </Link>
       </div>
@@ -92,7 +92,7 @@ export default function AccountPage() {
     <div className="max-w-2xl mx-auto py-8 space-y-6 px-4">
 
       {/* Back link */}
-      <Link to="/" className="text-xs text-slate-400 hover:underline">
+      <Link to="/app" className="text-xs text-slate-400 hover:underline">
         ← Back to parser
       </Link>
 
@@ -174,7 +174,7 @@ export default function AccountPage() {
                 <div className="text-2xl mb-2">📜</div>
                 <div className="font-medium">No skills on record yet</div>
                 <div className="text-sm mt-1">
-                  <Link to="/" className="text-indigo-600 hover:underline">
+                  <Link to="/app" className="text-indigo-600 hover:underline">
                     Parse your resume
                   </Link>
                   {' '}to build your character sheet

@@ -25,8 +25,16 @@ export default function PricingPage() {
   }
 
   return (
+    <div className="min-h-screen bg-white">
+      <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <Link to="/" className="font-bold text-slate-800 text-lg">⚔ Nat20</Link>
+        <Link to="/app" className="text-sm px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition">
+          Try free
+        </Link>
+      </nav>
+
     <div className="max-w-md mx-auto py-16 px-4 space-y-8">
-      <Link to="/" className="text-xs text-slate-400 hover:underline">
+      <Link to="/app" className="text-xs text-slate-400 hover:underline">
         ← Back to parser
       </Link>
 
@@ -85,6 +93,7 @@ export default function PricingPage() {
       <div className="text-center text-sm text-slate-400">
         Free tier: unlimited resume parses + 15 JD parses/day — always free
       </div>
+    </div>
     </div>
   )
 }
