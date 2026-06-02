@@ -292,6 +292,21 @@
     { "id": "npm", "canonical": "npm", "category": "Build Tool", "aliases": ["npm", "node package manager"], "patterns": ["\\bnpm\\b", "\\bnode package manager\\b"], "guardWords": [] },
     { "id": "pip", "canonical": "pip", "category": "Build Tool", "aliases": ["pip", "pypi"], "patterns": ["\\bpip\\b(?=\\s+install|\\s+package|\\s+requirements|\\s+freeze)", "\\bpypi\\b"], "guardWords": [] },
     { "id": "informatica", "canonical": "Informatica", "category": "Big Data", "aliases": ["informatica"], "patterns": ["\\binformatica\\b"], "guardWords": [] },
-    { "id": "talend", "canonical": "Talend", "category": "Big Data", "aliases": ["talend"], "patterns": ["\\btalend\\b"], "guardWords": [] }
+    { "id": "talend", "canonical": "Talend", "category": "Big Data", "aliases": ["talend"], "patterns": ["\\btalend\\b"], "guardWords": [] },
+
+    { "id": "erp", "canonical": "ERP", "category": "Enterprise / ERP", "aliases": ["erp", "enterprise resource planning"], "patterns": ["\\bERP\\b", "\\benterprise resource planning\\b"], "guardWords": [] },
+    { "id": "oracle-erp", "canonical": "Oracle ERP", "category": "Enterprise / ERP", "aliases": ["oracle erp", "oracle e-business suite", "oracle ebs", "oracle fusion"], "patterns": ["\\boracle erp\\b", "\\boracle e-business suite\\b", "\\boracle ebs\\b", "\\boracle fusion\\b"], "guardWords": [] },
+    { "id": "obiee", "canonical": "OBIEE", "category": "Enterprise / ERP", "aliases": ["obiee", "oracle bi", "oracle business intelligence"], "patterns": ["\\bOBIEE\\b", "\\boracle bi\\b", "\\boracle business intelligence\\b"], "guardWords": [] },
+
+    { "id": "waterfall", "canonical": "Waterfall", "category": "Methodology", "aliases": ["waterfall", "waterfall methodology", "waterfall model"], "patterns": ["\\bwaterfall\\b"], "guardWords": [] },
+
+    { "id": "project-management", "canonical": "Project Management", "category": "Project Management", "aliases": ["project management"], "patterns": ["\\bproject management\\b"], "guardWords": [] },
+    { "id": "it-project-management", "canonical": "IT Project Management", "category": "Project Management", "aliases": ["it project management"], "patterns": ["\\bIT project management\\b", "\\bit project management\\b"], "guardWords": [] },
+    { "id": "pmp", "canonical": "PMP", "category": "Project Management", "aliases": ["pmp", "project management professional"], "patterns": ["\\bPMP\\b", "\\bproject management professional\\b"], "guardWords": [] },
+    { "id": "stakeholder-management", "canonical": "Stakeholder Management", "category": "Project Management", "aliases": ["stakeholder management", "stakeholder engagement"], "patterns": ["\\bstakeholder management\\b", "\\bstakeholder engagement\\b"], "guardWords": [] },
+    { "id": "budget-management", "canonical": "Budget Management", "category": "Project Management", "aliases": ["budget management", "budget planning", "budget oversight"], "patterns": ["\\bbudget management\\b", "\\bbudget planning\\b", "\\bbudget oversight\\b"], "guardWords": [] },
+    { "id": "risk-management", "canonical": "Risk Management", "category": "Project Management", "aliases": ["risk management", "risk assessment", "risk mitigation"], "patterns": ["\\brisk management\\b", "\\brisk assessment\\b", "\\brisk mitigation\\b"], "guardWords": [] },
+    { "id": "resource-planning", "canonical": "Resource Planning", "category": "Project Management", "aliases": ["resource planning", "resource management", "resource allocation"], "patterns": ["\\bresource planning\\b", "\\bresource management\\b", "\\bresource allocation\\b"], "guardWords": [] },
+    { "id": "microsoft-project", "canonical": "Microsoft Project", "category": "Project Management", "aliases": ["microsoft project", "ms project", "msproject"], "patterns": ["\\bmicrosoft project\\b", "\\bms project\\b", "\\bMSProject\\b"], "guardWords": [] }
   ]
 }
