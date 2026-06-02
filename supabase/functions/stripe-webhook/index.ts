@@ -29,16 +29,14 @@ serve(async (req) => {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object
     const userId = session.client_reference_id
-    const customerId = session.customer
-
-    console.log('Processing checkout.session.completed')
-    console.log('userId:', userId)
-    console.log('customerId:', customerId)
-    console.log('SUPABASE_URL present:', !!Deno.env.get('SUPABASE_URL'))
-    console.log('SERVICE_ROLE_KEY present:', !!Deno.env.get('SERVICE_ROLE_KEY'))
+    // customer can be a string ID or an expanded object depending on Stripe SDK version
+    const rawCustomer = session.customer
+    const customerId = typeof rawCustomer === 'string'
+      ? rawCustomer
+      : (rawCustomer as { id: string } | null)?.id ?? null
 
     if (userId) {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('users')
         .update({
           is_paid: true,
@@ -47,15 +45,12 @@ serve(async (req) => {
         })
         .eq('id', userId)
 
-      console.log('Update result data:', JSON.stringify(data))
-      console.log('Update result error:', JSON.stringify(error))
-
       if (error) {
         console.error('Failed to update user:', error.message)
         return new Response('Database Error', { status: 500 })
       }
     } else {
-      console.log('ERROR: No userId found in session')
+      console.error('checkout.session.completed: no client_reference_id in session')
     }
   }
 
