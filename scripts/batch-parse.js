@@ -39,10 +39,10 @@ for (const file of files) {
     continue
   }
 
-  const skills = result.skills ?? result.extractedSkills ?? []
-  const softSkills = result.softSkills ?? result.behavioralSignals ?? []
+  const skills = result.technicalSignals ?? []
+  const softSkills = result.behavioralSignals ?? []
   const misclassified = skills.filter(s =>
-    s.evidenceType === 'project' || s.evidenceType === 'skills-only'
+    s.source === 'Projects' || s.source === 'Technical Skills'
   )
 
   console.log(`══════════════════════════════════`)
@@ -63,7 +63,7 @@ for (const file of files) {
     }
   }
 
-  console.log(`Behavioral: ${softSkills.length > 0 ? softSkills.join(', ') : 'none'}`)
+  console.log(`Behavioral: ${softSkills.length > 0 ? softSkills.map(s => s.name ?? s).join(', ') : 'none'}`)
   if (misclassified.length > 0) {
     console.log(`⚠️  ${misclassified.length} skill(s) possibly misclassified`)
     totalMisclassified++

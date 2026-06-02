@@ -7,7 +7,8 @@
       "Bash(node --input-type=module)",
       "Bash(Select-Object FullName)",
       "Bash(npm test *)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(dir C:\\\\Users\\\\nikec\\\\Desktop\\\\nat20-core\\\\offline_tests\\\\resume-samples *)"
     ]
   }
 }

@@ -1,0 +1,216 @@
+Found 24 resume files
+
+══════════════════════════════════
+FILE: Data Analyst.txt
+Skills detected: 1
+  Statistics — L5 — Experience (unknown duration)
+Behavioral: Attention to Detail, Communication
+
+══════════════════════════════════
+FILE: Data analyst2.txt
+Skills detected: 3
+  Statistics — L4 — Experience (unknown duration)
+  Jenkins — L3 — Experience (unknown duration)
+  Data Visualization — L1 — Technical Skills (unknown duration)
+Behavioral: Communication
+⚠️  1 skill(s) possibly misclassified
+
+══════════════════════════════════
+FILE: dataentryclerk2.txt
+Skills detected: 0
+  ⚠️  NO SKILLS DETECTED
+Behavioral: Accuracy
+
+══════════════════════════════════
+FILE: datatentryclerk1.txt
+Skills detected: 1
+  Monitoring — L1 — Technical Skills (unknown duration)
+Behavioral: Accuracy, Adaptability, Attention to Detail, Organization
+⚠️  1 skill(s) possibly misclassified
+
+══════════════════════════════════
+FILE: desktopsupport1.txt
+Skills detected: 0
+  ⚠️  NO SKILLS DETECTED
+Behavioral: Communication, Troubleshooting
+
+══════════════════════════════════
+FILE: embeddedsoftwareengineer.txt
+Skills detected: 2
+  Python — L3 — Experience (unknown duration)
+  C++ — L1 — Technical Skills (unknown duration)
+Behavioral: Accuracy, Communication, Teamwork
+⚠️  1 skill(s) possibly misclassified
+
+══════════════════════════════════
+FILE: frontenddeveloper.txt
+Skills detected: 8
+  React — L5 — Experience (unknown duration)
+  JavaScript — L5 — Experience (unknown duration)
+  C# — L1 — Technical Skills (unknown duration)
+  CSS — L1 — Technical Skills (unknown duration)
+  HTML — L1 — Technical Skills (unknown duration)
+  Python — L1 — Technical Skills (unknown duration)
+  Ruby — L1 — Technical Skills (unknown duration)
+  SQL — L1 — Technical Skills (unknown duration)
+Behavioral: Innovation
+⚠️  6 skill(s) possibly misclassified
+
+══════════════════════════════════
+FILE: javadev.txt
+Skills detected: 3
+  Java — L5 — Experience (unknown duration)
+  Testing — L4 — Experience (unknown duration)
+  Object-Oriented Programming — L1 — Technical Skills (unknown duration)
+Behavioral: Attention to Detail, Collaboration, Communication, Problem-Solving, Troubleshooting
+⚠️  1 skill(s) possibly misclassified
+
+══════════════════════════════════
+FILE: seniorengineer.txt
+Skills detected: 1
+  Python — L1 — Technical Skills (unknown duration)
+Behavioral: Root Cause Analysis, Troubleshooting
+⚠️  1 skill(s) possibly misclassified
+
+══════════════════════════════════
+FILE: softarchitect1.txt
+Skills detected: 8
+  Agile / Scrum — L2 — Experience (unknown duration)
+  CI/CD — L2 — Experience (unknown duration)
+  Code Review — L2 — Experience (unknown duration)
+  Git — L2 — Experience (unknown duration)
+  SDLC — L2 — Experience (unknown duration)
+  Trello — L2 — Experience (unknown duration)
+  C# — L1 — Technical Skills (unknown duration)
+  JavaScript — L1 — Technical Skills (unknown duration)
+Behavioral: none
+⚠️  2 skill(s) possibly misclassified
+
+══════════════════════════════════
+FILE: softarchitect2.txt
+Skills detected: 2
+  Jenkins — L4 — Experience (unknown duration)
+  Project Management — L1 — Technical Skills (unknown duration)
+Behavioral: Active Listening, Attention to Detail, Collaboration, Communication, Critical Thinking, Mentoring, Troubleshooting
+⚠️  1 skill(s) possibly misclassified
+
+══════════════════════════════════
+FILE: softdev2.txt
+Skills detected: 8
+  C++ — L4 — Experience (unknown duration)
+  JavaScript — L4 — Experience (unknown duration)
+  Testing — L4 — Experience (unknown duration)
+  Financial Services — L4 — Experience (unknown duration)
+  C# — L1 — Technical Skills (unknown duration)
+  Encryption — L1 — Technical Skills (unknown duration)
+  Microsoft Excel — L1 — Technical Skills (unknown duration)
+  Python — L1 — Technical Skills (unknown duration)
+Behavioral: Collaboration, Leadership, Mentoring, Teamwork, Troubleshooting
+⚠️  4 skill(s) possibly misclassified
+
+══════════════════════════════════
+FILE: ssoftdev1.txt
+Skills detected: 7
+  C++ — L2 — Experience (unknown duration)
+  HTML — L2 — Experience (unknown duration)
+  Linux — L2 — Experience (unknown duration)
+  Monitoring — L2 — Experience (unknown duration)
+  PHP — L2 — Experience (unknown duration)
+  .NET — L1 — Technical Skills (unknown duration)
+  C# — L1 — Technical Skills (unknown duration)
+Behavioral: none
+⚠️  2 skill(s) possibly misclassified
+
+══════════════════════════════════
+FILE: supportspecialist.txt
+Skills detected: 1
+  Cybersecurity — L1 — Education (unknown duration)
+Behavioral: Communication
+
+══════════════════════════════════
+FILE: swe.txt
+Skills detected: 3
+  C++ — L4 — Experience (unknown duration)
+  HTML — L4 — Experience (unknown duration)
+  Python — L4 — Experience (unknown duration)
+Behavioral: Attention to Detail, Collaboration, Communication, Problem-Solving
+
+══════════════════════════════════
+FILE: swe2.txt
+Skills detected: 2
+  Algorithms — L5 — Experience (unknown duration)
+  Data Structures — L1 — Technical Skills (unknown duration)
+Behavioral: Critical Thinking, Leadership, Technical Writing, Troubleshooting
+⚠️  1 skill(s) possibly misclassified
+
+══════════════════════════════════
+FILE: sysadmin1.txt
+Skills detected: 3
+  Jenkins — L2 — Experience (unknown duration)
+  HTML — L1 — Technical Skills (unknown duration)
+  JavaScript — L1 — Technical Skills (unknown duration)
+Behavioral: none
+⚠️  2 skill(s) possibly misclassified
+
+══════════════════════════════════
+FILE: sysadmin2.txt
+Skills detected: 2
+  Linux — L3 — Experience (unknown duration)
+  Monitoring — L3 — Experience (unknown duration)
+Behavioral: Reliability, Troubleshooting
+
+══════════════════════════════════
+FILE: sysegineer2.txt
+Skills detected: 3
+  Encryption — L4 — Experience (unknown duration)
+  Azure — L1 — Technical Skills (unknown duration)
+  Project Management — L1 — Technical Skills (unknown duration)
+Behavioral: Communication, Reliability, Technical Writing, Troubleshooting
+⚠️  2 skill(s) possibly misclassified
+
+══════════════════════════════════
+FILE: sysengineer1.txt
+Skills detected: 2
+  Testing — L4 — Experience (unknown duration)
+  C — L3 — Experience (unknown duration)
+Behavioral: Collaboration, Communication, Cross-Functional Collaboration, Problem-Solving, Technical Writing
+
+══════════════════════════════════
+FILE: systemanalyst1.txt
+Skills detected: 0
+  ⚠️  NO SKILLS DETECTED
+Behavioral: Attention to Detail, Collaboration, Troubleshooting
+
+══════════════════════════════════
+FILE: systemanalyst2.txt
+Skills detected: 4
+  Jenkins — L2 — Experience (unknown duration)
+  Statistics — L1 — Education (unknown duration)
+  HTML — L1 — Technical Skills (unknown duration)
+  SharePoint — L1 — Technical Skills (unknown duration)
+Behavioral: Communication
+⚠️  2 skill(s) possibly misclassified
+
+══════════════════════════════════
+FILE: technicalprogrammanager.txt
+Skills detected: 3
+  Jenkins — L2 — Experience (unknown duration)
+  Microsoft Office — L1 — Technical Skills (unknown duration)
+  Microsoft Project — L1 — Technical Skills (unknown duration)
+Behavioral: Collaboration
+⚠️  2 skill(s) possibly misclassified
+
+══════════════════════════════════
+FILE: technicalwriter.txt
+Skills detected: 0
+  ⚠️  NO SKILLS DETECTED
+Behavioral: Attention to Detail, Collaboration, Communication, Time Management
+
+══════════════════════════════════
+SUMMARY
+Total resumes: 24
+Total skills detected: 67
+Avg skills per resume: 2.8
+Resumes with 0 skills: 4
+Resumes with misclassified evidence: 15
+Files with no skills: dataentryclerk2.txt, desktopsupport1.txt, systemanalyst1.txt, technicalwriter.txt

@@ -64,42 +64,60 @@ export function extractBehavioralSignals(text) {
 // Section extraction
 // ---------------------------------------------------------------------------
 
-const RESUME_SECTION_HEADERS = [
-    'PROFESSIONAL SUMMARY',
-    'EDUCATION',
-    'TECHNICAL SKILLS',
-    'PROJECTS',
-    'PROFESSIONAL EXPERIENCE',
-    'ADDITIONAL INFORMATION',
-    'CERTIFICATIONS',
-    'SKILLS',
-    'EXPERIENCE',
-    'WORK EXPERIENCE',
-]
+// All known aliases — used both to locate a section and to find where it ends.
+const SECTION_ALIASES = {
+    summary:        ['PROFESSIONAL SUMMARY', 'SUMMARY', 'PROFILE', 'OBJECTIVE', 'ABOUT ME', 'OVERVIEW'],
+    experience:     ['PROFESSIONAL EXPERIENCE', 'WORK EXPERIENCE', 'EXPERIENCE', 'EMPLOYMENT HISTORY', 'EMPLOYMENT', 'CAREER HISTORY'],
+    technicalSkills:['TECHNICAL SKILLS', 'SKILLS', 'CORE SKILLS', 'KEY SKILLS', 'TECHNOLOGIES', 'TOOLS & TECHNOLOGIES', 'COMPETENCIES', 'TECHNICAL EXPERTISE'],
+    projects:       ['PROJECTS', 'PERSONAL PROJECTS', 'SIDE PROJECTS', 'PORTFOLIO', 'ACADEMIC PROJECTS'],
+    education:      ['EDUCATION', 'ACADEMIC BACKGROUND', 'EDUCATIONAL BACKGROUND', 'DEGREES'],
+    certifications: ['CERTIFICATIONS', 'CERTIFICATES', 'LICENSES', 'CREDENTIALS', 'ADDITIONAL INFORMATION'],
+}
 
+// Flat list of every known header — used to detect section boundaries.
+const ALL_KNOWN_HEADERS = Object.values(SECTION_ALIASES).flat()
+
+// extractSection requires the header to appear at the start of a line (ignoring
+// leading whitespace) so "experience" mid-sentence doesn't match "Experience" header.
 function extractSection(text, sectionName) {
-    const upperText = text.toUpperCase()
-    const startIdx = upperText.indexOf(sectionName.toUpperCase())
-    if (startIdx === -1) return ''
+    const re = new RegExp(`(?:^|\\n)[\\t ]*${escapeRegex(sectionName)}[\\t ]*(?:\\r?\\n|$)`, 'i')
+    const match = re.exec(text)
+    if (!match) return ''
 
+    const startIdx = match.index + match[0].length
+
+    const upperText = text.toUpperCase()
     let endIdx = text.length
-    for (const header of RESUME_SECTION_HEADERS) {
-        if (header === sectionName.toUpperCase()) continue
-        const idx = upperText.indexOf(header, startIdx + sectionName.length)
-        if (idx !== -1 && idx < endIdx) endIdx = idx
+    for (const header of ALL_KNOWN_HEADERS) {
+        if (header.toUpperCase() === sectionName.toUpperCase()) continue
+        const headerRe = new RegExp(`(?:^|\\n)[\\t ]*${escapeRegex(header)}[\\t ]*(?:\\r?\\n|$)`, 'i')
+        const m = headerRe.exec(text.substring(startIdx))
+        if (m) {
+            const idx = startIdx + m.index
+            if (idx < endIdx) endIdx = idx
+        }
     }
 
-    return text.substring(startIdx + sectionName.length, endIdx).trim()
+    return text.substring(startIdx, endIdx).trim()
+}
+
+// Try each alias in order; return the first non-empty result.
+function extractSectionWithAliases(text, aliases) {
+    for (const alias of aliases) {
+        const result = extractSection(text, alias)
+        if (result && result.trim().length > 0) return result
+    }
+    return ''
 }
 
 function extractResumeSections(text) {
     return {
-        summary:        extractSection(text, 'PROFESSIONAL SUMMARY'),
-        education:      extractSection(text, 'EDUCATION'),
-        technicalSkills: extractSection(text, 'TECHNICAL SKILLS'),
-        projects:       extractSection(text, 'PROJECTS'),
-        experience:     extractSection(text, 'PROFESSIONAL EXPERIENCE'),
-        additionalInfo: extractSection(text, 'ADDITIONAL INFORMATION'),
+        summary:         extractSectionWithAliases(text, SECTION_ALIASES.summary),
+        education:       extractSectionWithAliases(text, SECTION_ALIASES.education),
+        technicalSkills: extractSectionWithAliases(text, SECTION_ALIASES.technicalSkills),
+        projects:        extractSectionWithAliases(text, SECTION_ALIASES.projects),
+        experience:      extractSectionWithAliases(text, SECTION_ALIASES.experience),
+        additionalInfo:  extractSectionWithAliases(text, SECTION_ALIASES.certifications),
     }
 }
 
@@ -182,29 +200,52 @@ function extractSkillsFromProjects(text) {
     }))
 }
 
-const TECH_ROLE_KEYWORDS = [
-    'engineer', 'developer', 'programmer', 'analyst',
-    'data', 'software', 'machine learning', 'ai', 'ml',
-    'architect', 'devops', 'backend', 'frontend', 'fullstack',
-]
+const MONTH_PATTERN = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|January|February|March|April|June|July|August|September|October|November|December)\.?\s/i
+const YEAR_PATTERN  = /^\d{4}/
 
-function isTechRole(jobTitle) {
-    const lower = jobTitle.toLowerCase()
-    return TECH_ROLE_KEYWORDS.some(kw => lower.includes(kw))
+function splitExperienceBlocks(text) {
+    const lines = text.split('\n')
+    const blockStarts = []
+
+    // Pattern B: non-date line immediately followed by a date line
+    for (let i = 0; i < lines.length - 1; i++) {
+        const line = lines[i].trim()
+        const next = lines[i + 1].trim()
+        if (!line) continue
+        const nextIsDate = MONTH_PATTERN.test(next) || YEAR_PATTERN.test(next)
+        const lineIsDate = MONTH_PATTERN.test(line) || YEAR_PATTERN.test(line)
+        if (nextIsDate && !lineIsDate && line.length > 5) {
+            blockStarts.push(i)
+        }
+    }
+
+    // Pattern A: pipe-delimited title lines (existing behaviour)
+    for (let i = 0; i < lines.length; i++) {
+        if (lines[i].includes('|') && !blockStarts.includes(i)) {
+            blockStarts.push(i)
+        }
+    }
+
+    blockStarts.sort((a, b) => a - b)
+
+    if (blockStarts.length === 0) return [text]
+
+    return blockStarts.map((start, idx) => {
+        const end = blockStarts[idx + 1] ?? lines.length
+        return lines.slice(start, end).join('\n')
+    })
 }
 
 function extractSkillsFromExperience(text) {
     const instances = []
     if (!text) return instances
 
-    const jobBlocks = text.split(/\n(?=[A-Z][a-z].*\|)/)
+    const jobBlocks = splitExperienceBlocks(text)
 
     for (const block of jobBlocks) {
         const titleLine = block.split('\n')[0]
-        if (!isTechRole(titleLine)) continue
-
-        const roleTitle = titleLine.split('|')[0].trim()
-        const durationMonths = extractDateFromTitleLine(titleLine)
+        const roleTitle = titleLine.split('|')[0].split(',')[0].trim()
+        const durationMonths = parseDateRange(block.split('\n').slice(0, 3).find(l => MONTH_PATTERN.test(l.trim()) || YEAR_PATTERN.test(l.trim()))?.trim() ?? '') ?? extractDateFromTitleLine(titleLine)
         const wType = classifyEvidenceType('experience', roleTitle)
 
         for (const { canonical, category } of matchSkillsInText(block)) {
