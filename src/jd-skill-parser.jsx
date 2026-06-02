@@ -10,7 +10,8 @@ import { saveResumeProfile, loadResumeProfile, getUserPlanStatus } from './lib/s
 import { checkAndIncrementParseCount, FREE_DAILY_LIMIT, isPaid } from './lib/limits.js';
 import SignInButton from './components/SignInButton.jsx';
 import UserMenu from './components/UserMenu.jsx';
-import UpgradePrompt from './components/UpgradePrompt.jsx';
+import UpgradePrompt from './components/UpgradePrompt.jsx'
+import AdSlot from './components/AdSlot.jsx';
 
 // ============================================================
 // CLASSIFICATION SYSTEM
@@ -1569,15 +1570,18 @@ export default function App() {
                                 </div>
                             </div>
                         ) : (
-                            <GapAnalysisView
-                                gap={runGapAnalysis(results.technicalSignals, resumeResults.technicalSignals)}
-                                behavioralGap={runBehavioralGap(results.behavioralSignals, resumeResults.behavioralSignals)}
-                                jobDuties={results.jobDuties}
-                                companyName={companyName}
-                                jobRole={jobRole}
-                                jobMeta={jobMeta}
-                                decisionResult={getDecision(results, resumeResults)}
-                            />
+                            <>
+                                <GapAnalysisView
+                                    gap={runGapAnalysis(results.technicalSignals, resumeResults.technicalSignals)}
+                                    behavioralGap={runBehavioralGap(results.behavioralSignals, resumeResults.behavioralSignals)}
+                                    jobDuties={results.jobDuties}
+                                    companyName={companyName}
+                                    jobRole={jobRole}
+                                    jobMeta={jobMeta}
+                                    decisionResult={getDecision(results, resumeResults)}
+                                />
+                                <AdSlot isPaid={isPaidStatus} />
+                            </>
                         )}
                     </div>
                 )}
