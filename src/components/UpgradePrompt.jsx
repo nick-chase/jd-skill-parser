@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { analytics } from '../lib/analytics.js'
 
 const MESSAGES = {
   parse_limit: {
@@ -16,17 +17,22 @@ const MESSAGES = {
 }
 
 export default function UpgradePrompt({ reason }) {
+  const navigate = useNavigate()
   const { title, body } = MESSAGES[reason] ?? MESSAGES.parse_limit
 
   return (
     <div className="border border-indigo-200 rounded-xl p-6 bg-indigo-50 text-center space-y-3">
       <div className="text-lg font-semibold text-indigo-900">{title}</div>
       <div className="text-sm text-indigo-700">{body}</div>
-      <Link to="/pricing">
-        <button className="mt-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition">
-          Upgrade to Pro — $9.99/mo
-        </button>
-      </Link>
+      <button
+        onClick={() => {
+          analytics.upgradeClick(reason)
+          navigate('/pricing')
+        }}
+        className="mt-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg transition"
+      >
+        Upgrade to Pro — $9.99/mo
+      </button>
       <div className="text-xs text-indigo-500">Cancel anytime</div>
     </div>
   )

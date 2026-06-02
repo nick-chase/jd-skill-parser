@@ -5,7 +5,8 @@ import { parseDateRange, classifyEvidenceType, scoreSkillEvidence } from '@core/
 import { getDecision } from '@core/parser/decision.js';
 import DecisionCard from './components/DecisionCard.jsx';
 import SkillRow from './components/SkillRow.jsx';
-import { getOrCreateUser, onAuthStateChange } from './lib/auth.js';
+import { getOrCreateUser, onAuthStateChange } from './lib/auth.js'
+import { analytics } from './lib/analytics.js';
 import { saveResumeProfile, loadResumeProfile, getUserPlanStatus } from './lib/supabase.js';
 import { checkAndIncrementParseCount, FREE_DAILY_LIMIT, isPaid } from './lib/limits.js';
 import SignInButton from './components/SignInButton.jsx';
@@ -1239,7 +1240,7 @@ export default function App() {
     const [showPdfLimit, setShowPdfLimit] = useState(false);
     const [resumeInputError, setResumeInputError] = useState(false);
     const [activeTab, setActiveTab] = useState('jd');
-    const [input, setInput] = useState(SAMPLE_JD);
+    const [input, setInput] = useState('');
     const [companyName, setCompanyName] = useState('');
     const [jobRole, setJobRole] = useState('');
     const [results, setResults] = useState(null);
@@ -1296,6 +1297,7 @@ export default function App() {
         setJobMeta(meta);
         const jdResults = parseJobDescription(input);
         setResults(jdResults);
+        analytics.parseComplete('jd');
         if (resumeResults?.technicalSignals?.length > 0) {
             setActiveTab('compare');
         }
@@ -1309,6 +1311,7 @@ export default function App() {
         setResumeInputError(false);
         const parsed = parseResumeInput(resumeInput, 'text');
         setResumeResults(parsed);
+        analytics.parseComplete('resume');
         // Auto-switch to Gap Analysis if JD already parsed
         if (results?.technicalSignals?.length > 0) {
             setActiveTab('compare');

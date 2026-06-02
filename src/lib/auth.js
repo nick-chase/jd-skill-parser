@@ -1,4 +1,5 @@
 import { supabase } from './supabase.js'
+import { analytics } from './analytics.js'
 
 export async function signInWithGoogle() {
   const { error } = await supabase.auth.signInWithOAuth({
@@ -20,12 +21,21 @@ export async function getOrCreateUser(session) {
 
   const { id, email } = session.user
 
+  // Detect new users: check existence before upsert so we fire Signup only once.
+  const { data: existing } = await supabase
+    .from('users')
+    .select('id')
+    .eq('id', id)
+    .maybeSingle()
+
   const { error } = await supabase
     .from('users')
     .upsert({ id, email, updated_at: new Date().toISOString() },
              { onConflict: 'id' })
 
   if (error) console.error('User upsert error:', error.message)
+  if (!existing) analytics.signup()
+
   return { id, email }
 }
 
