@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import * as registry from '@core/registry.js';
 import { extractTextFromPdf } from './lib/pdfExtract.js';
 import { parseResume, extractBehavioralSignals } from './core/parser/parseResume.js';
@@ -13,6 +14,7 @@ import SignInButton from './components/SignInButton.jsx';
 import UserMenu from './components/UserMenu.jsx';
 import UpgradePrompt from './components/UpgradePrompt.jsx'
 import AdSlot from './components/AdSlot.jsx';
+import AppFooter from './components/AppFooter.jsx';
 
 // ============================================================
 // CLASSIFICATION SYSTEM
@@ -754,10 +756,18 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
 function ResumeResultsView({ results }) {
     const SOURCE_COLORS = {
         'Technical Skills': '#0369a1',
-        'Education': '#7c3aed',
-        'Projects': '#059669',
-        'Experience': '#d97706',
+        'Education':        '#7c3aed',
+        'Projects':         '#059669',
+        'Experience':       '#d97706',
+        'Certifications':   '#0891b2',
     };
+
+    const skillResults = results.filter(s => s.level !== 'certified');
+    const certResults  = results.filter(s => s.level === 'certified');
+
+    const avgLevel = skillResults.length > 0
+        ? (skillResults.reduce((s, r) => s + r.level, 0) / skillResults.length).toFixed(1)
+        : '—';
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -766,45 +776,63 @@ function ResumeResultsView({ results }) {
                 <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#0f172a', marginBottom: '12px' }}>Your Profile</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div>
-                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Total Skills</div>
-                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#0f172a' }}>{results.length}</div>
+                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Skills</div>
+                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#0f172a' }}>{skillResults.length}</div>
                     </div>
                     <div>
-                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>L2 Novice</div>
-                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#7c3aed' }}>{results.filter(s => s.level === 2).length}</div>
+                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Certifications</div>
+                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#0891b2' }}>{certResults.length}</div>
                     </div>
                     <div>
                         <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>L1 Awareness</div>
-                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#64748b' }}>{results.filter(s => s.level === 1).length}</div>
+                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#64748b' }}>{skillResults.filter(s => s.level === 1).length}</div>
                     </div>
                     <div>
                         <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Avg Level</div>
-                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#0f172a' }}>
-                            {(results.reduce((s, r) => s + r.level, 0) / results.length).toFixed(1)}
-                        </div>
+                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#0f172a' }}>{avgLevel}</div>
                     </div>
                 </div>
             </div>
 
-            {/* Skills Table */}
-            <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '4px', overflowX: 'auto' }}>
-                <div style={{ padding: '10px 8px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: '150px 150px 100px 120px', gap: '8px' }}>
-                    <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Skill</div>
-                    <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Category</div>
-                    <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Level</div>
-                    <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Source</div>
+            {/* Skills Table — L1–L5 skills only */}
+            {skillResults.length > 0 && (
+                <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '4px', overflowX: 'auto' }}>
+                    <div style={{ padding: '10px 8px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: '150px 150px 100px 120px', gap: '8px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Skill</div>
+                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Category</div>
+                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Level</div>
+                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Source</div>
+                    </div>
+                    <div>
+                        {skillResults.map((skill, idx) => (
+                            <div key={skill.name} style={{ padding: '8px', borderBottom: idx < skillResults.length - 1 ? '1px solid #f1f5f9' : 'none', display: 'grid', gridTemplateColumns: '150px 150px 100px 120px', gap: '8px', alignItems: 'center', backgroundColor: idx % 2 === 0 ? 'white' : '#f8fafc' }}>
+                                <div style={{ fontWeight: '500', color: '#0f172a', fontSize: '14px' }}>{skill.name}</div>
+                                <div style={{ fontSize: '12px', color: '#475569' }}>{skill.category}</div>
+                                <div style={{ fontSize: '12px', color: '#475569' }}>L{skill.level} · {LEVEL_NAMES[skill.level]}</div>
+                                <div style={{ fontSize: '11px', fontWeight: '600', color: SOURCE_COLORS[skill.source] || '#64748b' }}>{skill.source}</div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-                <div>
-                    {results.map((skill, idx) => (
-                        <div key={skill.name} style={{ padding: '8px', borderBottom: idx < results.length - 1 ? '1px solid #f1f5f9' : 'none', display: 'grid', gridTemplateColumns: '150px 150px 100px 120px', gap: '8px', alignItems: 'center', backgroundColor: idx % 2 === 0 ? 'white' : '#f8fafc' }}>
-                            <div style={{ fontWeight: '500', color: '#0f172a', fontSize: '14px' }}>{skill.name}</div>
-                            <div style={{ fontSize: '12px', color: '#475569' }}>{skill.category}</div>
-                            <div style={{ fontSize: '12px', color: '#475569' }}>L{skill.level} · {LEVEL_NAMES[skill.level]}</div>
-                            <div style={{ fontSize: '11px', fontWeight: '600', color: SOURCE_COLORS[skill.source] || '#64748b' }}>{skill.source}</div>
-                        </div>
-                    ))}
+            )}
+
+            {/* Certifications chips — credential-level evidence, no L1–L5 */}
+            {certResults.length > 0 && (
+                <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+                    <div style={{ padding: '10px 16px', backgroundColor: '#ecfeff', borderBottom: '1px solid #a5f3fc' }}>
+                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#0e7490', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            Certifications ({certResults.length})
+                        </span>
+                    </div>
+                    <div style={{ padding: '12px 16px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        {certResults.map(cert => (
+                            <span key={cert.name} style={{ fontSize: '12px', padding: '4px 12px', backgroundColor: '#cffafe', color: '#0e7490', borderRadius: '20px', fontWeight: '600', border: '1px solid #a5f3fc' }}>
+                                {cert.name}
+                            </span>
+                        ))}
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 }
@@ -937,7 +965,7 @@ export function runGapAnalysis(jdSkills, resumeSkills) {
                 resumeLevel: 0,
                 gap: jdSkill.level,
             });
-        } else if (resumeSkill.level < jdSkill.level || resumeSkill.level === 0) {
+        } else if (resumeSkill.level !== 'certified' && (resumeSkill.level < jdSkill.level || resumeSkill.level === 0)) {
             // Have it but below required level
             levelGaps.push({
                 ...jdSkill,
@@ -945,7 +973,7 @@ export function runGapAnalysis(jdSkills, resumeSkills) {
                 gap: jdSkill.level - resumeSkill.level,
             });
         } else {
-            // Have it at or above required level
+            // Have it at or above required level (includes 'certified' — credential counts as met)
             matched.push({
                 ...jdSkill,
                 resumeLevel: resumeSkill.level,
@@ -1116,7 +1144,7 @@ export default function App() {
                 {/* Header */}
                 <header className="mb-8">
                     <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-center">
-                        Nat20
+                        <Link to="/" className="hover:opacity-80 transition-opacity">Nat20</Link>
                     </h1>
                     <p className="text-sm sm:text-base text-slate-600 mt-2 text-center">
                         Skill-based job matching, leveled.
@@ -1353,8 +1381,8 @@ export default function App() {
                 {/* Reference Tab */}
                 {activeTab === 'reference' && <ReferenceTab />}
 
-
             </div>
+            <AppFooter />
         </div>
     );
 }

@@ -174,6 +174,15 @@ function extractDateFromTitleLine(titleLine) {
 // Per-section evidence extractors
 // ---------------------------------------------------------------------------
 
+function extractSkillsFromSummary(text) {
+    return matchSkillsInText(text).map(({ canonical, category }) => ({
+        canonical, category,
+        wType: classifyEvidenceType('summary', ''),
+        durationMonths: null,
+        sectionName: 'summary',
+    }))
+}
+
 function extractSkillsFromTechnicalSection(text) {
     return matchSkillsInText(text).map(({ canonical, category }) => ({
         canonical, category,
@@ -302,6 +311,7 @@ export function parseResume(text) {
     const sections = extractResumeSections(text)
 
     const allInstances = [
+        ...extractSkillsFromSummary(sections.summary),
         ...extractSkillsFromEducation(sections.education),
         ...extractSkillsFromTechnicalSection(sections.technicalSkills),
         ...extractSkillsFromProjects(sections.projects),
@@ -326,11 +336,13 @@ export function parseResume(text) {
 
     const technicalSignals = [...skillMap.entries()].map(([name, { category, instances }]) => {
         const { score, level: levelStr, confidence, primarySignal, suggestion } = scoreSkillEvidence(instances)
-        const level = parseInt(levelStr.slice(1), 10)
+        const level = levelStr === 'certified' ? 'certified' : parseInt(levelStr.slice(1), 10)
         const source = SECTION_SOURCE_LABEL[primarySignal] ?? primarySignal
         return { name, category, level, score, confidence, source, suggestion }
     }).sort((a, b) => {
-        if (b.level !== a.level) return b.level - a.level
+        const aLvl = a.level === 'certified' ? -1 : a.level
+        const bLvl = b.level === 'certified' ? -1 : b.level
+        if (bLvl !== aLvl) return bLvl - aLvl
         if (b.score !== a.score) return b.score - a.score
         return a.name.localeCompare(b.name)
     })

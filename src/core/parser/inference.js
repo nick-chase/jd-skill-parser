@@ -153,8 +153,8 @@ export function classifyEvidenceType(sectionName, roleTitle = '') {
 // ---------------------------------------------------------------------------
 
 const BLOOM_LEVELS = [
-  { multiplier: 1.40, pattern: /\b(led|architected|designed|owned|spearheaded|founded|established|launched)\b/i },
-  { multiplier: 1.20, pattern: /\b(reviewed|validated|optimized|evaluated|assessed|audited)\b/i },
+  { multiplier: 1.40, pattern: /\b(led|lead|architected|designed|owned|spearheaded|founded|established|launched|manage|managed|direct|directed|champion|drive|define)\b/i },
+  { multiplier: 1.20, pattern: /\b(reviewed|validated|optimized|optimize|evaluated|assessed|audited|improve|improved|enhance|enhanced|streamline|streamlined)\b/i },
   { multiplier: 1.10, pattern: /\b(analyzed|debugged|refactored|diagnosed|investigated)\b/i },
   { multiplier: 1.00, pattern: /\b(built|used|implemented|developed|deployed|configured|wrote|created)\b/i },
   { multiplier: 0.70, pattern: /\b(learned|studied|familiar|exposure|understanding|training)\b/i },
@@ -293,6 +293,12 @@ export function scoreSkillEvidence(instances) {
     cur.contribution > best.contribution ? cur : best
   ).inst
   const primarySignal = primary.sectionName
+
+  // Certifications don't map to L1–L5 — you either hold the credential or you don't.
+  const allFromCerts = instances.every(i => i.sectionName === 'certifications')
+  if (allFromCerts) {
+    return { score, level: 'certified', confidence: 'high', primarySignal: 'certifications', suggestion: null }
+  }
 
   return { score, level, confidence, primarySignal, suggestion: SUGGESTIONS[level] }
 }

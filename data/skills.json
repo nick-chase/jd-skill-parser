@@ -131,6 +131,7 @@
     { "id": "linux", "canonical": "Linux", "category": "Dev Tool", "aliases": ["linux", "unix"], "patterns": ["\\blinux\\b", "\\bunix\\b"], "guardWords": [] },
     { "id": "ci-cd", "canonical": "CI/CD", "category": "Dev Tool", "aliases": ["ci/cd", "continuous integration"], "patterns": ["\\bci/cd\\b", "\\bcontinuous integration\\b", "\\bcontinuous delivery\\b", "\\bcontinuous deployment\\b"], "guardWords": [] },
     { "id": "rest-api", "canonical": "REST API", "category": "Dev Tool", "aliases": ["rest api", "rest service", "RESTful"], "patterns": ["\\bREST\\b", "\\brest api\\b", "\\brest service\\b", "\\bRESTful\\b", "\\brest\\b(?=\\s+api|\\s+endpoint|\\s+service|\\s+architectural)"], "guardWords": [] },
+    { "id": "api-development", "canonical": "API Development", "category": "Dev Tool", "aliases": ["api development", "api design", "api integration", "APIs"], "patterns": ["\\bAPI development\\b", "\\bAPI design\\b", "\\bAPI integration\\b", "\\bAPIs?\\b"], "guardWords": ["rest", "graphql", "openapi", "soap", "grpc", "api gateway", "api testing"] },
     { "id": "graphql", "canonical": "GraphQL", "category": "Dev Tool", "aliases": ["graphql"], "patterns": ["\\bgraphql\\b"], "guardWords": [] },
     { "id": "xcode", "canonical": "Xcode", "category": "Dev Tool", "aliases": ["xcode"], "patterns": ["\\bxcode\\b"], "guardWords": [] },
     { "id": "monitoring", "canonical": "Monitoring", "category": "Dev Tool", "aliases": ["monitoring"], "patterns": ["\\bmonitoring\\b"], "guardWords": [] },
@@ -153,6 +154,7 @@
     { "id": "oauth2", "canonical": "OAuth", "category": "Dev Tool", "aliases": ["oauth", "oauth2", "oauth 2.0"], "patterns": ["\\boauth\\b", "\\boauth2\\b"], "guardWords": [] },
     { "id": "openapi-swagger", "canonical": "OpenAPI / Swagger", "category": "Dev Tool", "aliases": ["openapi", "swagger"], "patterns": ["\\bopenapi\\b", "\\bswagger\\b"], "guardWords": [] },
     { "id": "openid-connect", "canonical": "OpenID Connect", "category": "Dev Tool", "aliases": ["openid", "openid connect", "oidc"], "patterns": ["\\bOpenID\\b", "\\bOpenID Connect\\b", "\\bOIDC\\b"], "guardWords": [] },
+    { "id": "open-source", "canonical": "Open Source", "category": "Dev Tool", "aliases": ["open source", "open-source", "open source development"], "patterns": ["\\bopen[\\s-]?source\\b"], "guardWords": [] },
     { "id": "tcp-ip", "canonical": "TCP/IP", "category": "Dev Tool", "aliases": ["tcp/ip", "tcp ip"], "patterns": ["\\bTCP/IP\\b", "\\btcp/ip\\b", "\\bTCP\\b(?=\\s*/IP|/IP|\\s+IP|\\s+socket|\\s+connection|\\s+protocol|\\s+network)"], "guardWords": [] },
 
     { "id": "statistics", "canonical": "Statistics", "category": "Foundational Concept", "aliases": ["statistics", "statistical"], "patterns": ["\\bstatistics\\b", "\\bstatistical\\b"], "guardWords": [] },
@@ -237,6 +239,7 @@
     { "id": "rtos", "canonical": "RTOS", "category": "Systems", "aliases": ["rtos", "real-time operating system"], "patterns": ["\\brtos\\b", "\\breal[- ]time operating system\\b"], "guardWords": [] },
     { "id": "hardware-testing", "canonical": "Hardware Testing", "category": "Systems", "aliases": ["hardware testing", "ate", "automated test equipment"], "patterns": ["\\bhardware testing\\b", "\\bautomated test equipment\\b", "\\bATE\\b"], "guardWords": [] },
     { "id": "pcb-design", "canonical": "PCB Design", "category": "Systems", "aliases": ["pcb", "pcb design"], "patterns": ["\\bpcb design\\b", "\\bpcb\\b(?=\\s+layout|\\s+design|\\s+schematic|\\s+board)"], "guardWords": [] },
+    { "id": "software-optimization", "canonical": "Software Optimization", "category": "Systems", "aliases": ["software optimization", "performance optimization", "code optimization", "system performance"], "patterns": ["\\bsoftware optimization\\b", "\\bperformance optimization\\b", "\\bcode optimization\\b", "\\bsystem performance\\b"], "guardWords": [] },
 
     { "id": "microservices", "canonical": "Microservices", "category": "Architecture", "aliases": ["microservices", "microservice"], "patterns": ["\\bmicroservices\\b", "\\bmicroservice\\b"], "guardWords": [] },
     { "id": "distributed-systems", "canonical": "Distributed Systems", "category": "Architecture", "aliases": ["distributed system", "distributed systems"], "patterns": ["\\bdistributed system\\b", "\\bdistributed systems\\b"], "guardWords": [] },

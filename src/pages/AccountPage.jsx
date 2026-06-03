@@ -6,6 +6,7 @@ import { getUserPlanStatus, loadResumeProfile } from '../lib/supabase.js'
 import SignInButton from '../components/SignInButton.jsx'
 import StatBlock from '../components/StatBlock.jsx'
 import UpgradePrompt from '../components/UpgradePrompt.jsx'
+import AppFooter from '../components/AppFooter.jsx'
 
 function deriveClass(skills) {
   if (!skills?.length) return 'Adventurer'
@@ -55,27 +56,33 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <div className="text-center py-16 text-slate-400 text-sm">
-        Loading...
-      </div>
+      <>
+        <div className="text-center py-16 text-slate-400 text-sm">
+          Loading...
+        </div>
+        <AppFooter />
+      </>
     )
   }
 
   if (!user) {
     return (
-      <div className="max-w-md mx-auto py-16 text-center space-y-4">
-        <div className="text-2xl">🔐</div>
-        <div className="font-medium text-slate-800">Sign in to view your account</div>
-        <div className="text-sm text-slate-500">
-          Save your resume profile and track your skill progress
+      <>
+        <div className="max-w-md mx-auto py-16 text-center space-y-4">
+          <div className="text-2xl">🔐</div>
+          <div className="font-medium text-slate-800">Sign in to view your account</div>
+          <div className="text-sm text-slate-500">
+            Save your resume profile and track your skill progress
+          </div>
+          <div className="flex justify-center pt-2">
+            <SignInButton />
+          </div>
+          <Link to="/app" className="block text-xs text-slate-400 hover:underline">
+            ← Back to parser
+          </Link>
         </div>
-        <div className="flex justify-center pt-2">
-          <SignInButton />
-        </div>
-        <Link to="/app" className="block text-xs text-slate-400 hover:underline">
-          ← Back to parser
-        </Link>
-      </div>
+        <AppFooter />
+      </>
     )
   }
 
@@ -89,6 +96,7 @@ export default function AccountPage() {
   }, {})
 
   return (
+    <>
     <div className="max-w-2xl mx-auto py-8 space-y-6 px-4">
 
       {/* Back link */}
@@ -267,5 +275,7 @@ export default function AccountPage() {
         </div>
       )}
     </div>
+    <AppFooter />
+    </>
   )
 }
