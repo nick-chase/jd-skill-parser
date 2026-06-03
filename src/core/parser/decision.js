@@ -22,7 +22,7 @@ const CRITICAL_IMPORTANCE = 5
 
 function isEntryLevelResume(resumeSkills) {
   if (!resumeSkills || resumeSkills.length === 0) return true
-  const maxLevel = Math.max(...resumeSkills.map(s => s.level ?? 0))
+  const maxLevel = Math.max(...resumeSkills.map(s => s.level === 'certified' ? 3 : (s.level ?? 0)))
   return maxLevel <= 2
 }
 

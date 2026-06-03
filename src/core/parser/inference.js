@@ -32,11 +32,11 @@ const MONTH_NAMES = {
 }
 
 function parseMonthYear(str) {
-  // "Jan 2023", "January 2023", "2023" (returns { year, month })
+  // "Jan 2023", "January 2023", "Aug. 2019", "2023" (returns { year, month })
   const trimmed = str.trim()
 
-  // Month + year: "Jan 2023", "March 2021"
-  const monthYear = trimmed.match(/^([A-Za-z]+)\s+(\d{4})$/)
+  // Month + year: "Jan 2023", "March 2021", "Aug. 2019" (optional trailing period)
+  const monthYear = trimmed.match(/^([A-Za-z]+)\.?\s+(\d{4})$/)
   if (monthYear) {
     const month = MONTH_NAMES[monthYear[1].toLowerCase()]
     if (month !== undefined) return { year: parseInt(monthYear[2], 10), month }
@@ -132,23 +132,20 @@ const NO_OUTCOME_RE = /\bno[- ]?outcome\b/i
  * Returns the E weight for a resume evidence instance.
  */
 export function classifyEvidenceType(sectionName, roleTitle = '') {
-  const section = (sectionName || '').toLowerCase().trim()
+  // Strip HTML entities (&nbsp; etc.) and normalise whitespace from copy-paste artefacts
+  const raw = (sectionName || '').replace(/&[a-z]+;|&#\d+;/gi, ' ').replace(/ /g, ' ')
+  const section = raw.toLowerCase().trim().replace(/\s+/g, ' ')
 
-  switch (section) {
-    case 'experience':
-      return CONTRACT_RE.test(roleTitle) ? 0.65 : 1.0
-    case 'projects':
-      return NO_OUTCOME_RE.test(roleTitle) ? 0.30 : 0.50
-    case 'education':
-      return 0.4
-    case 'certifications':
-    case 'bootcamp':
-      return 0.55
-    case 'skills':
-    case 'summary':
-    default:
-      return 0.05
-  }
+  const isExperience = /^(experience|work experience|work history|employment)$/.test(section)
+  const isProjects   = /^projects?$/.test(section)
+  const isEducation  = /^education$/.test(section)
+  const isCert       = /^(certifications?|bootcamp)$/.test(section)
+
+  if (isExperience) return CONTRACT_RE.test(roleTitle) ? 0.65 : 1.0
+  if (isProjects)   return NO_OUTCOME_RE.test(roleTitle) ? 0.30 : 0.50
+  if (isEducation)  return 0.4
+  if (isCert)       return 0.55
+  return 0.05
 }
 
 // ---------------------------------------------------------------------------
@@ -156,8 +153,8 @@ export function classifyEvidenceType(sectionName, roleTitle = '') {
 // ---------------------------------------------------------------------------
 
 const BLOOM_LEVELS = [
-  { multiplier: 1.40, pattern: /\b(led|architected|designed|owned|spearheaded|founded|established|launched)\b/i },
-  { multiplier: 1.20, pattern: /\b(reviewed|validated|optimized|evaluated|assessed|audited)\b/i },
+  { multiplier: 1.40, pattern: /\b(led|lead|architected|designed|owned|spearheaded|founded|established|launched|manage|managed|direct|directed|champion|drive|define)\b/i },
+  { multiplier: 1.20, pattern: /\b(reviewed|validated|optimized|optimize|evaluated|assessed|audited|improve|improved|enhance|enhanced|streamline|streamlined)\b/i },
   { multiplier: 1.10, pattern: /\b(analyzed|debugged|refactored|diagnosed|investigated)\b/i },
   { multiplier: 1.00, pattern: /\b(built|used|implemented|developed|deployed|configured|wrote|created)\b/i },
   { multiplier: 0.70, pattern: /\b(learned|studied|familiar|exposure|understanding|training)\b/i },
@@ -296,6 +293,12 @@ export function scoreSkillEvidence(instances) {
     cur.contribution > best.contribution ? cur : best
   ).inst
   const primarySignal = primary.sectionName
+
+  // Certifications don't map to L1–L5 — you either hold the credential or you don't.
+  const allFromCerts = instances.every(i => i.sectionName === 'certifications')
+  if (allFromCerts) {
+    return { score, level: 'certified', confidence: 'high', primarySignal: 'certifications', suggestion: null }
+  }
 
   return { score, level, confidence, primarySignal, suggestion: SUGGESTIONS[level] }
 }

@@ -76,6 +76,31 @@ describe('parseDateRange()', () => {
     expect(parseDateRange('2 years 3 months')).toBe(27)
   })
 
+  // Abbreviated months with trailing period (common in real resumes)
+  test('parses "Aug. 2019 – Current" → >60 months (at least 5 years to 2026)', () => {
+    const result = parseDateRange('Aug. 2019 – Current')
+    expect(result).toBeGreaterThan(60)
+    expect(result).toBeLessThan(120)
+  })
+
+  test('parses "Sep. 2015 – Aug. 2019" → ~47 months', () => {
+    const result = parseDateRange('Sep. 2015 – Aug. 2019')
+    expect(result).toBeGreaterThanOrEqual(44)
+    expect(result).toBeLessThanOrEqual(50)
+  })
+
+  test('parses "Jan 2020 – current" (lowercase) → months from Jan 2020 to today (≥24)', () => {
+    const result = parseDateRange('Jan 2020 – current')
+    expect(result).toBeGreaterThanOrEqual(24)
+    expect(result).toBeLessThan(120)
+  })
+
+  test('parses "August 2019 - Present" (full month name) → >60 months', () => {
+    const result = parseDateRange('August 2019 - Present')
+    expect(result).toBeGreaterThan(60)
+    expect(result).toBeLessThan(120)
+  })
+
   // Unparseable
   test('returns null for empty string', () => {
     expect(parseDateRange('')).toBeNull()
@@ -157,6 +182,40 @@ describe('classifyEvidenceType()', () => {
 
   test('Projects (capitalised) → 0.5', () => {
     expect(classifyEvidenceType('Projects', '')).toBe(0.5)
+  })
+
+  // Work history / employment variants
+  test('"Work Experience" section → 1.0', () => {
+    expect(classifyEvidenceType('Work Experience', 'IT Project Manager')).toBe(1.0)
+  })
+
+  test('"WORK EXPERIENCE" section → 1.0', () => {
+    expect(classifyEvidenceType('WORK EXPERIENCE', '')).toBe(1.0)
+  })
+
+  test('"Work History" section → 1.0', () => {
+    expect(classifyEvidenceType('Work History', 'Senior Analyst')).toBe(1.0)
+  })
+
+  test('"WORK HISTORY" section → 1.0', () => {
+    expect(classifyEvidenceType('WORK HISTORY', '')).toBe(1.0)
+  })
+
+  test('"Employment" section → 1.0', () => {
+    expect(classifyEvidenceType('Employment', '')).toBe(1.0)
+  })
+
+  test('"EMPLOYMENT" section → 1.0', () => {
+    expect(classifyEvidenceType('EMPLOYMENT', '')).toBe(1.0)
+  })
+
+  test('"Work History" + intern title → 0.65', () => {
+    expect(classifyEvidenceType('Work History', 'Software Engineering Intern')).toBe(0.65)
+  })
+
+  // HTML entity stripping
+  test('section name with &nbsp; entity → treated as experience', () => {
+    expect(classifyEvidenceType('Experience&nbsp;', '')).toBe(1.0)
   })
 })
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { redirectToCheckout } from '../lib/stripe.js'
 import { onAuthStateChange } from '../lib/auth.js'
+import AppFooter from '../components/AppFooter.jsx'
 
 export default function PricingPage() {
   const [user, setUser] = useState(null)
@@ -94,6 +95,7 @@ export default function PricingPage() {
         Free tier: unlimited resume parses + 15 JD parses/day — always free
       </div>
     </div>
+      <AppFooter />
     </div>
   )
 }

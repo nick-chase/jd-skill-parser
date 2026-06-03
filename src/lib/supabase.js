@@ -51,8 +51,7 @@ export async function loadResumeProfile(userId) {
     .eq('user_id', userId)
     .single()
 
-  if (error && error.code !== 'PGRST116') {
-    // PGRST116 = no rows found, that's fine for new users
+  if (error && error.code !== 'PGRST116' && error.status !== 406) {
     console.error('Resume profile load error:', error.message)
   }
 
