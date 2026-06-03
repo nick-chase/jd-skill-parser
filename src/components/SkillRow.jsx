@@ -24,6 +24,15 @@ const RESOURCE_MAP = resourceData.resources
 
 const LEVEL_NAMES  = ['—', 'Awareness', 'Novice', 'Intermediate', 'Advanced', 'Expert']
 
+const LEVEL_TIPS = [
+  '',
+  'L1 Awareness — basic familiarity; can recognize but not independently apply.',
+  'L2 Novice — limited practical experience; works with guidance.',
+  'L3 Intermediate — independent on routine tasks.',
+  'L4 Advanced — applies theory fluently; can guide others.',
+  'L5 Expert — recognized authority; drives innovation.',
+]
+
 const IMPORTANCE_NAMES = ['—', 'Optional', 'Nice-to-have', 'Preferred', 'Required', 'Critical']
 
 const IMPORTANCE_STYLES = {
@@ -98,20 +107,23 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
     const resumeDisplay = skill.resumeLevel === 'certified'
       ? 'Certified'
       : `L${skill.resumeLevel} · ${LEVEL_NAMES[skill.resumeLevel]}`
+    const tip = skill.resumeLevel === 'certified' ? '' : (LEVEL_TIPS[skill.resumeLevel] ?? '')
     levelCell = (
-      <div style={{ fontSize: '12px', color: '#059669' }}>
+      <div style={{ fontSize: '12px', color: '#059669' }} title={tip || undefined}>
         Your {resumeDisplay}{confidenceSuffix}
       </div>
     )
   } else if (isGap) {
+    const tip = `${LEVEL_TIPS[skill.resumeLevel] ?? ''} → ${LEVEL_TIPS[skill.level] ?? ''}`.trim().replace(/^ → /, '')
     levelCell = (
-      <div style={{ fontSize: '12px', color: '#d97706' }}>
+      <div style={{ fontSize: '12px', color: '#d97706' }} title={tip || undefined}>
         Your L{skill.resumeLevel} → Need L{skill.level}{confidenceSuffix}
       </div>
     )
   } else {
+    const tip = LEVEL_TIPS[skill.level] ?? ''
     levelCell = (
-      <div style={{ fontSize: '12px', color: '#475569' }}>
+      <div style={{ fontSize: '12px', color: '#475569' }} title={tip || undefined}>
         Required: L{skill.level}
       </div>
     )

@@ -849,98 +849,6 @@ function ResultsView({ results, companyName, jobRole, jobMeta }) {
     return <ResultsViewSimple results={results} companyName={companyName} jobRole={jobRole} jobMeta={jobMeta} />;
 }
 
-function ReferenceTab() {
-    return (
-        <div className="space-y-4">
-            <p className="text-xs text-slate-500 uppercase tracking-wider">
-                OPM 5-Level Scale · Lightcast Skill Taxonomy
-            </p>
-
-            {/* Proficiency Levels */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-3">Proficiency Levels</h3>
-                <div className="space-y-3">
-                    {[
-                        { level: 'L1', name: 'Awareness',     desc: 'Basic familiarity; can recognize but not apply', badge: 'bg-slate-100 text-slate-700' },
-                        { level: 'L2', name: 'Novice',        desc: 'Limited practical experience; needs guidance',   badge: 'bg-blue-100 text-blue-700' },
-                        { level: 'L3', name: 'Intermediate',  desc: 'Independent on routine tasks',                  badge: 'bg-green-100 text-green-700' },
-                        { level: 'L4', name: 'Advanced',      desc: 'Applied theory; can teach others',              badge: 'bg-amber-100 text-amber-700' },
-                        { level: 'L5', name: 'Expert',        desc: 'Recognized authority; innovates',               badge: 'bg-purple-100 text-purple-700' },
-                    ].map(({ level, name, desc, badge }) => (
-                        <div key={level}>
-                            <div className="flex items-center gap-2 mb-0.5">
-                                <span className={`text-xs font-semibold px-2 py-0.5 rounded ${badge}`}>{level}</span>
-                                <span className="text-sm font-semibold text-slate-900">{name}</span>
-                            </div>
-                            <p className="text-sm text-slate-600 pl-10">{desc}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Importance Tiers */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6">
-                <h3 className="text-lg font-semibold text-slate-900 mb-3">Importance Tiers</h3>
-                <div className="space-y-3">
-                    {[
-                        { label: 'Critical',     desc: 'Required / Must-Have / Minimum Qualifications', badge: 'bg-red-100 text-red-700' },
-                        { label: 'Required',     desc: 'Qualifications / general requirements',         badge: 'bg-orange-100 text-orange-700' },
-                        { label: 'Preferred',    desc: 'Preferred / Desired',                           badge: 'bg-blue-100 text-blue-700' },
-                        { label: 'Nice-to-have', desc: 'Bonus / Plus / Nice-to-have',                  badge: 'bg-slate-100 text-slate-600' },
-                    ].map(({ label, desc, badge }) => (
-                        <div key={label}>
-                            <div className="flex items-center gap-2 mb-0.5">
-                                <span className={`text-xs font-semibold px-2 py-0.5 rounded ${badge}`}>{label}</span>
-                            </div>
-                            <p className="text-sm text-slate-600 mt-0.5">{desc}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Phrase Detection + Years of Experience */}
-            <div className="grid sm:grid-cols-2 gap-4">
-                <div className="bg-white rounded-xl border border-slate-200 p-6">
-                    <h3 className="text-lg font-semibold text-slate-900 mb-3">Phrase Detection</h3>
-                    <div className="space-y-2">
-                        {[
-                            { phrase: '"expert"',           level: 'L5', badge: 'bg-purple-100 text-purple-700' },
-                            { phrase: '"strong / proficient"', level: 'L4', badge: 'bg-amber-100 text-amber-700' },
-                            { phrase: '"experience with"',  level: 'L3', badge: 'bg-green-100 text-green-700' },
-                            { phrase: '"familiarity"',      level: 'L2', badge: 'bg-blue-100 text-blue-700' },
-                            { phrase: '"exposure"',         level: 'L1', badge: 'bg-slate-100 text-slate-700' },
-                        ].map(({ phrase, level, badge }) => (
-                            <div key={phrase} className="flex items-center gap-2">
-                                <code className="text-xs bg-slate-50 border border-slate-200 px-2 py-0.5 rounded font-mono text-slate-700">{phrase}</code>
-                                <span className="text-slate-400 text-xs">→</span>
-                                <span className={`text-xs font-semibold px-2 py-0.5 rounded ${badge}`}>{level}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div className="bg-white rounded-xl border border-slate-200 p-6">
-                    <h3 className="text-lg font-semibold text-slate-900 mb-3">Years of Experience</h3>
-                    <div className="space-y-2">
-                        {[
-                            { range: '7+ yrs',  level: 'L5 · Expert',       badge: 'bg-purple-100 text-purple-700' },
-                            { range: '4–6 yrs', level: 'L4 · Advanced',     badge: 'bg-amber-100 text-amber-700' },
-                            { range: '2–3 yrs', level: 'L3 · Intermediate', badge: 'bg-green-100 text-green-700' },
-                            { range: '<2 yrs',  level: 'L2 · Novice',       badge: 'bg-blue-100 text-blue-700' },
-                        ].map(({ range, level, badge }) => (
-                            <div key={range} className="flex items-center gap-2">
-                                <span className="text-sm font-semibold text-slate-700 w-16">{range}</span>
-                                <span className="text-slate-400 text-xs">→</span>
-                                <span className={`text-xs font-semibold px-2 py-0.5 rounded ${badge}`}>{level}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
 // ============================================================
 // GAP ANALYSIS
 // ============================================================
@@ -1160,10 +1068,9 @@ export default function App() {
                 <div className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 mb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
                     <div className="flex">
                         {[
-                            { key: 'jd',        label: 'JD' },
-                            { key: 'resume',    label: 'Resume' },
-                            { key: 'compare',   label: 'Match' },
-                            { key: 'reference', label: 'Reference' },
+                            { key: 'jd',      label: 'JD' },
+                            { key: 'resume',  label: 'Resume' },
+                            { key: 'compare', label: 'Match' },
                         ].map(({ key, label }) => (
                             <button
                                 key={key}
@@ -1378,8 +1285,6 @@ export default function App() {
                     </div>
                 )}
 
-                {/* Reference Tab */}
-                {activeTab === 'reference' && <ReferenceTab />}
 
             </div>
             <AppFooter />
