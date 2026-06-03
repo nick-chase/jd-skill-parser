@@ -2,37 +2,48 @@
 
 ## Two-Repo Workflow
 
-**Claude Code: read this section in full at the start of every session.
-The repo split is enforced by a pre-commit hook — bypassing it is
-never acceptable.**
+**Claude Code: read this section in full at the start of every session.**
 
-This project uses two repos:
+This project uses two repos with a deliberate asymmetry:
 
-- **Public:** `jd-skill-parser` (this repo) — code, tests, public docs, sample data
-- **Private:** `../nat20-private/` — master plan, research, scoring weights, strategy
+- **Public (this repo):** `C:\Users\nikec\Desktop\jd-skill-parser\`
+  Code, tests, public docs, sample data, **and the active parser logic**.
+  This is where Claude Code runs and where all edits happen.
+
+- **Private (read-only from Claude's perspective):** `C:\Users\nikec\Desktop\nat20-core\`
+  Master plan (`docs/master-plan-v4.md`), research notes, strategy docs.
+  Claude **reads** from here for context. Claude **never writes** here.
+  You update this repo manually after task completion.
+
+### Path conventions for Claude Code
+
+When Claude Code runs from `jd-skill-parser/`, the private repo is at the
+relative path `../nat20-core/`. All hooks and agents use this relative path.
 
 ### Rules
 
 - Never add private filenames to this repo. The pre-commit hook enforces this.
-- Pricing, monetization strategy, and launch plans live in `nat20-private` only.
+- Pricing, monetization strategy, and launch plans live in `nat20-core` only.
 - `data/skills.json` and `data/soft-skills.json` are public and contain the
-  launch-ready dataset. If a private extended dataset is ever introduced, it
-  will live in `nat20-private/data/` and merge at build time — but this does
-  not exist today. Treat the public files as the source of truth.
-- `docs/scoring-model.md` has been moved to `nat20-private/docs/`. Do not
-  recreate it here.
+  launch-ready dataset and are the source of truth for vocabulary.
+- `docs/scoring-model.md` lives in `nat20-core/docs/`. Do not recreate it here.
+- **Architecture note:** An earlier plan called for the core parser to live in
+  `nat20-core`. That plan has been deferred — the parser is currently in this
+  public repo under `src/`. A future architecture discussion will resolve
+  whether to keep it here or move it. Until that decision is made, treat
+  `src/` in this repo as authoritative for parser logic.
 
 ### Hook installation (required on each fresh clone)
 
-The pre-commit hook lives in `.git/hooks/pre-commit` which is NOT
-tracked by git. After cloning this repo, the hook will be missing
-and commits will be unprotected.
+The pre-commit hook lives in `.git/hooks/pre-commit` which is NOT tracked
+by git. After cloning this repo, the hook will be missing and commits will
+be unprotected.
 
-To install: copy `.git/hooks/pre-commit` from a working clone, or
-recreate it from `docs/pre-commit-template.md` (a reference copy
-kept in this repo for that purpose).
+To install: copy `.git/hooks/pre-commit` from a working clone, or recreate
+it from `docs/pre-commit-template.md` (a reference copy kept in this repo
+for that purpose).
 
-After installing:
+After installing (Git Bash only — not needed in PowerShell):
 
     chmod +x .git/hooks/pre-commit
 
@@ -43,7 +54,7 @@ Verify with:
 
 ### Adding a new private file
 
-1. Create it in `../nat20-private/`
+1. Create it in `../nat20-core/`
 2. Add its pattern to `.gitignore` in this repo
 3. Add the same pattern to `.git/hooks/pre-commit` BANNED_PATTERNS
 4. Run `bash scripts/verify-gitignore.sh` to confirm
@@ -54,7 +65,7 @@ Sometimes a doc starts private and is later cleared for public release
 (e.g., the README, a public architecture doc).
 
 To move private → public:
-1. Copy (don't move) the file from `../nat20-private/` to this repo
+1. Copy (don't move) the file from `../nat20-core/` to this repo
 2. Verify it contains no pricing, strategy, or operational content
 3. Verify the pre-commit hook does NOT match its filename pattern
 4. Commit to the public repo
@@ -63,7 +74,6 @@ To move private → public:
 
 Never move a file between repos in a single step. Always: copy →
 verify → commit public → then delete private.
-
 ---
 
 ## Product Goal
