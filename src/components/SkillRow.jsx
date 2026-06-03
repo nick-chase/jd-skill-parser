@@ -95,9 +95,12 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
   // Level cell text
   let levelCell
   if (isMatched) {
+    const resumeDisplay = skill.resumeLevel === 'certified'
+      ? 'Certified'
+      : `L${skill.resumeLevel} · ${LEVEL_NAMES[skill.resumeLevel]}`
     levelCell = (
       <div style={{ fontSize: '12px', color: '#059669' }}>
-        Your L{skill.resumeLevel} · {LEVEL_NAMES[skill.resumeLevel]}{confidenceSuffix}
+        Your {resumeDisplay}{confidenceSuffix}
       </div>
     )
   } else if (isGap) {
