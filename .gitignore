@@ -7,6 +7,10 @@
 *.key
 *.secret
 
+# Draft / scratch files (local only)
+docs/DRAFT_*.md
+docs/FINAL_*.md
+
 # Personal & operational docs (kept in private repo)
 docs/master-plan*.md
 docs/research-dive*.md

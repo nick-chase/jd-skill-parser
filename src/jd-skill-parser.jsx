@@ -14,6 +14,8 @@ import UserMenu from './components/UserMenu.jsx';
 import UpgradePrompt from './components/UpgradePrompt.jsx'
 import AdSlot from './components/AdSlot.jsx';
 import AppFooter from './components/AppFooter.jsx';
+import HowToTour from './components/HowToTour.jsx'
+import FeedbackForm from './components/FeedbackForm.jsx';
 
 // ============================================================
 // CLASSIFICATION SYSTEM
@@ -988,6 +990,8 @@ export default function App() {
         setJobMeta(meta);
         const jdResults = parseJobDescription(input);
         setResults(jdResults);
+        sessionStorage.setItem('beta_jd_results', JSON.stringify(jdResults));
+        sessionStorage.setItem('beta_jd_count', jdResults.technicalSignals.length);
         analytics.parseComplete('jd');
         if (resumeResults?.technicalSignals?.length > 0) {
             setActiveTab('compare');
@@ -1002,6 +1006,8 @@ export default function App() {
         setResumeInputError(false);
         const parsed = parseResumeInput(resumeInput, 'text');
         setResumeResults(parsed);
+        sessionStorage.setItem('beta_resume_results', JSON.stringify(parsed));
+        sessionStorage.setItem('beta_resume_count', parsed.technicalSignals.length);
         analytics.parseComplete('resume');
         // Auto-switch to Gap Analysis if JD already parsed
         if (results?.technicalSignals?.length > 0) {
@@ -1068,12 +1074,13 @@ export default function App() {
                 <div className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200 mb-6 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
                     <div className="flex">
                         {[
-                            { key: 'jd',      label: 'JD' },
-                            { key: 'resume',  label: 'Resume' },
-                            { key: 'compare', label: 'Match' },
-                        ].map(({ key, label }) => (
+                            { key: 'jd',      label: 'JD',     id: undefined },
+                            { key: 'resume',  label: 'Resume', id: 'resume-tab' },
+                            { key: 'compare', label: 'Match',  id: 'match-tab' },
+                        ].map(({ key, label, id }) => (
                             <button
                                 key={key}
+                                id={id}
                                 onClick={() => setActiveTab(key)}
                                 className={`flex-1 sm:flex-none py-3 px-4 sm:px-5 text-xs sm:text-sm font-semibold border-b-2 -mb-px transition-colors ${
                                     activeTab === key
@@ -1120,6 +1127,7 @@ export default function App() {
                         </div>
 
                         <textarea
+                            id="jd-textarea"
                             value={input}
                             onChange={e => { setInput(e.target.value); setJdInputError(false); }}
                             className="w-full h-[200px] sm:h-[280px] p-4 border border-slate-200 rounded-lg font-mono text-[13px] leading-relaxed bg-white shadow-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none focus:border-indigo-400 resize-none"
@@ -1127,6 +1135,7 @@ export default function App() {
                         />
 
                         <button
+                            id="parse-jd-btn"
                             onClick={parse}
                             className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-medium transition shadow-sm"
                         >
@@ -1152,6 +1161,9 @@ export default function App() {
                                 <ResultsView results={results.technicalSignals} companyName={companyName} jobRole={jobRole} jobMeta={jobMeta} />
                                 <BehavioralSignalsPanel signals={results.behavioralSignals} title="Behavioral Signals" />
                                 <JobDutiesPanel duties={results.jobDuties} />
+                                <div className="mt-8 border-t pt-6">
+                                    <FeedbackForm />
+                                </div>
                             </>
                         )}
                     </div>
@@ -1280,6 +1292,9 @@ export default function App() {
                                     decisionResult={getDecision(results, resumeResults)}
                                 />
                                 <AdSlot isPaid={isPaidStatus} />
+                                <div className="mt-8 border-t pt-6">
+                                    <FeedbackForm />
+                                </div>
                             </>
                         )}
                     </div>
@@ -1288,6 +1303,7 @@ export default function App() {
 
             </div>
             <AppFooter />
+            <HowToTour />
         </div>
     );
 }
