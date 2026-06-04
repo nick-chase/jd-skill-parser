@@ -24,7 +24,7 @@ if ($Command -match 'rm.*\.env|>.*\.env') {
 }
 
 # Block dropping prod tables
-if ($Command -match -icase 'drop table|truncate.*users|truncate.*profiles') {
+if ($Command -imatch 'drop table|truncate.*users|truncate.*profiles') {
     Write-Error "BLOCKED: Destructive database operation." -ErrorAction Stop
     exit 2
 }
