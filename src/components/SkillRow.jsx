@@ -101,6 +101,15 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
     ? <span style={{ color: '#94a3b8', fontWeight: '400' }}> ({skill.confidence} confidence)</span>
     : null
 
+  // Evidence explanation line — shown for matched and gap rows only
+  const evidenceLine = (isMatched || isGap) && skill.confidence && skill.source
+    ? (
+      <div className="text-xs text-gray-400 mt-0.5">
+        ({skill.confidence.toLowerCase()} confidence: {skill.source})
+      </div>
+    )
+    : null
+
   // Level cell text
   let levelCell
   if (isMatched) {
@@ -111,6 +120,7 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
     levelCell = (
       <div style={{ fontSize: '12px', color: '#059669' }} title={tip || undefined}>
         Your {resumeDisplay}{confidenceSuffix}
+        {evidenceLine}
       </div>
     )
   } else if (isGap) {
@@ -118,6 +128,7 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
     levelCell = (
       <div style={{ fontSize: '12px', color: '#d97706' }} title={tip || undefined}>
         Your L{skill.resumeLevel} → Need L{skill.level}{confidenceSuffix}
+        {evidenceLine}
       </div>
     )
   } else {

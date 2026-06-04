@@ -26,7 +26,7 @@ if ($recentCommits) {
     Write-Output ""
     Write-Output "Skipping STEP 1 makes the working list drift."
     Write-Output "Skipping STEP 2 makes the strategy doc drift."
-    Write-Output "Claude cannot do either — nat20-core is read-only from this side."
+    Write-Output "Claude cannot do either - nat20-core is read-only from this side."
     Write-Output ""
 }
 

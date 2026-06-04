@@ -4,7 +4,6 @@ import * as registry from '@core/registry.js';
 import { extractTextFromPdf } from './lib/pdfExtract.js';
 import { parseResume, extractBehavioralSignals } from './core/parser/parseResume.js';
 import { getDecision } from '@core/parser/decision.js';
-import DecisionCard from './components/DecisionCard.jsx';
 import SkillRow from './components/SkillRow.jsx';
 import { getOrCreateUser, onAuthStateChange } from './lib/auth.js'
 import { analytics } from './lib/analytics.js';
@@ -556,9 +555,6 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-            {/* Decision Card — top of the Match tab */}
-            {decisionResult && <DecisionCard decisionResult={decisionResult} />}
-
             {/* Zero match warning */}
             {
                 critical.length === 0 && levelGaps.length === 0 && matched.length === 0 && bonus.length > 0 && (
@@ -879,6 +875,8 @@ export function runGapAnalysis(jdSkills, resumeSkills) {
                 ...jdSkill,
                 resumeLevel: resumeSkill.level,
                 gap: jdSkill.level - resumeSkill.level,
+                confidence: resumeSkill.confidence ?? null,
+                source: resumeSkill.source ?? null,
             });
         } else {
             // Have it at or above required level (includes 'certified' — credential counts as met)
@@ -886,6 +884,8 @@ export function runGapAnalysis(jdSkills, resumeSkills) {
                 ...jdSkill,
                 resumeLevel: resumeSkill.level,
                 gap: 0,
+                confidence: resumeSkill.confidence ?? null,
+                source: resumeSkill.source ?? null,
             });
         }
     }
