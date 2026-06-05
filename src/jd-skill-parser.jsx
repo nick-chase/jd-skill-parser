@@ -1136,7 +1136,7 @@ export default function App() {
                                 >
                                     Clear
                                 </button>
-                                {results?.technicalSignals?.length > 0 && (
+                                {false && results?.technicalSignals?.length > 0 && (
                                     <button
                                         onClick={exportJson}
                                         className="text-xs px-2.5 py-1 border border-slate-300 rounded hover:bg-slate-100 transition"
@@ -1326,7 +1326,7 @@ export default function App() {
 
             </div>
             <AppFooter />
-            <HowToTour />
+            <HowToTour onStart={() => setActiveTab('jd')} />
         </div>
     );
 }

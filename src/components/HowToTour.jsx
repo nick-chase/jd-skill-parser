@@ -136,14 +136,17 @@ function TooltipBox({ step, stepIndex, total, onNext, onSkip }) {
   );
 }
 
-export default function HowToTour() {
+export default function HowToTour({ onStart }) {
   const [active, setActive] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
 
   useEffect(() => {
     if (!localStorage.getItem(STORAGE_KEY)) {
       // small delay so DOM is ready
-      const t = setTimeout(() => setActive(true), 600);
+      const t = setTimeout(() => {
+        if (onStart) onStart();
+        setActive(true);
+      }, 600);
       return () => clearTimeout(t);
     }
   }, []);
@@ -163,6 +166,7 @@ export default function HowToTour() {
   };
 
   const startTour = () => {
+    if (onStart) onStart();
     setStepIndex(0);
     setActive(true);
   };
@@ -190,7 +194,7 @@ export default function HowToTour() {
           boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
         }}
       >
-        ? How-to
+        How-to?
       </button>
 
       {active && (
