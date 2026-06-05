@@ -8,6 +8,8 @@ import StatBlock from '../components/StatBlock.jsx'
 import UpgradePrompt from '../components/UpgradePrompt.jsx'
 import AppFooter from '../components/AppFooter.jsx'
 
+const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
+
 function deriveClass(skills) {
   if (!skills?.length) return 'Adventurer'
   const counts = {}
@@ -83,7 +85,7 @@ export default function AccountPage() {
             Save your resume profile and track your skill progress
           </div>
           <div className="flex justify-center pt-2">
-            <SignInButton />
+            {paymentsEnabled && <SignInButton />}
           </div>
           <Link to="/app" className="block text-xs text-slate-400 hover:underline">
             ← Back to parser

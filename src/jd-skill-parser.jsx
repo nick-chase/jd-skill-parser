@@ -1076,7 +1076,7 @@ export default function App() {
 
                 {/* Auth bar */}
                 <div className="flex justify-end px-4 py-2">
-                    {user ? <UserMenu user={user} /> : <SignInButton />}
+                    {paymentsEnabled && (user ? <UserMenu user={user} /> : <SignInButton />)}
                 </div>
 
                 {/* Tabs — single nav, all screen sizes, sticky */}
