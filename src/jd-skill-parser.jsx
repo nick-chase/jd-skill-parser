@@ -17,6 +17,9 @@ import AppFooter from './components/AppFooter.jsx';
 import HowToTour from './components/HowToTour.jsx'
 import FeedbackForm from './components/FeedbackForm.jsx';
 
+const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
+const betaFeedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
+
 // ============================================================
 // CLASSIFICATION SYSTEM
 // ============================================================
@@ -940,33 +943,35 @@ export default function App() {
     const fileInputRef = useRef(null);
 
     useEffect(() => {
-        const { data: { subscription } } = onAuthStateChange(async (authUser) => {
-            setUser(authUser)
+        if (paymentsEnabled) {
+            const { data: { subscription } } = onAuthStateChange(async (authUser) => {
+                setUser(authUser)
 
-            if (authUser) {
-                // Ensure user row exists in public.users
-                await getOrCreateUser({ user: authUser })
+                if (authUser) {
+                    // Ensure user row exists in public.users
+                    await getOrCreateUser({ user: authUser })
 
-                // Load plan status and saved resume profile in parallel
-                const [planStatus, profile] = await Promise.all([
-                    getUserPlanStatus(authUser.id),
-                    loadResumeProfile(authUser.id),
-                ])
-                setIsPaidStatus(planStatus)
-                if (profile?.parsed_skills) {
-                    setResumeResults({
-                        technicalSignals: profile.parsed_skills,
-                        behavioralSignals: profile.parsed_soft_skills ?? []
-                    })
+                    // Load plan status and saved resume profile in parallel
+                    const [planStatus, profile] = await Promise.all([
+                        getUserPlanStatus(authUser.id),
+                        loadResumeProfile(authUser.id),
+                    ])
+                    setIsPaidStatus(planStatus)
+                    if (profile?.parsed_skills) {
+                        setResumeResults({
+                            technicalSignals: profile.parsed_skills,
+                            behavioralSignals: profile.parsed_soft_skills ?? []
+                        })
+                    }
+                } else {
+                    // Signed out — clear user-specific state
+                    setResumeResults(null)
+                    setIsPaidStatus(false)
                 }
-            } else {
-                // Signed out — clear user-specific state
-                setResumeResults(null)
-                setIsPaidStatus(false)
-            }
-        })
+            })
 
-        return () => subscription.unsubscribe()
+            return () => subscription.unsubscribe()
+        }
     }, []);
 
     const parse = async () => {
@@ -975,13 +980,15 @@ export default function App() {
             return;
         }
         setJdInputError(false);
-        const { allowed, remaining } = await checkAndIncrementParseCount(user, isPaid(user, isPaidStatus));
-        if (!allowed) {
-            setShowParseLimit(true);
-            return;
+        if (paymentsEnabled) {
+            const { allowed, remaining } = await checkAndIncrementParseCount(user, isPaid(user, isPaidStatus));
+            if (!allowed) {
+                setShowParseLimit(true);
+                return;
+            }
+            setParseCount(remaining);
+            setShowParseLimit(false);
         }
-        setParseCount(remaining);
-        setShowParseLimit(false);
 
         const { companyName: extractedCompany, jobRole: extractedRole } = parseCompanyAndRole(input);
         const meta = parseJobMeta(input);
@@ -1014,13 +1021,15 @@ export default function App() {
             setActiveTab('compare');
         }
         // Save to Supabase only for paid users — free users don't accumulate stored data
-        if (user?.id && isPaidStatus) {
-            await saveResumeProfile(
-                user.id,
-                parsed.technicalSignals,
-                parsed.behavioralSignals,
-                resumeInput
-            )
+        if (paymentsEnabled) {
+            if (user?.id && isPaidStatus) {
+                await saveResumeProfile(
+                    user.id,
+                    parsed.technicalSignals,
+                    parsed.behavioralSignals,
+                    resumeInput
+                )
+            }
         }
     };
 
@@ -1091,6 +1100,18 @@ export default function App() {
                                 {label}
                             </button>
                         ))}
+                        {betaFeedbackEnabled && (
+                            <button
+                                onClick={() => setActiveTab('feedback')}
+                                className={`flex-1 sm:flex-none py-3 px-4 sm:px-5 text-xs sm:text-sm font-semibold border-b-2 -mb-px transition-colors ${
+                                    activeTab === 'feedback'
+                                        ? 'border-indigo-600 text-indigo-600'
+                                        : 'border-transparent text-slate-500 hover:text-slate-700'
+                                }`}
+                            >
+                                Feedback
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -1148,22 +1169,19 @@ export default function App() {
                             </p>
                         )}
 
-                        {parseCount !== null && !isPaid(user, isPaidStatus) && (
+                        {paymentsEnabled && parseCount !== null && !isPaid(user, isPaidStatus) && (
                             <div className="text-xs text-slate-400 text-right">
                                 {parseCount} of {FREE_DAILY_LIMIT} parses remaining today
                             </div>
                         )}
 
-                        {showParseLimit && <UpgradePrompt reason="parse_limit" />}
+                        {paymentsEnabled && showParseLimit && <UpgradePrompt reason="parse_limit" />}
 
                         {results !== null && (
                             <>
                                 <ResultsView results={results.technicalSignals} companyName={companyName} jobRole={jobRole} jobMeta={jobMeta} />
                                 <BehavioralSignalsPanel signals={results.behavioralSignals} title="Behavioral Signals" />
                                 <JobDutiesPanel duties={results.jobDuties} />
-                                <div className="mt-8 border-t pt-6">
-                                    <FeedbackForm />
-                                </div>
                             </>
                         )}
                     </div>
@@ -1202,7 +1220,8 @@ export default function App() {
                                 />
                                 <button
                                     onClick={() => {
-                                        if (!isPaid(user, isPaidStatus)) {
+                                        const canUploadPDF = !paymentsEnabled || isPaidStatus;
+                                        if (!canUploadPDF) {
                                             setShowPdfLimit(true);
                                             return;
                                         }
@@ -1212,7 +1231,7 @@ export default function App() {
                                     className="text-xs px-2.5 py-1 border border-slate-300 rounded hover:bg-slate-100 transition"
                                     style={{ opacity: pdfStatus === 'loading' ? 0.5 : 1, cursor: pdfStatus === 'loading' ? 'not-allowed' : 'pointer' }}
                                 >
-                                    Upload PDF {!isPaid(user, isPaidStatus) ? '🔒' : ''}
+                                    Upload PDF {paymentsEnabled && !isPaidStatus ? '🔒' : ''}
                                 </button>
                             </div>
                         </div>
@@ -1228,7 +1247,7 @@ export default function App() {
                             <p className="text-xs text-red-600">Extraction failed — try a different file.</p>
                         )}
 
-                        {showPdfLimit && <UpgradePrompt reason="pdf" />}
+                        {paymentsEnabled && showPdfLimit && <UpgradePrompt reason="pdf" />}
 
                         <textarea
                             value={resumeInput}
@@ -1292,11 +1311,15 @@ export default function App() {
                                     decisionResult={getDecision(results, resumeResults)}
                                 />
                                 <AdSlot isPaid={isPaidStatus} />
-                                <div className="mt-8 border-t pt-6">
-                                    <FeedbackForm />
-                                </div>
                             </>
                         )}
+                    </div>
+                )}
+
+                {/* Feedback Tab */}
+                {betaFeedbackEnabled && activeTab === 'feedback' && (
+                    <div className="mt-6">
+                        <FeedbackForm />
                     </div>
                 )}
 
