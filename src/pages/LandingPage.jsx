@@ -26,10 +26,6 @@ export default function LandingPage() {
       <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
         <div className="font-bold text-slate-800 text-lg">⚔ Nat20</div>
         <div className="flex items-center gap-4">
-          <Link to="/pricing"
-                className="text-sm text-slate-500 hover:text-slate-700 transition">
-            Pricing
-          </Link>
           <Link to="/app"
                 className="text-sm px-4 py-2 bg-indigo-600 hover:bg-indigo-700
                            text-white rounded-lg font-medium transition">
@@ -40,10 +36,6 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 py-20 text-center space-y-6">
-        <div className="inline-block text-xs font-medium px-3 py-1 bg-indigo-50
-                        text-indigo-600 rounded-full border border-indigo-200">
-          Free to try — no account required
-        </div>
         <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 leading-tight">
           See exactly how your resume<br />
           <span className="text-indigo-600">stacks up against any job</span>
@@ -56,17 +48,9 @@ export default function LandingPage() {
           <Link to="/app"
                 className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700
                            text-white font-medium rounded-lg transition shadow-sm">
-            Start parsing free →
-          </Link>
-          <Link to="/pricing"
-                className="px-8 py-3 border border-slate-300 hover:bg-slate-50
-                           text-slate-700 font-medium rounded-lg transition">
-            See pricing
+            Start parsing →
           </Link>
         </div>
-        <p className="text-xs text-slate-400">
-          15 free parses/day · No credit card required · Upgrade anytime
-        </p>
       </section>
 
       {/* Demo placeholder */}
@@ -120,74 +104,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing */}
-      <section className="max-w-4xl mx-auto px-6 py-20">
-        <h2 className="text-2xl font-bold text-slate-800 text-center mb-12">
-          Simple pricing
-        </h2>
-        <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mx-auto">
-
-          {/* Free */}
-          <div className="border border-slate-200 rounded-xl p-6 space-y-4">
-            <div>
-              <div className="font-bold text-slate-800">Free</div>
-              <div className="text-3xl font-bold text-slate-800 mt-1">$0</div>
-              <div className="text-sm text-slate-400">forever</div>
-            </div>
-            <ul className="space-y-2">
-              {[
-                '15 JD parses per day',
-                'Unlimited resume parses',
-                'Full gap map every time',
-                'No account required',
-                'Ad-supported (upgrade to remove)',
-              ].map(f => (
-                <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
-                  <span className="text-slate-400">✓</span> {f}
-                </li>
-              ))}
-            </ul>
-            <Link to="/app"
-                  className="block text-center py-2.5 border border-slate-300
-                             rounded-lg text-sm font-medium hover:bg-slate-50 transition">
-              Start free
-            </Link>
-          </div>
-
-          {/* Pro */}
-          <div className="border-2 border-indigo-500 rounded-xl p-6 space-y-4
-                          relative overflow-hidden">
-            <div className="absolute top-3 right-3 text-xs px-2 py-0.5
-                            bg-indigo-600 text-white rounded-full">
-              Pro
-            </div>
-            <div>
-              <div className="font-bold text-slate-800">Pro</div>
-              <div className="text-3xl font-bold text-slate-800 mt-1">$9.99</div>
-              <div className="text-sm text-slate-400">per month</div>
-            </div>
-            <ul className="space-y-2">
-              {[
-                'Unlimited JD parses',
-                'PDF resume upload',
-                'Resume profile saved',
-                'Character sheet + XP tracking',
-                'No ads',
-              ].map(f => (
-                <li key={f} className="flex items-center gap-2 text-sm text-slate-600">
-                  <span className="text-indigo-500 font-bold">✓</span> {f}
-                </li>
-              ))}
-            </ul>
-            <Link to="/pricing"
-                  className="block text-center py-2.5 bg-indigo-600 hover:bg-indigo-700
-                             text-white rounded-lg text-sm font-medium transition">
-              Upgrade to Pro
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* FAQ */}
       <section className="bg-slate-50 border-t border-slate-100 py-20">
         <div className="max-w-2xl mx-auto px-6 space-y-8">
@@ -231,7 +147,6 @@ export default function LandingPage() {
             ⚔ Nat20 · Skill-based job matching, leveled.
           </div>
           <div className="flex items-center gap-6 text-sm text-slate-400">
-            <Link to="/pricing" className="hover:text-slate-600 transition">Pricing</Link>
             <Link to="/app" className="hover:text-slate-600 transition">App</Link>
             <Link to="/privacy" className="hover:text-slate-600 transition">Privacy</Link>
             <Link to="/terms" className="hover:text-slate-600 transition">Terms</Link>
