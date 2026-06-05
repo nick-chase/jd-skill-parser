@@ -2,13 +2,15 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { onAuthStateChange } from '../lib/auth.js'
 
+const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
+
 export default function LandingPage() {
   const navigate = useNavigate()
   const [checking, setChecking] = useState(true)
 
   useEffect(() => {
     const { data: { subscription } } = onAuthStateChange((user) => {
-      if (user) {
+      if (paymentsEnabled && user) {
         navigate('/app')
       } else {
         setChecking(false)
@@ -17,7 +19,7 @@ export default function LandingPage() {
     return () => subscription.unsubscribe()
   }, [navigate])
 
-  if (checking) return null
+  if (paymentsEnabled && checking) return null
 
   return (
     <div className="min-h-screen bg-white">
