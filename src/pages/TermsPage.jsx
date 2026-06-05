@@ -20,7 +20,7 @@ export default function TermsPage() {
           <h2 className="text-lg font-semibold text-slate-800">1. The service</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
             Nat20 is a browser-based tool that parses job descriptions and resumes to produce
-            a skill gap map. It is operated by Nick Chase ("we", "us"). By using Nat20 you agree
+            a skill gap map. It is operated by The team at Nat20 ("we", "us"). By using Nat20 you agree
             to these terms. If you do not agree, do not use the service.
           </p>
         </section>
@@ -48,7 +48,7 @@ export default function TermsPage() {
           </p>
           <p className="text-sm text-slate-600 leading-relaxed">
             We do not offer refunds for partial billing periods. If you believe you were charged
-            in error, contact <a href="mailto:nick@nat20app.com" className="text-indigo-600 hover:underline">nick@nat20app.com</a> within
+            in error, contact <a href="mailto:devteam@nat20app.com" className="text-indigo-600 hover:underline">devteam@nat20app.com</a> within
             14 days and we will review it.
           </p>
         </section>
@@ -122,7 +122,7 @@ export default function TermsPage() {
           <h2 className="text-lg font-semibold text-slate-800">Contact</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
             Questions about these terms?
-            Email <a href="mailto:nick@nat20app.com" className="text-indigo-600 hover:underline">nick@nat20app.com</a>.
+            Email <a href="mailto:devteam@nat20app.com" className="text-indigo-600 hover:underline">devteam@nat20app.com</a>.
           </p>
         </section>
       </main>

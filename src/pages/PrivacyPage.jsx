@@ -19,8 +19,8 @@ export default function PrivacyPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-slate-800">What Nat20 is</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
-            Nat20 is a skill-based resume and job description matching tool operated by Nick Chase
-            (<a href="mailto:nick@nat20app.com" className="text-indigo-600 hover:underline">nick@nat20app.com</a>).
+            Nat20 is a skill-based resume and job description matching tool operated by The team at Nat20
+            (<a href="mailto:devteam@nat20app.com" className="text-indigo-600 hover:underline">devteam@nat20app.com</a>).
             We are not a staffing agency and do not share your data with employers.
           </p>
         </section>
@@ -95,7 +95,7 @@ export default function PrivacyPage() {
             Signed-in users: your email address and subscription status are retained while
             your account is active. Pro users: your saved resume profile is retained until
             you request deletion. To delete your account and all associated data, email
-            <a href="mailto:nick@nat20app.com" className="text-indigo-600 hover:underline ml-1">nick@nat20app.com</a>.
+            <a href="mailto:devteam@nat20app.com" className="text-indigo-600 hover:underline ml-1">devteam@nat20app.com</a>.
             We will process deletion requests within 30 days.
           </p>
         </section>
@@ -106,7 +106,7 @@ export default function PrivacyPage() {
             You have the right to access, correct, or delete the personal data we hold about you.
             If you are in the EU or California, you also have the right to data portability and
             to object to processing. To exercise any of these rights, email
-            <a href="mailto:nick@nat20app.com" className="text-indigo-600 hover:underline ml-1">nick@nat20app.com</a>.
+            <a href="mailto:devteam@nat20app.com" className="text-indigo-600 hover:underline ml-1">devteam@nat20app.com</a>.
           </p>
         </section>
 
@@ -123,7 +123,7 @@ export default function PrivacyPage() {
           <h2 className="text-lg font-semibold text-slate-800">Contact</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
             Questions about this policy?
-            Email <a href="mailto:nick@nat20app.com" className="text-indigo-600 hover:underline">nick@nat20app.com</a>.
+            Email <a href="mailto:devteam@nat20app.com" className="text-indigo-600 hover:underline">devteam@nat20app.com</a>.
           </p>
         </section>
       </main>

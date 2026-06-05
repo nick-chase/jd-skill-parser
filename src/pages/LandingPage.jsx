@@ -235,7 +235,7 @@ export default function LandingPage() {
             <Link to="/app" className="hover:text-slate-600 transition">App</Link>
             <Link to="/privacy" className="hover:text-slate-600 transition">Privacy</Link>
             <Link to="/terms" className="hover:text-slate-600 transition">Terms</Link>
-            <a href="mailto:nick@nat20app.com"
+            <a href="mailto:devteam@nat20app.com"
                className="hover:text-slate-600 transition">Contact</a>
           </div>
         </div>

@@ -10,7 +10,7 @@ export function sendFeedback({ title, body, results }) {
             title,
             body,
             results,
-            to_email: 'nick@nat20app.com',
+            to_email: 'devteam@nat20app.com',
             name: 'Beta User',
             email: 'feedback@nat20app.com',
         }
