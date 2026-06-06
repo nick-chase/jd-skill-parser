@@ -67,11 +67,20 @@ function missingSuggestion(name) {
 
 // Generate a specific action string for a level-gap skill.
 function gapSuggestion(name, resumeLevel, requiredLevel) {
-  if (resumeLevel === 0) {
-    return `Add ${name} to a project or experience description so it appears with real context, not just in your skills list.`
+  if (resumeLevel <= 1) {
+    return `Your resume lists ${name} but shows no context. ` +
+      `If you have used it professionally or in a project, describe where, ` +
+      `how long, and what you accomplished. If you are still learning, ` +
+      `a documented hands-on project will build the evidence your resume needs.`
   }
-  if (requiredLevel - resumeLevel >= 2) {
-    return `Your ${name} evidence is at ${LEVEL_NAMES[resumeLevel]} — the role expects ${LEVEL_NAMES[requiredLevel]}. Use ${name} in a 3+ month project and document the outcome.`
+  if (resumeLevel === 2) {
+    return `You have some ${name} experience showing on your resume. ` +
+      `Add a duration, a specific outcome, and a scale detail to push this higher.`
+  }
+  if (resumeLevel >= 3) {
+    return `Your ${name} evidence is solid. ` +
+      `Add an ownership or leadership signal — led, architected, owned — ` +
+      `with a measurable outcome to close this gap.`
   }
   return `Add duration and a specific outcome to your ${name} experience to close the one-level gap.`
 }

@@ -430,11 +430,20 @@ function nameToResourceId(name) {
 }
 
 function getGapSuggestion(name, resumeLevel, requiredLevel) {
-    if (!resumeLevel || resumeLevel === 0) {
-        return `Add ${name} to a project or experience description so it appears with real context, not just in your skills list.`;
+    if (!resumeLevel || resumeLevel <= 1) {
+        return `Your resume lists ${name} but shows no context. ` +
+            `If you have used it professionally or in a project, describe where, ` +
+            `how long, and what you accomplished. If you are still learning, ` +
+            `a documented hands-on project will build the evidence your resume needs.`;
     }
-    if (requiredLevel - resumeLevel >= 2) {
-        return `Your ${name} evidence is at ${LEVEL_NAMES[resumeLevel]} — the role expects ${LEVEL_NAMES[requiredLevel]}. Use ${name} in a 3+ month project and document the outcome.`;
+    if (resumeLevel === 2) {
+        return `You have some ${name} experience showing on your resume. ` +
+            `Add a duration, a specific outcome, and a scale detail to push this higher.`;
+    }
+    if (resumeLevel >= 3) {
+        return `Your ${name} evidence is solid. ` +
+            `Add an ownership or leadership signal — led, architected, owned — ` +
+            `with a measurable outcome to close this gap.`;
     }
     return `Add duration and a specific outcome to your ${name} experience to close the one-level gap.`;
 }
@@ -553,13 +562,27 @@ function ResultsViewSimple({ results, companyName, jobRole, behavioralSignals, j
             </div>
 
             {/* What this role does — read first */}
-            <JobDutiesPanel duties={jobDuties} />
+            {jobDuties?.length > 0 && (
+                <>
+                    <div className="pl-3 border-l-2 border-slate-100 mb-4">
+                        <JobDutiesPanel duties={jobDuties} />
+                    </div>
+                    <div className="border-t border-slate-100 my-4" />
+                </>
+            )}
 
             {/* Behavioral expectations */}
-            <BehavioralSignalsPanel signals={behavioralSignals} title="Behavioral Expectations" />
+            {behavioralSignals?.length > 0 && (
+                <>
+                    <div className="pl-3 border-l-2 border-indigo-200 mb-4">
+                        <BehavioralSignalsPanel signals={behavioralSignals} title="Behavioral Expectations" />
+                    </div>
+                    <div className="border-t border-slate-100 my-4" />
+                </>
+            )}
 
             {requiredSkills.length > 0 && (
-                <div className="mb-4">
+                <div className="pl-3 border-l-2 border-slate-200 mb-4">
                     <SectionHeader label="Required Skills" count={requiredSkills.length} color="text-slate-700" />
                     {requiredSkills.map(skill => (
                         <SkillLine
@@ -715,23 +738,33 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
             </div>
 
             {/* Job duties — read what the role does first */}
-            <JobDutiesPanel duties={jobDuties} />
+            {jobDuties?.length > 0 && (
+                <>
+                    <div className="pl-3 border-l-2 border-slate-100 mb-4">
+                        <JobDutiesPanel duties={jobDuties} />
+                    </div>
+                    <div className="border-t border-slate-100 my-4" />
+                </>
+            )}
 
             {/* Behavioral signals — present vs missing */}
             {behavioralGap && (behavioralGap.matched.length > 0 || behavioralGap.missing.length > 0) && (
-                <div className="mb-3">
-                    <SectionHeader label="Behavioral Signals" color="text-slate-500" />
-                    <div className="mb-2">
-                        <div className="text-xs text-slate-400 mb-1">Present in your resume:</div>
-                        <SignalPills signals={behavioralGap.matched} emptyText="None matched" />
-                    </div>
-                    {behavioralGap.missing.length > 0 && (
-                        <div>
-                            <div className="text-xs text-slate-400 mb-1">Not found on resume:</div>
-                            <SignalPills signals={behavioralGap.missing} />
+                <>
+                    <div className="pl-3 border-l-2 border-indigo-200 mb-3">
+                        <SectionHeader label="Behavioral Signals" color="text-slate-500" />
+                        <div className="mb-2">
+                            <div className="text-xs text-slate-400 mb-1">Present in your resume:</div>
+                            <SignalPills signals={behavioralGap.matched} emptyText="None matched" />
                         </div>
-                    )}
-                </div>
+                        {behavioralGap.missing.length > 0 && (
+                            <div>
+                                <div className="text-xs text-slate-400 mb-1">Not found on resume:</div>
+                                <SignalPills signals={behavioralGap.missing} />
+                            </div>
+                        )}
+                    </div>
+                    <div className="border-t border-slate-100 my-4" />
+                </>
             )}
 
             {/* Matched skills */}
@@ -871,29 +904,32 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
 
                     {/* Remaining gaps — compact list */}
                     {remainingGaps.length > 0 && (
-                        <div>
-                            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">
-                                Other gaps — {remainingGaps.length}
-                            </div>
-                            <div className="border border-slate-100 rounded-xl overflow-hidden">
-                                {remainingGaps.map((skill, index) => (
-                                    <div key={skill.name}
-                                         className={`flex items-center justify-between px-3 py-2.5 text-sm
-                                                     ${index < remainingGaps.length - 1 ? 'border-b border-slate-100' : ''}
-                                                     hover:bg-slate-50 transition`}>
-                                        <span className="font-medium text-slate-600">{skill.name}</span>
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-xs text-slate-400">
-                                                {skill.resumeLevel
-                                                    ? (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`)
-                                                    : '—'} → {LEVEL_NAMES[skill.level] ?? `L${skill.level}`}
-                                            </span>
-                                            <span className="text-xs text-slate-400">{skill.category}</span>
+                        <>
+                            <div className="border-t border-slate-100 my-4" />
+                            <div className="pl-3 border-l-2 border-slate-100 mb-4">
+                                <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">
+                                    Other gaps — {remainingGaps.length}
+                                </div>
+                                <div className="border border-slate-100 rounded-xl overflow-hidden">
+                                    {remainingGaps.map((skill, index) => (
+                                        <div key={skill.name}
+                                             className={`flex items-center justify-between px-3 py-2.5 text-sm
+                                                         ${index < remainingGaps.length - 1 ? 'border-b border-slate-100' : ''}
+                                                         hover:bg-slate-50 transition`}>
+                                            <span className="font-medium text-slate-600">{skill.name}</span>
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-xs text-slate-400">
+                                                    {skill.resumeLevel
+                                                        ? (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`)
+                                                        : '—'} → {LEVEL_NAMES[skill.level] ?? `L${skill.level}`}
+                                                </span>
+                                                <span className="text-xs text-slate-400">{skill.category}</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        </>
                     )}
                 </div>
             )}
@@ -977,6 +1013,19 @@ function ResumeResultsView({ results, behavioralSignals }) {
                           ))
                         : <span className="text-xs text-slate-400">None detected</span>
                     }
+                </div>
+            </div>
+
+            {/* Education / Degrees */}
+            <div className="pl-3 border-l-2 border-slate-200 mb-4">
+                <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1.5">
+                    Education &amp; Degrees
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-400 italic">Degree detection coming soon</span>
+                    <span className="text-[10px] px-2 py-0.5 bg-slate-100 text-slate-400 rounded-full border border-slate-200">
+                        in development
+                    </span>
                 </div>
             </div>
 

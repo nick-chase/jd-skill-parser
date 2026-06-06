@@ -1,5 +1,5 @@
-// AdSlot — renders affiliate resource or EthicalAds unit for free users.
-// Paid users see nothing. Affiliate links take priority over ads.
+// AdSlot — renders affiliate resource for free users, or an "in development" placeholder.
+// Paid users see nothing. Affiliate links take priority.
 
 export default function AdSlot({ isPaid, skillId = null, resources = [] }) {
   if (isPaid) return null
@@ -37,16 +37,10 @@ export default function AdSlot({ isPaid, skillId = null, resources = [] }) {
 
   return (
     <div className="mt-4">
-      <div className="text-xs text-slate-300 text-right mb-1">
-        Ad — free tier
-      </div>
       <div
-        className="border border-dashed border-slate-200 rounded-lg p-4 bg-slate-50 text-center text-slate-400 text-xs"
-        data-ea-publisher="nat20"
-        data-ea-type="text"
+        className="border border-dashed border-slate-200 rounded-lg p-3 bg-slate-50 text-center text-xs text-slate-300"
       >
-        {/* EthicalAds unit loads here post-launch */}
-        <span className="text-slate-300">Sponsored — ethicalads.io</span>
+        In development
       </div>
     </div>
   )
