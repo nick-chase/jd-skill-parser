@@ -26,7 +26,12 @@ export default function LandingPage() {
 
       {/* Nav */}
       <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-        <div className="font-bold text-slate-800 text-lg">⚔ Nat20</div>
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-slate-800 text-lg">⚔ Nat20</span>
+          <span className="text-xs font-semibold px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full border border-amber-200 tracking-wide">
+            Beta
+          </span>
+        </div>
         <div className="flex items-center gap-4">
           <Link to="/app"
                 className="text-sm px-4 py-2 bg-indigo-600 hover:bg-indigo-700

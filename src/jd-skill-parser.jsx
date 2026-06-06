@@ -1297,8 +1297,11 @@ export default function App() {
 
                 {/* Header */}
                 <header className="mb-8">
-                    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-center">
+                    <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-center flex items-center justify-center gap-2">
                         <Link to="/" className="hover:opacity-80 transition-opacity">Nat20</Link>
+                        <span className="text-xs font-semibold px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full border border-amber-200 tracking-wide">
+                            Beta
+                        </span>
                     </h1>
                     <p className="text-sm sm:text-base text-slate-600 mt-2 text-center">
                         Skill-based job matching, leveled.
