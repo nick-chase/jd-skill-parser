@@ -407,6 +407,75 @@ To review our candidate privacy notice, click here.
 `;
 
 // ============================================================
+// SHARED DESIGN CONSTANTS
+// ============================================================
+
+const EVIDENCE_BANDS = [
+    { key: 'strong',    label: 'Strong Evidence',  levels: [4, 5], color: 'text-emerald-700' },
+    { key: 'supported', label: 'Supported',         levels: [3],    color: 'text-blue-700'   },
+    { key: 'limited',   label: 'Limited Evidence',  levels: [2],    color: 'text-amber-700'  },
+    { key: 'mentioned', label: 'Mentioned',         levels: [1],    color: 'text-slate-400'  },
+];
+
+// ============================================================
+// SHARED UI PRIMITIVES
+// ============================================================
+
+function SectionHeader({ label, count, color = 'text-slate-500' }) {
+    return (
+        <div className={`text-xs font-semibold uppercase tracking-wide mb-2 ${color}`}>
+            {label}{count !== undefined ? ` — ${count}` : ''}
+        </div>
+    );
+}
+
+function SkillLine({ name, meta, color = 'text-slate-700', bg = 'bg-slate-50', metaColor }) {
+    return (
+        <div className={`flex items-center justify-between py-1.5 px-3 rounded-lg ${bg} text-sm mb-1`}>
+            <span className={`font-medium ${color}`}>{name}</span>
+            {meta && (
+                <span className="text-xs text-slate-400"
+                      style={metaColor ? { color: metaColor } : undefined}>
+                    {meta}
+                </span>
+            )}
+        </div>
+    );
+}
+
+function SignalPills({ signals, emptyText = 'None detected' }) {
+    return (
+        <div className="flex flex-wrap gap-1.5">
+            {signals?.length > 0
+                ? signals.map(s => (
+                    <span key={s.name ?? s}
+                          className="text-xs px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full">
+                        {s.name ?? s}
+                    </span>
+                  ))
+                : <span className="text-xs text-slate-400">{emptyText}</span>
+            }
+        </div>
+    );
+}
+
+function CollapsibleSection({ label, count, color = 'text-slate-400', children }) {
+    const [open, setOpen] = useState(false);
+    return (
+        <div className="mb-4">
+            <button
+                onClick={() => setOpen(!open)}
+                className={`text-xs font-semibold uppercase tracking-wide flex items-center gap-2 w-full text-left mb-2 ${color}`}
+            >
+                {label}{count !== undefined ? ` — ${count} skill${count !== 1 ? 's' : ''}` : ''}
+                <span className="ml-auto">{open ? '▲' : '▼'}</span>
+            </button>
+            {open && children}
+        </div>
+    );
+}
+
+// ============================================================
 // UI COMPONENTS
 // ============================================================
 
@@ -428,79 +497,67 @@ function ResultsViewSimple({ results, companyName, jobRole }) {
         );
     }
 
-    const total = results.length;
-    const critical = results.filter(s => s.importance >= 5).length;
-    const required = results.filter(s => s.importance >= 4).length;
-    const avgLevel = (results.reduce((sum, s) => sum + s.level, 0) / total).toFixed(1);
-
-    const sorted = [...results].sort((a, b) => {
-        if (b.importance !== a.importance) return b.importance - a.importance;
-        return b.level - a.level;
-    });
+    const requiredSkills  = results.filter(s => s.importance >= 4)
+                                   .sort((a, b) => b.importance - a.importance || b.level - a.level);
+    const preferredSkills = results.filter(s => s.importance === 3);
+    const niceToHave      = results.filter(s => s.importance <= 2);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {/* Job Info */}
+        <div className="flex flex-col gap-4">
+
             {(companyName || jobRole) && (
                 <div style={{ backgroundColor: '#f0f9ff', border: '1px solid #0284c7', borderRadius: '8px', padding: '12px 16px' }}>
-                    {companyName && (
-                        <div style={{ fontSize: '14px', fontWeight: '600', color: '#0369a1' }}>{companyName}</div>
-                    )}
-                    {jobRole && (
-                        <div style={{ fontSize: '13px', color: '#0c4a6e', marginTop: '4px' }}>{jobRole}</div>
-                    )}
+                    {companyName && <div style={{ fontSize: '14px', fontWeight: '600', color: '#0369a1' }}>{companyName}</div>}
+                    {jobRole && <div style={{ fontSize: '13px', color: '#0c4a6e', marginTop: '4px' }}>{jobRole}</div>}
                 </div>
             )}
 
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {/* Stats Section - Using inline styles */}
-                <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '8px' }}>
-                    <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#0f172a', marginBottom: '12px' }}>Overview</h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        <div>
-                            <div style={{ fontSize: '12px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Total Skills</div>
-                            <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#0f172a' }}>{total}</div>
-                        </div>
-                        <div>
-                            <div style={{ fontSize: '12px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Critical</div>
-                            <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#b91c1c' }}>{critical}</div>
-                        </div>
-                        <div>
-                            <div style={{ fontSize: '12px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Required</div>
-                            <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#d97706' }}>{required}</div>
-                        </div>
-                        <div>
-                            <div style={{ fontSize: '12px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Avg Level</div>
-                            <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#0f172a' }}>{avgLevel}</div>
-                            <div style={{ fontSize: '12px', color: '#78716c', marginTop: '4px' }}>({LEVEL_NAMES[Math.round(avgLevel)]})</div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Skills Table - Using inline styles */}
-                <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '4px', overflowX: 'auto' }}>
-                    <div style={{ padding: '10px 8px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: '140px 145px 145px 115px 100px', gap: '8px' }}>
-                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Skill</div>
-                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Category</div>
-                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Level</div>
-                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Importance</div>
-                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Experience</div>
-                    </div>
-
+            <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#0f172a', marginBottom: '12px' }}>Role Requirements</h3>
+                <div className="grid grid-cols-3 gap-4">
                     <div>
-                        {sorted.map((skill, idx) => (
-                            <div key={skill.name} style={{ padding: '8px 6px', borderBottom: idx < sorted.length - 1 ? '1px solid #f1f5f9' : 'none', display: 'grid', gridTemplateColumns: '150px 150px 150px 125px 125px', gap: '2px', alignItems: 'center', backgroundColor: idx % 2 === 0 ? 'white' : '#f8fafc' }}>
-                                <div style={{ fontWeight: '500', color: '#0f172a', fontSize: '14px' }}>{skill.name}</div>
-                                <div style={{ fontSize: '12px', color: '#475569' }}>{skill.category}</div>
-                                <div style={{ fontSize: '12px', color: '#475569' }}>L{skill.level} · {LEVEL_NAMES[skill.level]}</div>
-                                <div><ImportanceBadge importance={skill.importance} /></div>
-                                <div style={{ fontSize: '12px', color: '#475569' }}>{skill.years ? `${skill.years}+ yrs` : '—'}</div>
-                            </div>
-                        ))}
+                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Skills Found</div>
+                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#0f172a' }}>{results.length}</div>
+                    </div>
+                    <div>
+                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Required</div>
+                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#d97706' }}>{requiredSkills.length}</div>
+                    </div>
+                    <div>
+                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Preferred</div>
+                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#0369a1' }}>{preferredSkills.length + niceToHave.length}</div>
                     </div>
                 </div>
             </div>
+
+            {requiredSkills.length > 0 && (
+                <div className="mb-4">
+                    <SectionHeader label="Required Skills" count={requiredSkills.length} color="text-slate-700" />
+                    {requiredSkills.map(skill => (
+                        <SkillLine
+                            key={skill.name}
+                            name={skill.name}
+                            meta={skill.importance === 5 ? `Critical · ${skill.category}` : skill.category}
+                        />
+                    ))}
+                </div>
+            )}
+
+            {preferredSkills.length > 0 && (
+                <CollapsibleSection label="Preferred" count={preferredSkills.length} color="text-blue-600">
+                    {preferredSkills.map(skill => (
+                        <SkillLine key={skill.name} name={skill.name} meta={skill.category} color="text-slate-500" />
+                    ))}
+                </CollapsibleSection>
+            )}
+
+            {niceToHave.length > 0 && (
+                <CollapsibleSection label="Nice to Have" count={niceToHave.length} color="text-slate-400">
+                    {niceToHave.map(skill => (
+                        <SkillLine key={skill.name} name={skill.name} meta={skill.category} color="text-slate-400" />
+                    ))}
+                </CollapsibleSection>
+            )}
         </div>
     );
 }
@@ -508,19 +565,9 @@ function ResultsViewSimple({ results, companyName, jobRole }) {
 function BehavioralSignalsPanel({ signals, title = 'Behavioral Signals' }) {
     if (!signals || signals.length === 0) return null;
     return (
-        <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden', marginTop: '12px' }}>
-            <div style={{ padding: '10px 16px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                <span style={{ fontSize: '12px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    {title} ({signals.length})
-                </span>
-            </div>
-            <div style={{ padding: '12px 16px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {signals.map(s => (
-                    <span key={s.name} style={{ fontSize: '12px', padding: '4px 10px', backgroundColor: '#f1f5f9', color: '#475569', borderRadius: '20px', fontWeight: '500' }}>
-                        {s.name}
-                    </span>
-                ))}
-            </div>
+        <div className="mb-4">
+            <SectionHeader label={title} count={signals.length} color="text-slate-500" />
+            <SignalPills signals={signals} />
         </div>
     );
 }
@@ -528,17 +575,13 @@ function BehavioralSignalsPanel({ signals, title = 'Behavioral Signals' }) {
 function JobDutiesPanel({ duties }) {
     if (!duties || duties.length === 0) return null;
     return (
-        <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden', marginTop: '12px' }}>
-            <div style={{ padding: '10px 16px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                <span style={{ fontSize: '12px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    What This Role Does
-                </span>
-                <span style={{ fontSize: '11px', color: '#94a3b8', marginLeft: '8px' }}>read and decide</span>
-            </div>
-            <ul style={{ margin: 0, padding: '12px 16px', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <div className="mb-4">
+            <SectionHeader label="What This Role Does" color="text-slate-500" />
+            <p className="text-xs text-slate-400 mb-2">Read and decide.</p>
+            <ul className="space-y-2">
                 {duties.map((duty, i) => (
-                    <li key={i} style={{ fontSize: '13px', color: '#374151', display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                        <span style={{ color: '#94a3b8', flexShrink: 0 }}>•</span>
+                    <li key={i} className="flex gap-2 items-start text-sm text-slate-600 leading-relaxed">
+                        <span className="text-slate-300 flex-shrink-0">•</span>
                         {duty}
                     </li>
                 ))}
@@ -558,24 +601,22 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
     const scoreLabel = score >= 70 ? 'Strong Match' : score >= 40 ? 'Partial Match' : 'Weak Match';
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className="flex flex-col gap-4">
 
             {/* Zero match warning */}
-            {
-                critical.length === 0 && levelGaps.length === 0 && matched.length === 0 && bonus.length > 0 && (
-                    <div style={{ backgroundColor: '#fefce8', border: '1px solid #fde047', borderRadius: '8px', padding: '12px 16px', fontSize: '13px', color: '#854d0e' }}>
-                        ⚠️ <strong>No tech skills detected in this job description.</strong> This role may be:
-                        <ul style={{ marginTop: '6px', marginLeft: '16px', lineHeight: '1.8' }}>
-                            <li>A <strong>non-tech role</strong> (construction, healthcare, hospitality, etc.)</li>
-                            <li>A <strong>highly specialized role</strong> using domain-specific tools not in our dictionary (e.g. plasma physics, legal software)</li>
-                            <li>A <strong>senior/research role</strong> that assumes skills without listing them explicitly</li>
-                        </ul>
-                        <div style={{ marginTop: '8px', color: '#713f12' }}>
-                            This tool is in development and currently aimed at <strong>Software Engineering, ML/AI, and Data Science</strong> roles.
-                        </div>
+            {critical.length === 0 && levelGaps.length === 0 && matched.length === 0 && bonus.length > 0 && (
+                <div style={{ backgroundColor: '#fefce8', border: '1px solid #fde047', borderRadius: '8px', padding: '12px 16px', fontSize: '13px', color: '#854d0e' }}>
+                    ⚠️ <strong>No tech skills detected in this job description.</strong> This role may be:
+                    <ul style={{ marginTop: '6px', marginLeft: '16px', lineHeight: '1.8' }}>
+                        <li>A <strong>non-tech role</strong> (construction, healthcare, hospitality, etc.)</li>
+                        <li>A <strong>highly specialized role</strong> using domain-specific tools not in our dictionary (e.g. plasma physics, legal software)</li>
+                        <li>A <strong>senior/research role</strong> that assumes skills without listing them explicitly</li>
+                    </ul>
+                    <div style={{ marginTop: '8px', color: '#713f12' }}>
+                        This tool is in development and currently aimed at <strong>Software Engineering, ML/AI, and Data Science</strong> roles.
                     </div>
-                )
-            }
+                </div>
+            )}
 
             {(companyName || jobRole) && (
                 <div style={{ backgroundColor: '#f0f9ff', border: '1px solid #0284c7', borderRadius: '8px', padding: '12px 16px' }}>
@@ -608,7 +649,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                 </div>
             )}
 
-            {/* Score Overview */}
+            {/* Score overview */}
             <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 items-center">
                     <div>
@@ -635,126 +676,104 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                 </div>
             </div>
 
-            {/* Missing Skills */}
-            {critical.length > 0 && (
-                <div style={{ backgroundColor: 'white', border: '1px solid #fecaca', borderRadius: '8px', overflowX: 'auto' }}>
-                    <div style={{ padding: '10px 16px', backgroundColor: '#fef2f2', borderBottom: '1px solid #fecaca' }}>
-                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#dc2626', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                            ❌ Missing Skills ({critical.length})
-                        </span>
-                        <span style={{ fontSize: '11px', color: '#991b1b', marginLeft: '8px' }}>Not found in your resume</span>
-                    </div>
-                    {critical.map((skill, idx) => (
-                        <SkillRow
-                            key={skill.name}
-                            skill={skill}
-                            variant="missing"
-                            idx={idx}
-                            isLast={idx === critical.length - 1}
-                        />
-                    ))}
-                </div>
-            )}
-
-            {/* Level Gaps */}
-            {levelGaps.length > 0 && (
-                <div style={{ backgroundColor: 'white', border: '1px solid #fed7aa', borderRadius: '8px', overflowX: 'auto' }}>
-                    <div style={{ padding: '10px 16px', backgroundColor: '#fff7ed', borderBottom: '1px solid #fed7aa' }}>
-                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#d97706', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                            ⚠️ Level Gaps ({levelGaps.length})
-                        </span>
-                        <span style={{ fontSize: '11px', color: '#92400e', marginLeft: '8px' }}>You have these but need more depth</span>
-                    </div>
-                    {levelGaps.map((skill, idx) => (
-                        <SkillRow
-                            key={skill.name}
-                            skill={skill}
-                            variant="gap"
-                            idx={idx}
-                            isLast={idx === levelGaps.length - 1}
-                        />
-                    ))}
-                </div>
-            )}
-
-            {/* Matched Skills */}
+            {/* Matched skills */}
             {matched.length > 0 && (
-                <div style={{ backgroundColor: 'white', border: '1px solid #bbf7d0', borderRadius: '8px', overflowX: 'auto' }}>
-                    <div style={{ padding: '10px 16px', backgroundColor: '#f0fdf4', borderBottom: '1px solid #bbf7d0' }}>
-                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#059669', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                            ✅ Matched Skills ({matched.length})
-                        </span>
-                        <span style={{ fontSize: '11px', color: '#065f46', marginLeft: '8px' }}>You meet or exceed the requirement</span>
-                    </div>
-                    {matched.map((skill, idx) => (
-                        <SkillRow
-                            key={skill.name}
-                            skill={skill}
-                            variant="matched"
-                            idx={idx}
-                            isLast={idx === matched.length - 1}
-                        />
-                    ))}
+                <div className="mb-2">
+                    <SectionHeader label="Matched" count={matched.length} color="text-emerald-700" />
+                    {matched.map(skill => {
+                        const resumeLabel = skill.resumeLevel === 'certified'
+                            ? 'Certified'
+                            : (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`);
+                        const jdLabel = LEVEL_NAMES[skill.level] ?? `L${skill.level}`;
+                        return (
+                            <div key={skill.name}
+                                 className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-emerald-50 text-sm mb-1">
+                                <span className="font-medium text-emerald-800">{skill.name}</span>
+                                <span className="text-xs text-emerald-600 ml-2 shrink-0">
+                                    You: {resumeLabel} · JD: {jdLabel}
+                                </span>
+                            </div>
+                        );
+                    })}
                 </div>
             )}
 
-            {/* Bonus Skills */}
-            {bonus.length > 0 && (
-                <div style={{ backgroundColor: 'white', border: '1px solid #ddd6fe', borderRadius: '8px', overflow: 'hidden' }}>
-                    <div style={{ padding: '10px 16px', backgroundColor: '#f5f3ff', borderBottom: '1px solid #ddd6fe' }}>
-                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                            🎁 Bonus Skills ({bonus.length})
-                        </span>
-                        <span style={{ fontSize: '11px', color: '#5b21b6', marginLeft: '8px' }}>You have these — JD didn't ask for them</span>
+            {/* Missing skills */}
+            {critical.length > 0 && (
+                <div className="mb-2">
+                    <SectionHeader label="Missing from Resume" count={critical.length} color="text-slate-600" />
+                    <div style={{ overflowX: 'auto' }}>
+                        {critical.map((skill, idx) => (
+                            <SkillRow
+                                key={skill.name}
+                                skill={skill}
+                                variant="missing"
+                                idx={idx}
+                                isLast={idx === critical.length - 1}
+                            />
+                        ))}
                     </div>
-                    <div style={{ padding: '10px 16px', display: 'grid', gridTemplateColumns: '140px 140px 140px 140px', gap: '8px' }}>
+                </div>
+            )}
+
+            {/* Level gaps */}
+            {levelGaps.length > 0 && (
+                <div className="mb-2">
+                    <SectionHeader label="Evidence Gaps" count={levelGaps.length} color="text-amber-700" />
+                    <p className="text-xs text-slate-400 mb-2">You have these skills but your resume needs stronger evidence.</p>
+                    <div style={{ overflowX: 'auto' }}>
+                        {levelGaps.map((skill, idx) => (
+                            <SkillRow
+                                key={skill.name}
+                                skill={skill}
+                                variant="gap"
+                                idx={idx}
+                                isLast={idx === levelGaps.length - 1}
+                            />
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Bonus skills — collapsed */}
+            {bonus.length > 0 && (
+                <CollapsibleSection label="Bonus Skills" count={bonus.length} color="text-violet-600">
+                    <div className="flex flex-wrap gap-1.5">
                         {bonus.map(skill => (
-                            <span key={skill.name} style={{ fontSize: '12px', padding: '4px 10px', backgroundColor: '#ede9fe', color: '#5b21b6', borderRadius: '20px', fontWeight: '500' }}>
+                            <span key={skill.name}
+                                  className="text-xs px-2.5 py-1 bg-violet-50 text-violet-700 border border-violet-200 rounded-full font-medium">
                                 {skill.name} · L{skill.level}
                             </span>
                         ))}
                     </div>
-                </div>
+                </CollapsibleSection>
             )}
 
-            {/* Behavioral Signals */}
+            {/* Behavioral signals */}
             {behavioralGap && (behavioralGap.matched.length > 0 || behavioralGap.missing.length > 0) && (
-                <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
-                    <div style={{ padding: '10px 16px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                            Behavioral Signals
-                        </span>
-                        <span style={{ fontSize: '11px', color: '#94a3b8', marginLeft: '8px' }}>
-                            {behavioralGap.matched.length} matched · {behavioralGap.missing.length} not found on resume
-                        </span>
+                <div className="mb-4">
+                    <SectionHeader label="Behavioral Signals" color="text-slate-500" />
+                    <div className="mb-2">
+                        <div className="text-xs text-slate-400 mb-1">Present in your resume:</div>
+                        <SignalPills signals={behavioralGap.matched} emptyText="None matched" />
                     </div>
-                    <div style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        {behavioralGap.matched.map(s => (
-                            <div key={s.name} style={{ fontSize: '13px', display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                <span style={{ color: '#059669', fontWeight: '700', width: '12px' }}>✓</span>
-                                <span style={{ fontWeight: '500', color: '#0f172a' }}>{s.name}</span>
-                                <span style={{ fontSize: '11px', color: '#64748b' }}>— found on resume</span>
-                            </div>
-                        ))}
-                        {behavioralGap.missing.map(s => (
-                            <div key={s.name} style={{ fontSize: '13px', display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                <span style={{ color: '#94a3b8', fontWeight: '700', width: '12px' }}>—</span>
-                                <span style={{ fontWeight: '500', color: '#0f172a' }}>{s.name}</span>
-                                <span style={{ fontSize: '11px', color: '#64748b' }}>— not found on resume</span>
-                            </div>
-                        ))}
-                    </div>
+                    {behavioralGap.missing.length > 0 && (
+                        <div>
+                            <div className="text-xs text-slate-400 mb-1">Not found on resume:</div>
+                            <SignalPills signals={behavioralGap.missing} />
+                        </div>
+                    )}
                 </div>
             )}
 
-            {/* Job Duties */}
+            {/* Job duties */}
             <JobDutiesPanel duties={jobDuties} />
 
         </div>
     );
 }
 
-function ResumeResultsView({ results }) {
+function ResumeResultsView({ results, behavioralSignals }) {
     const SOURCE_COLORS = {
         'Technical Skills': '#0369a1',
         'Education':        '#7c3aed',
@@ -765,14 +784,14 @@ function ResumeResultsView({ results }) {
 
     const skillResults = results.filter(s => s.level !== 'certified');
     const certResults  = results.filter(s => s.level === 'certified');
-
     const avgLevel = skillResults.length > 0
         ? (skillResults.reduce((s, r) => s + r.level, 0) / skillResults.length).toFixed(1)
         : '—';
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {/* Stats */}
+        <div className="flex flex-col gap-4">
+
+            {/* Profile summary bar */}
             <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#0f172a', marginBottom: '12px' }}>Your Profile</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -785,7 +804,7 @@ function ResumeResultsView({ results }) {
                         <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#0891b2' }}>{certResults.length}</div>
                     </div>
                     <div>
-                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>L1 Awareness</div>
+                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Mentioned</div>
                         <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#64748b' }}>{skillResults.filter(s => s.level === 1).length}</div>
                     </div>
                     <div>
@@ -795,45 +814,56 @@ function ResumeResultsView({ results }) {
                 </div>
             </div>
 
-            {/* Skills Table — L1–L5 skills only */}
-            {skillResults.length > 0 && (
-                <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '4px', overflowX: 'auto' }}>
-                    <div style={{ padding: '10px 8px', backgroundColor: '#f1f5f9', borderBottom: '1px solid #e2e8f0', display: 'grid', gridTemplateColumns: '150px 150px 100px 120px', gap: '8px' }}>
-                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Skill</div>
-                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Category</div>
-                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Level</div>
-                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#475569' }}>Source</div>
-                    </div>
-                    <div>
-                        {skillResults.map((skill, idx) => (
-                            <div key={skill.name} style={{ padding: '8px', borderBottom: idx < skillResults.length - 1 ? '1px solid #f1f5f9' : 'none', display: 'grid', gridTemplateColumns: '150px 150px 100px 120px', gap: '8px', alignItems: 'center', backgroundColor: idx % 2 === 0 ? 'white' : '#f8fafc' }}>
-                                <div style={{ fontWeight: '500', color: '#0f172a', fontSize: '14px' }}>{skill.name}</div>
-                                <div style={{ fontSize: '12px', color: '#475569' }}>{skill.category}</div>
-                                <div style={{ fontSize: '12px', color: '#475569' }}>L{skill.level} · {LEVEL_NAMES[skill.level]}</div>
-                                <div style={{ fontSize: '11px', fontWeight: '600', color: SOURCE_COLORS[skill.source] || '#64748b' }}>{skill.source}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
+            {/* Behavioral signals */}
+            <div className="mb-4">
+                <SectionHeader label="Behavioral Signals" count={behavioralSignals?.length ?? 0} color="text-slate-500" />
+                <SignalPills signals={behavioralSignals ?? []} />
+            </div>
 
-            {/* Certifications chips — credential-level evidence, no L1–L5 */}
-            {certResults.length > 0 && (
-                <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
-                    <div style={{ padding: '10px 16px', backgroundColor: '#ecfeff', borderBottom: '1px solid #a5f3fc' }}>
-                        <span style={{ fontSize: '12px', fontWeight: '700', color: '#0e7490', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                            Certifications ({certResults.length})
-                        </span>
-                    </div>
-                    <div style={{ padding: '12px 16px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                        {certResults.map(cert => (
-                            <span key={cert.name} style={{ fontSize: '12px', padding: '4px 12px', backgroundColor: '#cffafe', color: '#0e7490', borderRadius: '20px', fontWeight: '600', border: '1px solid #a5f3fc' }}>
+            {/* Certifications */}
+            <div className="mb-4">
+                <SectionHeader label="Certifications" color="text-slate-500" />
+                <div className="flex flex-wrap gap-1.5">
+                    {certResults.length > 0
+                        ? certResults.map(cert => (
+                            <span key={cert.name}
+                                  className="text-xs px-2.5 py-1 bg-indigo-50 text-indigo-600
+                                             border border-indigo-200 rounded-full">
                                 {cert.name}
                             </span>
+                          ))
+                        : <span className="text-xs text-slate-400">None detected</span>
+                    }
+                </div>
+            </div>
+
+            {/* Skills grouped by evidence band */}
+            {EVIDENCE_BANDS.map(band => {
+                const bandSkills = skillResults.filter(s => band.levels.includes(s.level));
+                if (bandSkills.length === 0) return null;
+
+                if (band.key === 'mentioned') {
+                    return (
+                        <CollapsibleSection key={band.key} label={band.label} count={bandSkills.length} color={band.color}>
+                            {bandSkills.map(skill => (
+                                <SkillLine key={skill.name} name={skill.name}
+                                           meta={skill.source} color="text-slate-400" />
+                            ))}
+                        </CollapsibleSection>
+                    );
+                }
+
+                return (
+                    <div key={band.key} className="mb-4">
+                        <SectionHeader label={band.label} count={bandSkills.length} color={band.color} />
+                        {bandSkills.map(skill => (
+                            <SkillLine key={skill.name} name={skill.name}
+                                       meta={skill.source}
+                                       metaColor={SOURCE_COLORS[skill.source]} />
                         ))}
                     </div>
-                </div>
-            )}
+                );
+            })}
         </div>
     );
 }
@@ -1180,7 +1210,7 @@ export default function App() {
                         {results !== null && (
                             <>
                                 <ResultsView results={results.technicalSignals} companyName={companyName} jobRole={jobRole} jobMeta={jobMeta} />
-                                <BehavioralSignalsPanel signals={results.behavioralSignals} title="Behavioral Signals" />
+                                <BehavioralSignalsPanel signals={results.behavioralSignals} title="Behavioral Expectations" />
                                 <JobDutiesPanel duties={results.jobDuties} />
                             </>
                         )}
@@ -1276,8 +1306,10 @@ export default function App() {
                                 </div>
                             ) : (
                                 <>
-                                    <ResumeResultsView results={resumeResults.technicalSignals} />
-                                    <BehavioralSignalsPanel signals={resumeResults.behavioralSignals} title="Behavioral Signals" />
+                                    <ResumeResultsView
+                                        results={resumeResults.technicalSignals}
+                                        behavioralSignals={resumeResults.behavioralSignals}
+                                    />
                                 </>
                             )
                         )}
