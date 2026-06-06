@@ -203,11 +203,11 @@ function getDurationModifier(wType, durationMonths) {
 }
 
 const LEVEL_MAP = [
-  { min: 1.80, level: 'L5', label: 'Expert' },
-  { min: 1.10, level: 'L4', label: 'Advanced' },
-  { min: 0.55, level: 'L3', label: 'Intermediate' },
-  { min: 0.25, level: 'L2', label: 'Novice' },
-  { min: 0.00, level: 'L1', label: 'Awareness' },
+  { min: 1.80, level: 'L5', label: 'Extensive evidence' },
+  { min: 1.10, level: 'L4', label: 'Strong evidence' },
+  { min: 0.55, level: 'L3', label: 'Supported' },
+  { min: 0.25, level: 'L2', label: 'Limited evidence' },
+  { min: 0.00, level: 'L1', label: 'Mentioned' },
 ]
 
 function mapLevel(score) {

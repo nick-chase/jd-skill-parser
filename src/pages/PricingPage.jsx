@@ -60,7 +60,7 @@ export default function PricingPage() {
             'Unlimited JD parses (free: 15/day)',
             'PDF resume upload',
             'Resume profile saved — no re-paste',
-            'Character sheet — skill XP bars + class',
+            'Skill profile — evidence strength per skill',
             'No ads',
           ].map(feature => (
             <li key={feature} className="flex items-center gap-3 text-sm text-slate-700">

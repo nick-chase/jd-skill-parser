@@ -22,15 +22,15 @@ function nameToResourceId(name) {
 
 const RESOURCE_MAP = resourceData.resources
 
-const LEVEL_NAMES  = ['—', 'Awareness', 'Novice', 'Intermediate', 'Advanced', 'Expert']
+const LEVEL_NAMES  = ['—', 'Mentioned', 'Limited evidence', 'Supported', 'Strong evidence', 'Extensive evidence']
 
 const LEVEL_TIPS = [
   '',
-  'L1 Awareness — basic familiarity; can recognize but not independently apply.',
-  'L2 Novice — limited practical experience; works with guidance.',
-  'L3 Intermediate — independent on routine tasks.',
-  'L4 Advanced — applies theory fluently; can guide others.',
-  'L5 Expert — recognized authority; drives innovation.',
+  'L1 Mentioned — skill appears on resume with no supporting context.',
+  'L2 Limited evidence — skill backed by coursework, short project, or brief mention.',
+  'L3 Supported — skill backed by project work or internship context.',
+  'L4 Strong evidence — skill backed by sustained job history or multiple contexts.',
+  'L5 Extensive evidence — skill backed by multi-year professional history across roles.',
 ]
 
 const IMPORTANCE_NAMES = ['—', 'Optional', 'Nice-to-have', 'Preferred', 'Required', 'Critical']
@@ -121,6 +121,7 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
       <div style={{ fontSize: '12px', color: '#059669' }} title={tip || undefined}>
         Your {resumeDisplay}{confidenceSuffix}
         {evidenceLine}
+        <span className="text-xs text-slate-400 block mt-0.5">resume evidence strength</span>
       </div>
     )
   } else if (isGap) {
@@ -129,6 +130,7 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
       <div style={{ fontSize: '12px', color: '#d97706' }} title={tip || undefined}>
         Your L{skill.resumeLevel} → Need L{skill.level}{confidenceSuffix}
         {evidenceLine}
+        <span className="text-xs text-slate-400 block mt-0.5">resume evidence strength</span>
       </div>
     )
   } else {

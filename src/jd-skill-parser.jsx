@@ -28,7 +28,7 @@ const betaFeedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true
 // Importance: inferred from JD section structure
 // ============================================================
 
-const LEVEL_NAMES = ['—', 'Awareness', 'Novice', 'Intermediate', 'Advanced', 'Expert'];
+const LEVEL_NAMES = ['—', 'Mentioned', 'Limited evidence', 'Supported', 'Strong evidence', 'Extensive evidence'];
 const IMPORTANCE_NAMES = ['—', 'Optional', 'Nice-to-have', 'Preferred', 'Required', 'Critical'];
 
 const IMPORTANCE_STYLES = {
@@ -1301,6 +1301,11 @@ export default function App() {
                             </div>
                         ) : (
                             <>
+                                <p className="text-xs text-slate-400 mb-4">
+                                    Scores reflect how your resume communicates each skill — not your actual ability.
+                                    If your resume understates a skill, edit it. If it overstates one, expect the gap
+                                    to surface in interviews.
+                                </p>
                                 <GapAnalysisView
                                     gap={runGapAnalysis(results.technicalSignals, resumeResults.technicalSignals)}
                                     behavioralGap={runBehavioralGap(results.behavioralSignals, resumeResults.behavioralSignals)}

@@ -43,9 +43,9 @@ export default function LandingPage() {
           <span className="text-indigo-600">your resume and the role.</span>
         </h1>
         <p className="text-lg text-slate-500 max-w-2xl mx-auto">
-          Paste a job description and your resume. Nat20 maps your skill gaps
-          by level — not just which keywords are missing, but how far behind
-          you actually are.
+          Paste a job description and your resume. Nat20 maps how strongly your
+          resume backs up each required skill — not just which keywords are
+          missing, but how well your resume communicates what you know.
         </p>
         <div className="flex items-center justify-center gap-4 pt-2">
           <Link to="/app"
@@ -84,12 +84,12 @@ export default function LandingPage() {
               {
                 icon: '🎯',
                 title: 'Skill gap map',
-                body: 'See which skills the JD requires, which you have, and exactly how far apart they are — by level, not just presence.'
+                body: 'See which skills the JD requires and how strongly your resume backs each one up — by evidence strength, not just keyword presence.'
               },
               {
                 icon: '⚔️',
                 title: 'Character sheet',
-                body: 'Your resume becomes a leveled stat block — skill proficiency mapped by category and evidence. See your skill distribution at a glance, not just which keywords you have.'
+                body: 'A visual breakdown of how your resume communicates each skill — grouped by category, scored by evidence. Not a mastery rating. A read on how your resume reads.'
               },
               {
                 icon: '📋',
@@ -132,7 +132,7 @@ export default function LandingPage() {
             },
             {
               q: 'What does the character sheet do?',
-              a: "Pro users get a D&D-style stat block showing their skill levels across categories — mapped from evidence on their resume, not self-reported. See your skill distribution at a glance."
+              a: "Pro users get a visual breakdown of how strongly their resume backs up each skill — grouped by category, based on where skills appear, how long, and what context. It is not a mastery score. It is a read on how your resume communicates each skill."
             },
             {
               q: 'Can I cancel anytime?',
