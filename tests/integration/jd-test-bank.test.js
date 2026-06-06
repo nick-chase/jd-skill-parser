@@ -38,10 +38,10 @@ const TEST_CASES = [
   {
     file:           'job_desc_2.txt',
     label:          'Data Engineering Intern',
-    minSkills:      0, // data-ops / warehouse tooling not yet in skill dictionary
+    minSkills:      2, // Data Warehousing + Microsoft Office confirmed; AI also present
     assertJobType:  false, // bug #2: Full-time text may override Internship detection
     jobType:        'Internship',
-    expectedSkills: [],
+    expectedSkills: ['Data Warehousing', 'Microsoft Office'],
   },
   {
     file:           'job_desc_3.txt',
@@ -78,10 +78,10 @@ const TEST_CASES = [
   {
     file:           'job_desc_7.txt',
     label:          'Automation Consultant (TCS)',
-    minSkills:      0, // banking / SWIFT / UAT domain not well covered by skill dictionary
+    minSkills:      2, // Testing + Core Banking + UAT + Payments + SWIFT confirmed
     assertJobType:  true,
     jobType:        'Full-time',
-    expectedSkills: [],
+    expectedSkills: ['Core Banking', 'UAT'],
   },
   {
     file:           'job_desc_8.txt',

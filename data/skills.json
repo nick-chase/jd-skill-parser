@@ -1,6 +1,6 @@
 {
-  "version": "2026.3",
-  "updated": "2026-06-01",
+  "version": "2026.4",
+  "updated": "2026-06-06",
   "skills": [
     { "id": "python", "canonical": "Python", "category": "Programming Language", "aliases": ["python"], "patterns": ["\\bpython\\b"], "guardWords": [] },
     { "id": "kotlin", "canonical": "Kotlin", "category": "Programming Language", "aliases": ["kotlin"], "patterns": ["\\bkotlin\\b"], "guardWords": [] },
@@ -81,6 +81,8 @@
     { "id": "big-data", "canonical": "Big Data", "category": "Big Data", "aliases": ["big data"], "patterns": ["\\bbig data\\b"], "guardWords": [] },
     { "id": "etl", "canonical": "ETL", "category": "Big Data", "aliases": ["etl", "extract transform load", "data integration"], "patterns": ["\\betl\\b", "\\bextract transform load\\b", "\\bdata integration\\b"], "guardWords": [] },
     { "id": "data-warehousing", "canonical": "Data Warehousing", "category": "Big Data", "aliases": ["data warehouse", "data warehousing"], "patterns": ["\\bdata warehouse\\b", "\\bdata warehousing\\b"], "guardWords": [] },
+    { "id": "data-modeling", "canonical": "Data Modeling", "category": "Big Data", "aliases": ["data modeling", "data modelling", "data model", "data architecture"], "patterns": ["\\bdata model(?:ing|s)?\\b", "\\bdata architecture\\b"], "guardWords": [] },
+    { "id": "data-lake", "canonical": "Data Lake", "category": "Big Data", "aliases": ["data lake", "data lakehouse", "data mesh"], "patterns": ["\\bdata lake\\b", "\\bdata lakehouse\\b", "\\bdata mesh\\b"], "guardWords": [] },
     { "id": "dbt", "canonical": "dbt", "category": "Big Data", "aliases": ["dbt", "data build tool"], "patterns": ["\\bdbt\\b", "\\bdata build tool\\b"], "guardWords": [] },
     { "id": "amazon-redshift", "canonical": "Amazon Redshift", "category": "Big Data", "aliases": ["redshift", "amazon redshift"], "patterns": ["\\bredshift\\b", "\\bamazon redshift\\b"], "guardWords": [] },
     { "id": "google-bigquery", "canonical": "BigQuery", "category": "Big Data", "aliases": ["bigquery", "google bigquery", "bq"], "patterns": ["\\bbigquery\\b", "\\bgoogle bigquery\\b"], "guardWords": [] },
@@ -212,12 +214,12 @@
 
     { "id": "graphics-api", "canonical": "Graphics API", "category": "Graphics", "aliases": ["graphics api", "directx", "opengl", "vulkan"], "patterns": ["\\bgraphics api\\b", "\\bdirectx\\b", "\\bopengl\\b", "\\bvulkan\\b"], "guardWords": [] },
 
-    { "id": "quality-assurance", "canonical": "Quality Assurance", "category": "Testing", "aliases": ["qa", "quality assurance", "quality control", "qc"], "patterns": ["\\bquality assurance\\b", "\\bQA\\b", "\\bquality control\\b", "\\bQC\\b"], "guardWords": [] },
+    { "id": "quality-assurance", "canonical": "Quality Assurance", "category": "Testing", "aliases": ["qa", "quality assurance", "quality control", "qc", "quality engineering"], "patterns": ["\\bquality assurance\\b", "\\bQA\\b", "\\bquality control\\b", "\\bQC\\b", "\\bquality engineering\\b"], "guardWords": [] },
     { "id": "unit-testing", "canonical": "Unit Testing", "category": "Testing", "aliases": ["unit test", "unit testing"], "patterns": ["\\bunit test\\b", "\\bunit testing\\b"], "guardWords": [] },
     { "id": "automated-testing", "canonical": "Automated Testing", "category": "Testing", "aliases": ["automated test", "test automation"], "patterns": ["\\bautomated test\\b", "\\btest automation\\b"], "guardWords": [] },
     { "id": "regression-testing", "canonical": "Regression Testing", "category": "Testing", "aliases": ["regression testing", "regression test"], "patterns": ["\\bregression test\\b", "\\bregression testing\\b"], "guardWords": [] },
     { "id": "integration-testing", "canonical": "Integration Testing", "category": "Testing", "aliases": ["integration testing", "integration test"], "patterns": ["\\bintegration test\\b", "\\bintegration testing\\b"], "guardWords": [] },
-    { "id": "end-to-end-testing", "canonical": "End-to-End Testing", "category": "Testing", "aliases": ["end-to-end testing", "e2e testing", "e2e test"], "patterns": ["\\bend[- ]to[- ]end test\\b", "\\be2e test\\b"], "guardWords": [] },
+    { "id": "end-to-end-testing", "canonical": "End-to-End Testing", "category": "Testing", "aliases": ["end-to-end testing", "e2e testing", "e2e test"], "patterns": ["\\bend[- ]to[- ]end test(?:ing)?\\b", "\\be2e test(?:ing)?\\b"], "guardWords": [] },
     { "id": "uat", "canonical": "UAT", "category": "Testing", "aliases": ["uat", "user acceptance testing"], "patterns": ["\\bUAT\\b", "\\buser acceptance test\\b"], "guardWords": [] },
     { "id": "database-testing", "canonical": "Database Testing", "category": "Testing", "aliases": ["database testing", "db testing"], "patterns": ["\\bdatabase testing\\b", "\\bdb testing\\b", "\\bdata base testing\\b"], "guardWords": [] },
     { "id": "api-testing", "canonical": "API Testing", "category": "Testing", "aliases": ["api testing"], "patterns": ["\\bapi testing\\b"], "guardWords": [] },
@@ -230,6 +232,12 @@
     { "id": "junit", "canonical": "JUnit", "category": "Testing", "aliases": ["junit"], "patterns": ["\\bjunit\\b"], "guardWords": [] },
     { "id": "postman", "canonical": "Postman", "category": "Testing", "aliases": ["postman"], "patterns": ["\\bpostman\\b"], "guardWords": [] },
     { "id": "testing", "canonical": "Testing", "category": "Testing", "aliases": ["testing"], "patterns": ["\\btesting\\b"], "guardWords": [] },
+    { "id": "software-testing", "canonical": "Software Testing", "category": "Testing", "aliases": ["software testing", "sw testing"], "patterns": ["\\bsoftware testing\\b", "\\bsw testing\\b"], "guardWords": [] },
+    { "id": "manual-testing", "canonical": "Manual Testing", "category": "Testing", "aliases": ["manual testing", "manual test"], "patterns": ["\\bmanual test(?:ing)?\\b"], "guardWords": [] },
+    { "id": "functional-testing", "canonical": "Functional Testing", "category": "Testing", "aliases": ["functional testing", "functional test", "smoke testing", "smoke test"], "patterns": ["\\bfunctional test(?:ing)?\\b", "\\bsmoke test(?:ing)?\\b"], "guardWords": [] },
+    { "id": "testng", "canonical": "TestNG", "category": "Testing", "aliases": ["testng", "TestNG"], "patterns": ["\\btestng\\b", "\\bTestNG\\b"], "guardWords": [] },
+    { "id": "test-plans", "canonical": "Test Planning", "category": "Testing", "aliases": ["test plan", "test plans", "test case", "test cases", "test strategy", "test suite"], "patterns": ["\\btest plan\\b", "\\btest cases?\\b", "\\btest strategy\\b", "\\btest suite\\b"], "guardWords": [] },
+    { "id": "bug-tracking", "canonical": "Bug Tracking", "category": "Testing", "aliases": ["bug tracking", "defect management", "defect tracking", "bug management"], "patterns": ["\\bbug tracking\\b", "\\bdefect management\\b", "\\bdefect tracking\\b", "\\bbug management\\b"], "guardWords": [] },
 
     { "id": "embedded-systems", "canonical": "Embedded Systems", "category": "Systems", "aliases": ["embedded", "embedded systems", "embedded software"], "patterns": ["\\bembedded\\b", "\\bembedded systems\\b", "\\bembedded software\\b"], "guardWords": [] },
     { "id": "linux-kernel", "canonical": "Linux Kernel", "category": "Systems", "aliases": ["linux kernel", "kernel module", "kernel development"], "patterns": ["\\blinux kernel\\b", "\\bkernel module\\b", "\\bkernel development\\b"], "guardWords": [] },
@@ -289,6 +297,7 @@
     { "id": "payments", "canonical": "Payments", "category": "Finance", "aliases": ["payment processing", "payments domain", "payment systems"], "patterns": ["\\bpayment processing\\b", "\\bpayments domain\\b", "\\bpayment systems\\b", "\\bpayment domain\\b"], "guardWords": [] },
     { "id": "core-banking", "canonical": "Core Banking", "category": "Finance", "aliases": ["core banking"], "patterns": ["\\bcore banking\\b"], "guardWords": [] },
     { "id": "financial-services", "canonical": "Financial Services", "category": "Finance", "aliases": ["financial services", "fintech", "banking domain"], "patterns": ["\\bfinancial services\\b", "\\bfintech\\b", "\\bbanking domain\\b"], "guardWords": [] },
+    { "id": "financial-analysis", "canonical": "Financial Analysis", "category": "Finance", "aliases": ["financial analysis", "financial modeling", "financial reporting", "financial analytics"], "patterns": ["\\bfinancial analysis\\b", "\\bfinancial model(?:ing)?\\b", "\\bfinancial reporting\\b", "\\bfinancial analytics\\b"], "guardWords": [] },
 
     { "id": "apache-maven", "canonical": "Maven", "category": "Build Tool", "aliases": ["maven", "apache maven"], "patterns": ["\\bmaven\\b", "\\bapache maven\\b"], "guardWords": [] },
     { "id": "gradle", "canonical": "Gradle", "category": "Build Tool", "aliases": ["gradle"], "patterns": ["\\bgradle\\b"], "guardWords": [] },
