@@ -39,14 +39,13 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 py-20 text-center space-y-6">
         <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 leading-tight">
-          Your resume isn't a list of skills.<br />
-          <span className="text-indigo-600">It's evidence of who you've become.</span>
+          Mind the gap between<br />
+          <span className="text-indigo-600">your resume and the role.</span>
         </h1>
         <p className="text-lg text-slate-500 max-w-2xl mx-auto">
-          Nat20 reads your resume the way a hiring system does — surfacing the gaps
-          between what you've done and what your resume says you've done. For
-          early-career users, that means turning a skills list into evidence. For
-          experienced users, it means reframing work you've already done.
+          Paste a job description and your resume. Nat20 maps your skill gaps
+          by level — not just which keywords are missing, but how far behind
+          you actually are.
         </p>
         <div className="flex items-center justify-center gap-4 pt-2">
           <Link to="/app"
@@ -90,7 +89,7 @@ export default function LandingPage() {
               {
                 icon: '⚔️',
                 title: 'Character sheet',
-                body: 'Your resume becomes a leveled stat block — skill proficiency mapped by category, evidence, and context. See where you stand at a glance, not just what keywords you have.'
+                body: 'Your resume becomes a leveled stat block — skill proficiency mapped by category and evidence. See your skill distribution at a glance, not just which keywords you have.'
               },
               {
                 icon: '📋',
@@ -120,12 +119,12 @@ export default function LandingPage() {
               a: 'Right now Nat20 is optimized for Software Engineering, ML/AI, and Data Science roles. Finance and other industries are planned for later this year.'
             },
             {
-              q: 'Is my resume data stored?',
-              a: "Free users: nothing is stored — results disappear when you close the tab. Pro users: your parsed resume profile is saved so you don't have to re-paste on return visits."
-            },
-            {
               q: 'Who is this for?',
               a: "Early-career job seekers — students, bootcamp grads, new grads — who need to turn a skills list into evidence-backed bullets. And experienced professionals or career changers who have done the work but need to reframe how their resume describes it. The gap looks different depending on where you are. The tool reads the same signal either way."
+            },
+            {
+              q: 'Is my resume data stored?',
+              a: "Free users: nothing is stored — results disappear when you close the tab. Pro users: your parsed resume profile is saved so you don't have to re-paste on return visits."
             },
             {
               q: 'How is this different from other resume tools?',
@@ -133,7 +132,7 @@ export default function LandingPage() {
             },
             {
               q: 'What does the character sheet do?',
-              a: "Pro users get a D&D-style stat block showing their skill levels across categories — like an XP bar for your career. It tracks how your skills grow across job searches."
+              a: "Pro users get a D&D-style stat block showing their skill levels across categories — mapped from evidence on their resume, not self-reported. See your skill distribution at a glance."
             },
             {
               q: 'Can I cancel anytime?',
@@ -152,7 +151,7 @@ export default function LandingPage() {
       <footer className="border-t border-slate-100 py-8 px-6">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="text-sm text-slate-400">
-            ⚔ Nat20 · Skill-based job matching, leveled.
+            ⚔ Nat20 · Mind the gap.
           </div>
           <div className="flex items-center gap-6 text-sm text-slate-400">
             <Link to="/app" className="hover:text-slate-600 transition">App</Link>
