@@ -39,12 +39,14 @@ export default function LandingPage() {
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 py-20 text-center space-y-6">
         <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 leading-tight">
-          See exactly how your resume<br />
-          <span className="text-indigo-600">stacks up against any job</span>
+          Your resume isn't a list of skills.<br />
+          <span className="text-indigo-600">It's evidence of who you've become.</span>
         </h1>
         <p className="text-lg text-slate-500 max-w-2xl mx-auto">
-          Paste a job description and your resume. Nat20 maps the skill gaps,
-          levels your proficiency, and shows you what to fix — in seconds.
+          Nat20 reads your resume the way a hiring system does — surfacing the gaps
+          between what you've done and what your resume says you've done. For
+          early-career users, that means turning a skills list into evidence. For
+          experienced users, it means reframing work you've already done.
         </p>
         <div className="flex items-center justify-center gap-4 pt-2">
           <Link to="/app"
@@ -122,8 +124,12 @@ export default function LandingPage() {
               a: "Free users: nothing is stored — results disappear when you close the tab. Pro users: your parsed resume profile is saved so you don't have to re-paste on return visits."
             },
             {
+              q: 'Who is this for?',
+              a: "Early-career job seekers — students, bootcamp grads, new grads — who need to turn a skills list into evidence-backed bullets. And experienced professionals or career changers who have done the work but need to reframe how their resume describes it. The gap looks different depending on where you are. The tool reads the same signal either way."
+            },
+            {
               q: 'How is this different from other resume tools?',
-              a: "Most resume scanners give you a keyword match score and a list of missing words. Nat20 gives you a skill proficiency map — it tells you not just what's missing, but how far behind you are and what to do about it. And at $9.99/mo, it's a fraction of the cost of premium alternatives."
+              a: "Most resume scanners give you a keyword match score and a list of missing words. Nat20 gives you a skill proficiency map — it shows not just what's missing, but how the evidence on your resume lines up against what the role requires. And at $9.99/mo, it's a fraction of the cost of premium alternatives."
             },
             {
               q: 'What does the character sheet do?',

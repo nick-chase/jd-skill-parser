@@ -1,7 +1,8 @@
-# Nat20 — Skill-Based Job Matching, Leveled
+# Nat20 — Close the Gap Between Your Work and Your Resume
 
-A web app that parses job descriptions and resumes to identify skill
-gaps, proficiency levels, and decision-readiness for tech roles.
+A web app that reads your resume the way a hiring system does —
+surfacing the gaps between what you've done and what your resume says
+you've done, for both early-career and experienced job seekers.
 
 🔗 **[Live App](https://jd-skill-parser.vercel.app)**
 
@@ -11,9 +12,14 @@ gaps, proficiency levels, and decision-readiness for tech roles.
 
 ## What It Does
 
-Nat20 answers one question for tech job seekers:
+Nat20 answers one question for anyone targeting a specific job:
 
 > **Based on how my resume reads today, how well does it match this job description?**
+
+For early-career users — students, bootcamp grads, new grads — that usually means
+turning a skills list into evidence-backed bullets. For experienced professionals
+and career changers, it usually means reframing existing work so the resume
+reflects what was actually done. Same parser, different gap.
 
 Instead of a vague "match percentage," it shows you the signal clearly across three panels:
 
