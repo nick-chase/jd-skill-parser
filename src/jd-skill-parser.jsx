@@ -16,6 +16,7 @@ import AdSlot from './components/AdSlot.jsx';
 import AppFooter from './components/AppFooter.jsx';
 import HowToTour from './components/HowToTour.jsx'
 import FeedbackForm from './components/FeedbackForm.jsx';
+import resourceData from '@data/resources.json';
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
 const betaFeedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
@@ -417,13 +418,34 @@ const EVIDENCE_BANDS = [
     { key: 'mentioned', label: 'Mentioned',         levels: [1],    color: 'text-slate-400'  },
 ];
 
+const RESOURCE_MAP = resourceData.resources;
+
+function nameToResourceId(name) {
+    return (name || '')
+        .toLowerCase()
+        .replace(/\./g, '')
+        .replace(/[/\s]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/[^a-z0-9-]/g, '');
+}
+
+function getGapSuggestion(name, resumeLevel, requiredLevel) {
+    if (!resumeLevel || resumeLevel === 0) {
+        return `Add ${name} to a project or experience description so it appears with real context, not just in your skills list.`;
+    }
+    if (requiredLevel - resumeLevel >= 2) {
+        return `Your ${name} evidence is at ${LEVEL_NAMES[resumeLevel]} — the role expects ${LEVEL_NAMES[requiredLevel]}. Use ${name} in a 3+ month project and document the outcome.`;
+    }
+    return `Add duration and a specific outcome to your ${name} experience to close the one-level gap.`;
+}
+
 // ============================================================
 // SHARED UI PRIMITIVES
 // ============================================================
 
 function SectionHeader({ label, count, color = 'text-slate-500' }) {
     return (
-        <div className={`text-xs font-semibold uppercase tracking-wide mb-2 ${color}`}>
+        <div className={`text-xs font-semibold uppercase tracking-wide mb-1.5 ${color}`}>
             {label}{count !== undefined ? ` — ${count}` : ''}
         </div>
     );
@@ -431,7 +453,7 @@ function SectionHeader({ label, count, color = 'text-slate-500' }) {
 
 function SkillLine({ name, meta, color = 'text-slate-700', bg = 'bg-slate-50', metaColor }) {
     return (
-        <div className={`flex items-center justify-between py-1.5 px-3 rounded-lg ${bg} text-sm mb-1`}>
+        <div className={`flex items-center justify-between py-1 px-2.5 rounded-lg ${bg} text-sm mb-1`}>
             <span className={`font-medium ${color}`}>{name}</span>
             {meta && (
                 <span className="text-xs text-slate-400"
@@ -445,11 +467,11 @@ function SkillLine({ name, meta, color = 'text-slate-700', bg = 'bg-slate-50', m
 
 function SignalPills({ signals, emptyText = 'None detected' }) {
     return (
-        <div className="flex flex-wrap gap-1.5">
+        <div className="flex flex-wrap gap-1">
             {signals?.length > 0
                 ? signals.map(s => (
                     <span key={s.name ?? s}
-                          className="text-xs px-2.5 py-1 bg-slate-100 text-slate-600 rounded-full">
+                          className="text-xs px-2.5 py-0.5 bg-slate-100 text-slate-600 rounded-full">
                         {s.name ?? s}
                     </span>
                   ))
@@ -487,7 +509,7 @@ function ImportanceBadge({ importance }) {
     );
 }
 
-function ResultsViewSimple({ results, companyName, jobRole }) {
+function ResultsViewSimple({ results, companyName, jobRole, behavioralSignals, jobDuties }) {
     if (results.length === 0) {
         return (
             <div className="text-sm text-slate-500 p-8 text-center border border-dashed border-slate-300 rounded-lg bg-white">
@@ -529,6 +551,12 @@ function ResultsViewSimple({ results, companyName, jobRole }) {
                     </div>
                 </div>
             </div>
+
+            {/* What this role does — read first */}
+            <JobDutiesPanel duties={jobDuties} />
+
+            {/* Behavioral expectations */}
+            <BehavioralSignalsPanel signals={behavioralSignals} title="Behavioral Expectations" />
 
             {requiredSkills.length > 0 && (
                 <div className="mb-4">
@@ -594,6 +622,16 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
     if (!gap) return null;
 
     const { critical, levelGaps, matched, bonus } = gap;
+
+    // Sort gaps: required/critical first, then by gap size descending
+    const sortedGaps = [...levelGaps].sort((a, b) => {
+        const aReq = a.importance >= 4 ? 1 : 0;
+        const bReq = b.importance >= 4 ? 1 : 0;
+        if (bReq !== aReq) return bReq - aReq;
+        return (b.level - (b.resumeLevel ?? 0)) - (a.level - (a.resumeLevel ?? 0));
+    });
+    const topGaps       = sortedGaps.slice(0, 3);
+    const remainingGaps = sortedGaps.slice(3);
 
     // Use the decision engine's matchScore as the single source of truth (fixes B-FIX-01).
     const score = decisionResult?.matchScore ?? 0;
@@ -676,6 +714,26 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                 </div>
             </div>
 
+            {/* Job duties — read what the role does first */}
+            <JobDutiesPanel duties={jobDuties} />
+
+            {/* Behavioral signals — present vs missing */}
+            {behavioralGap && (behavioralGap.matched.length > 0 || behavioralGap.missing.length > 0) && (
+                <div className="mb-3">
+                    <SectionHeader label="Behavioral Signals" color="text-slate-500" />
+                    <div className="mb-2">
+                        <div className="text-xs text-slate-400 mb-1">Present in your resume:</div>
+                        <SignalPills signals={behavioralGap.matched} emptyText="None matched" />
+                    </div>
+                    {behavioralGap.missing.length > 0 && (
+                        <div>
+                            <div className="text-xs text-slate-400 mb-1">Not found on resume:</div>
+                            <SignalPills signals={behavioralGap.missing} />
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* Matched skills */}
             {matched.length > 0 && (
                 <div className="mb-2">
@@ -687,7 +745,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                         const jdLabel = LEVEL_NAMES[skill.level] ?? `L${skill.level}`;
                         return (
                             <div key={skill.name}
-                                 className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-emerald-50 text-sm mb-1">
+                                 className="flex items-center justify-between py-1 px-2.5 rounded-lg bg-emerald-50 text-sm mb-1">
                                 <span className="font-medium text-emerald-800">{skill.name}</span>
                                 <span className="text-xs text-emerald-600 ml-2 shrink-0">
                                     You: {resumeLabel} · JD: {jdLabel}
@@ -716,58 +774,143 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                 </div>
             )}
 
-            {/* Level gaps */}
+            {/* Evidence Gaps — Focus Zone */}
             {levelGaps.length > 0 && (
                 <div className="mb-2">
-                    <SectionHeader label="Evidence Gaps" count={levelGaps.length} color="text-amber-700" />
-                    <p className="text-xs text-slate-400 mb-2">You have these skills but your resume needs stronger evidence.</p>
-                    <div style={{ overflowX: 'auto' }}>
-                        {levelGaps.map((skill, idx) => (
-                            <SkillRow
-                                key={skill.name}
-                                skill={skill}
-                                variant="gap"
-                                idx={idx}
-                                isLast={idx === levelGaps.length - 1}
-                            />
-                        ))}
+
+                    <div className="text-xs font-semibold uppercase tracking-wide text-amber-700 mb-2">
+                        Top gaps to address — {topGaps.length} of {levelGaps.length}
                     </div>
+
+                    {/* Focus Zone — top 3 */}
+                    <div className="border border-amber-200 rounded-xl bg-amber-50/40 p-4 space-y-4 mb-4">
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs font-semibold text-amber-700 uppercase tracking-wide">
+                                Focus here first
+                            </span>
+                            <div className="flex-1 h-px bg-amber-200" />
+                        </div>
+
+                        {topGaps.map((skill, index) => {
+                            const resources = RESOURCE_MAP[nameToResourceId(skill.name)] ?? [];
+                            const freeResources = resources.filter(r => !r.affiliate).slice(0, 2);
+                            const affiliateResource = resources.find(r => r.affiliate);
+                            const resumeLabel = skill.resumeLevel
+                                ? (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`)
+                                : 'Not evidenced';
+                            const jdLabel = LEVEL_NAMES[skill.level] ?? `L${skill.level}`;
+                            const suggestion = getGapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level);
+
+                            return (
+                                <div key={skill.name}
+                                     className={`pb-4 ${index < topGaps.length - 1 ? 'border-b border-amber-100' : ''}`}>
+
+                                    {/* Skill header */}
+                                    <div className="flex items-start justify-between gap-2 mb-2">
+                                        <span className="font-semibold text-slate-800 text-sm">{skill.name}</span>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <span className="text-xs text-amber-600 font-medium">
+                                                {resumeLabel} → {jdLabel}
+                                            </span>
+                                            <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full border border-amber-200">
+                                                {IMPORTANCE_NAMES[skill.importance] ?? 'Required'}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Suggestion sentence */}
+                                    <div className="text-xs text-slate-500 italic mb-2">{suggestion}</div>
+
+                                    {/* Evidence checklist */}
+                                    <div className="text-xs font-medium text-slate-600 mb-1">
+                                        To strengthen your {skill.name} evidence, add:
+                                    </div>
+                                    <div className="space-y-0.5 pl-1 mb-3">
+                                        {[
+                                            'Where you used it (job title or project name)',
+                                            'How long (months or years)',
+                                            'What you built or accomplished',
+                                            'One specific outcome or scale detail',
+                                        ].map(item => (
+                                            <div key={item} className="flex items-start gap-1.5 text-xs text-slate-500">
+                                                <span className="text-amber-300 mt-0.5 flex-shrink-0">☐</span>
+                                                <span>{item}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Resources */}
+                                    {(freeResources.length > 0 || affiliateResource) && (
+                                        <div className="space-y-1">
+                                            {freeResources.map(r => (
+                                                <a key={r.url} href={r.url}
+                                                   target="_blank" rel="noopener noreferrer"
+                                                   className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 transition">
+                                                    <span className="text-slate-300">→</span>
+                                                    {r.title}
+                                                    <span className="text-slate-300 ml-auto">Free</span>
+                                                </a>
+                                            ))}
+                                            {affiliateResource && (
+                                                <a href={affiliateResource.url}
+                                                   target="_blank" rel="noopener noreferrer"
+                                                   className="flex items-center gap-2 text-xs mt-2 px-3 py-2 bg-white border border-indigo-200 text-indigo-700 rounded-lg hover:bg-indigo-50 transition">
+                                                    <span>📚</span>
+                                                    <span className="font-medium">{affiliateResource.title}</span>
+                                                    <span className="text-[10px] text-indigo-400 ml-auto">
+                                                        {affiliateResource.platform} · affiliate
+                                                    </span>
+                                                </a>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Remaining gaps — compact list */}
+                    {remainingGaps.length > 0 && (
+                        <div>
+                            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">
+                                Other gaps — {remainingGaps.length}
+                            </div>
+                            <div className="border border-slate-100 rounded-xl overflow-hidden">
+                                {remainingGaps.map((skill, index) => (
+                                    <div key={skill.name}
+                                         className={`flex items-center justify-between px-3 py-2.5 text-sm
+                                                     ${index < remainingGaps.length - 1 ? 'border-b border-slate-100' : ''}
+                                                     hover:bg-slate-50 transition`}>
+                                        <span className="font-medium text-slate-600">{skill.name}</span>
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-xs text-slate-400">
+                                                {skill.resumeLevel
+                                                    ? (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`)
+                                                    : '—'} → {LEVEL_NAMES[skill.level] ?? `L${skill.level}`}
+                                            </span>
+                                            <span className="text-xs text-slate-400">{skill.category}</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
             {/* Bonus skills — collapsed */}
             {bonus.length > 0 && (
                 <CollapsibleSection label="Bonus Skills" count={bonus.length} color="text-violet-600">
-                    <div className="flex flex-wrap gap-1.5">
+                    <div className="flex flex-wrap gap-1">
                         {bonus.map(skill => (
                             <span key={skill.name}
-                                  className="text-xs px-2.5 py-1 bg-violet-50 text-violet-700 border border-violet-200 rounded-full font-medium">
+                                  className="text-xs px-2.5 py-0.5 bg-violet-50 text-violet-700 border border-violet-200 rounded-full font-medium">
                                 {skill.name} · L{skill.level}
                             </span>
                         ))}
                     </div>
                 </CollapsibleSection>
             )}
-
-            {/* Behavioral signals */}
-            {behavioralGap && (behavioralGap.matched.length > 0 || behavioralGap.missing.length > 0) && (
-                <div className="mb-4">
-                    <SectionHeader label="Behavioral Signals" color="text-slate-500" />
-                    <div className="mb-2">
-                        <div className="text-xs text-slate-400 mb-1">Present in your resume:</div>
-                        <SignalPills signals={behavioralGap.matched} emptyText="None matched" />
-                    </div>
-                    {behavioralGap.missing.length > 0 && (
-                        <div>
-                            <div className="text-xs text-slate-400 mb-1">Not found on resume:</div>
-                            <SignalPills signals={behavioralGap.missing} />
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* Job duties */}
-            <JobDutiesPanel duties={jobDuties} />
 
         </div>
     );
@@ -789,45 +932,45 @@ function ResumeResultsView({ results, behavioralSignals }) {
         : '—';
 
     return (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
 
             {/* Profile summary bar */}
-            <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#0f172a', marginBottom: '12px' }}>Your Profile</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 16px' }}>
+                <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#0f172a', marginBottom: '10px' }}>Your Profile</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div>
-                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Skills</div>
-                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#0f172a' }}>{skillResults.length}</div>
+                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>Skills</div>
+                        <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#0f172a' }}>{skillResults.length}</div>
                     </div>
                     <div>
-                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Certifications</div>
-                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#0891b2' }}>{certResults.length}</div>
+                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>Certifications</div>
+                        <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#0891b2' }}>{certResults.length}</div>
                     </div>
                     <div>
-                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Mentioned</div>
-                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#64748b' }}>{skillResults.filter(s => s.level === 1).length}</div>
+                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>Mentioned</div>
+                        <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#64748b' }}>{skillResults.filter(s => s.level === 1).length}</div>
                     </div>
                     <div>
-                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Avg Level</div>
-                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#0f172a' }}>{avgLevel}</div>
+                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '2px' }}>Avg Level</div>
+                        <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#0f172a' }}>{avgLevel}</div>
                     </div>
                 </div>
             </div>
 
             {/* Behavioral signals */}
-            <div className="mb-4">
+            <div className="mb-3">
                 <SectionHeader label="Behavioral Signals" count={behavioralSignals?.length ?? 0} color="text-slate-500" />
                 <SignalPills signals={behavioralSignals ?? []} />
             </div>
 
             {/* Certifications */}
-            <div className="mb-4">
+            <div className="mb-3">
                 <SectionHeader label="Certifications" color="text-slate-500" />
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-1">
                     {certResults.length > 0
                         ? certResults.map(cert => (
                             <span key={cert.name}
-                                  className="text-xs px-2.5 py-1 bg-indigo-50 text-indigo-600
+                                  className="text-xs px-2.5 py-0.5 bg-indigo-50 text-indigo-600
                                              border border-indigo-200 rounded-full">
                                 {cert.name}
                             </span>
@@ -854,7 +997,7 @@ function ResumeResultsView({ results, behavioralSignals }) {
                 }
 
                 return (
-                    <div key={band.key} className="mb-4">
+                    <div key={band.key} className="mb-3">
                         <SectionHeader label={band.label} count={bandSkills.length} color={band.color} />
                         {bandSkills.map(skill => (
                             <SkillLine key={skill.name} name={skill.name}
@@ -868,7 +1011,7 @@ function ResumeResultsView({ results, behavioralSignals }) {
     );
 }
 
-function ResultsView({ results, companyName, jobRole, jobMeta }) {
+function ResultsView({ results, companyName, jobRole, jobMeta, behavioralSignals, jobDuties }) {
     if (results.length === 0) {
         return (
             <div className="text-sm text-slate-500 p-8 text-center border border-dashed border-slate-300 rounded-lg bg-white">
@@ -877,7 +1020,16 @@ function ResultsView({ results, companyName, jobRole, jobMeta }) {
         );
     }
 
-    return <ResultsViewSimple results={results} companyName={companyName} jobRole={jobRole} jobMeta={jobMeta} />;
+    return (
+        <ResultsViewSimple
+            results={results}
+            companyName={companyName}
+            jobRole={jobRole}
+            jobMeta={jobMeta}
+            behavioralSignals={behavioralSignals}
+            jobDuties={jobDuties}
+        />
+    );
 }
 
 // ============================================================
@@ -1208,11 +1360,14 @@ export default function App() {
                         {paymentsEnabled && showParseLimit && <UpgradePrompt reason="parse_limit" />}
 
                         {results !== null && (
-                            <>
-                                <ResultsView results={results.technicalSignals} companyName={companyName} jobRole={jobRole} jobMeta={jobMeta} />
-                                <BehavioralSignalsPanel signals={results.behavioralSignals} title="Behavioral Expectations" />
-                                <JobDutiesPanel duties={results.jobDuties} />
-                            </>
+                            <ResultsView
+                                results={results.technicalSignals}
+                                companyName={companyName}
+                                jobRole={jobRole}
+                                jobMeta={jobMeta}
+                                behavioralSignals={results.behavioralSignals}
+                                jobDuties={results.jobDuties}
+                            />
                         )}
                     </div>
                 )}
