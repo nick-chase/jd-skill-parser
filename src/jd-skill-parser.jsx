@@ -486,16 +486,27 @@ function SectionHeader({ label, count, color = 'text-slate-500' }) {
     );
 }
 
-function SkillLine({ name, meta, color = 'text-slate-700', bg = 'bg-slate-50', metaColor }) {
+function SkillLine({ name, meta, color = 'text-slate-700', bg = 'bg-slate-50', metaColor, evidenceText, level, confidence }) {
+    const hasEvidence = evidenceText != null || level != null;
     return (
-        <div className={`flex items-center justify-between py-1 px-2.5 rounded-lg ${bg} text-sm mb-1`}>
-            <span className={`font-medium ${color}`}>{name}</span>
-            {meta && (
-                <span className="text-xs text-slate-400"
-                      style={metaColor ? { color: metaColor } : undefined}>
-                    {meta}
-                </span>
+        <div className={`flex items-center gap-2 py-1 px-2.5 rounded-lg ${bg} text-sm mb-1`}>
+            <span className={`font-medium ${color} shrink-0`}>{name}</span>
+            {hasEvidence && (
+                <span className="text-xs text-gray-400 flex-1 min-w-0 truncate">{evidenceText}</span>
             )}
+            <div className="flex items-center gap-2 ml-auto shrink-0">
+                {level != null && (
+                    <span className="text-xs text-slate-500 flex items-center">
+                        L{level}<ConfidenceDot confidence={confidence} />
+                    </span>
+                )}
+                {meta && (
+                    <span className="text-xs text-slate-400"
+                          style={metaColor ? { color: metaColor } : undefined}>
+                        {meta}
+                    </span>
+                )}
+            </div>
         </div>
     );
 }
@@ -1069,7 +1080,9 @@ function ResumeResultsView({ results, behavioralSignals }) {
                         <CollapsibleSection key={band.key} label={band.label} count={bandSkills.length} color={band.color}>
                             {bandSkills.map(skill => (
                                 <SkillLine key={skill.name} name={skill.name}
-                                           meta={skill.source} color="text-slate-400" />
+                                           meta={skill.source} color="text-slate-400"
+                                           evidenceText={evidenceSummary(skill)}
+                                           level={skill.level} confidence={skill.confidence} />
                             ))}
                         </CollapsibleSection>
                     );
@@ -1081,7 +1094,9 @@ function ResumeResultsView({ results, behavioralSignals }) {
                         {bandSkills.map(skill => (
                             <SkillLine key={skill.name} name={skill.name}
                                        meta={skill.source}
-                                       metaColor={SOURCE_COLORS[skill.source]} />
+                                       metaColor={SOURCE_COLORS[skill.source]}
+                                       evidenceText={evidenceSummary(skill)}
+                                       level={skill.level} confidence={skill.confidence} />
                         ))}
                     </div>
                 );
