@@ -2,30 +2,32 @@ Found 24 resume files
 
 ══════════════════════════════════
 FILE: Data Analyst.txt
-Skills detected: 1
+Skills detected: 2
   Statistics — L5 — Experience (unknown duration)
+  Data Modeling — L1 — Summary (unknown duration)
 Behavioral: Attention to Detail, Communication
 
 ══════════════════════════════════
 FILE: Data analyst2.txt
 Skills detected: 3
   Statistics — L4 — Experience (unknown duration)
-  Jenkins — L3 — Experience (unknown duration)
-  Data Visualization — L1 — Technical Skills (unknown duration)
+  Jenkins — L4 — Experience (unknown duration)
+  Data Visualization — L1 — Summary (unknown duration)
 Behavioral: Communication
-⚠️  1 skill(s) possibly misclassified
 
 ══════════════════════════════════
 FILE: dataentryclerk2.txt
-Skills detected: 1
+Skills detected: 2
   Data Entry — L5 — Experience (unknown duration)
+  Microsoft Word — Lcertified — Certifications (unknown duration)
 Behavioral: Accuracy
 
 ══════════════════════════════════
 FILE: datatentryclerk1.txt
-Skills detected: 2
+Skills detected: 3
   Data Entry — L5 — Experience (unknown duration)
   Monitoring — L1 — Technical Skills (unknown duration)
+  Microsoft Office — Lcertified — Certifications (unknown duration)
 Behavioral: Accuracy, Adaptability, Attention to Detail, Organization
 ⚠️  1 skill(s) possibly misclassified
 
@@ -33,17 +35,23 @@ Behavioral: Accuracy, Adaptability, Attention to Detail, Organization
 FILE: desktopsupport1.txt
 Skills detected: 3
   Desktop Support — L5 — Experience (unknown duration)
-  Data Entry — L3 — Experience (unknown duration)
-  Technical Support — L3 — Experience (unknown duration)
+  Technical Support — L4 — Experience (unknown duration)
+  Data Entry — L4 — Experience (unknown duration)
 Behavioral: Communication, Troubleshooting
 
 ══════════════════════════════════
 FILE: embeddedsoftwareengineer.txt
-Skills detected: 2
-  Python — L3 — Experience (unknown duration)
+Skills detected: 8
+  API Development — L4 — Experience (unknown duration)
+  Python — L4 — Experience (unknown duration)
   C++ — L1 — Technical Skills (unknown duration)
+  Embedded Systems — L1 — Summary (unknown duration)
+  Open Source — L1 — Technical Skills (unknown duration)
+  Software Optimization — L1 — Technical Skills (unknown duration)
+  CSSLP — Lcertified — Certifications (unknown duration)
+  PMP — Lcertified — Certifications (unknown duration)
 Behavioral: Accuracy, Communication, Teamwork
-⚠️  1 skill(s) possibly misclassified
+⚠️  3 skill(s) possibly misclassified
 
 ══════════════════════════════════
 FILE: frontenddeveloper.txt
@@ -61,16 +69,18 @@ Behavioral: Innovation
 
 ══════════════════════════════════
 FILE: javadev.txt
-Skills detected: 3
+Skills detected: 4
   Java — L5 — Experience (unknown duration)
   Testing — L4 — Experience (unknown duration)
   Object-Oriented Programming — L1 — Technical Skills (unknown duration)
+  OCAJP — Lcertified — Certifications (unknown duration)
 Behavioral: Attention to Detail, Collaboration, Communication, Problem-Solving, Troubleshooting
 ⚠️  1 skill(s) possibly misclassified
 
 ══════════════════════════════════
 FILE: seniorengineer.txt
-Skills detected: 1
+Skills detected: 2
+  Monitoring — L1 — Summary (unknown duration)
   Python — L1 — Technical Skills (unknown duration)
 Behavioral: Root Cause Analysis, Troubleshooting
 ⚠️  1 skill(s) possibly misclassified
@@ -91,68 +101,75 @@ Behavioral: none
 
 ══════════════════════════════════
 FILE: softarchitect2.txt
-Skills detected: 2
-  Jenkins — L4 — Experience (unknown duration)
+Skills detected: 3
+  Jenkins — L5 — Experience (unknown duration)
   Project Management — L1 — Technical Skills (unknown duration)
+  PMP — Lcertified — Certifications (unknown duration)
 Behavioral: Active Listening, Attention to Detail, Collaboration, Communication, Critical Thinking, Mentoring, Troubleshooting
 ⚠️  1 skill(s) possibly misclassified
 
 ══════════════════════════════════
 FILE: softdev2.txt
-Skills detected: 8
-  C++ — L4 — Experience (unknown duration)
-  JavaScript — L4 — Experience (unknown duration)
-  Testing — L4 — Experience (unknown duration)
+Skills detected: 10
+  C++ — L5 — Experience (unknown duration)
+  JavaScript — L5 — Experience (unknown duration)
+  Testing — L5 — Experience (unknown duration)
   Financial Services — L4 — Experience (unknown duration)
-  C# — L1 — Technical Skills (unknown duration)
+  C# — L2 — Certifications (unknown duration)
+  Data Management — L1 — Summary (unknown duration)
   Encryption — L1 — Technical Skills (unknown duration)
   Microsoft Excel — L1 — Technical Skills (unknown duration)
   Python — L1 — Technical Skills (unknown duration)
+  Microsoft Certified — Lcertified — Certifications (unknown duration)
 Behavioral: Collaboration, Leadership, Mentoring, Teamwork, Troubleshooting
-⚠️  4 skill(s) possibly misclassified
+⚠️  3 skill(s) possibly misclassified
 
 ══════════════════════════════════
 FILE: ssoftdev1.txt
-Skills detected: 7
-  C++ — L2 — Experience (unknown duration)
+Skills detected: 8
+  C++ — L3 — Experience (unknown duration)
+  Linux — L3 — Experience (unknown duration)
   HTML — L2 — Experience (unknown duration)
-  Linux — L2 — Experience (unknown duration)
   Monitoring — L2 — Experience (unknown duration)
   PHP — L2 — Experience (unknown duration)
   .NET — L1 — Technical Skills (unknown duration)
   C# — L1 — Technical Skills (unknown duration)
+  Testing — L1 — Summary (unknown duration)
 Behavioral: none
 ⚠️  2 skill(s) possibly misclassified
 
 ══════════════════════════════════
 FILE: supportspecialist.txt
-Skills detected: 2
-  Helpdesk — L3 — Experience (unknown duration)
+Skills detected: 3
+  Helpdesk — L4 — Experience (unknown duration)
   Cybersecurity — L1 — Education (unknown duration)
+  CISSP — Lcertified — Certifications (unknown duration)
 Behavioral: Communication
 
 ══════════════════════════════════
 FILE: swe.txt
 Skills detected: 3
-  C++ — L4 — Experience (unknown duration)
+  C++ — L5 — Experience (unknown duration)
+  Python — L5 — Experience (unknown duration)
   HTML — L4 — Experience (unknown duration)
-  Python — L4 — Experience (unknown duration)
 Behavioral: Attention to Detail, Collaboration, Communication, Problem-Solving
 
 ══════════════════════════════════
 FILE: swe2.txt
-Skills detected: 3
+Skills detected: 5
   Algorithms — L5 — Experience (unknown duration)
-  Technical Writing — L4 — Experience (unknown duration)
+  Technical Writing — L5 — Experience (unknown duration)
   Data Structures — L1 — Technical Skills (unknown duration)
+  Azure — Lcertified — Certifications (unknown duration)
+  Microsoft Certified — Lcertified — Certifications (unknown duration)
 Behavioral: Critical Thinking, Leadership, Technical Writing, Troubleshooting
 ⚠️  1 skill(s) possibly misclassified
 
 ══════════════════════════════════
 FILE: sysadmin1.txt
 Skills detected: 4
-  Active Directory — L2 — Experience (unknown duration)
-  Jenkins — L2 — Experience (unknown duration)
+  Active Directory — L3 — Experience (unknown duration)
+  Jenkins — L3 — Experience (unknown duration)
   HTML — L1 — Technical Skills (unknown duration)
   JavaScript — L1 — Technical Skills (unknown duration)
 Behavioral: none
@@ -160,19 +177,23 @@ Behavioral: none
 
 ══════════════════════════════════
 FILE: sysadmin2.txt
-Skills detected: 3
+Skills detected: 4
   Linux — L3 — Experience (unknown duration)
   Monitoring — L3 — Experience (unknown duration)
-  Firewall — L2 — Experience (unknown duration)
+  Firewall — L3 — Experience (unknown duration)
+  CompTIA Security+ — L1 — Technical Skills (unknown duration)
 Behavioral: Reliability, Troubleshooting
+⚠️  1 skill(s) possibly misclassified
 
 ══════════════════════════════════
 FILE: sysegineer2.txt
-Skills detected: 4
-  Encryption — L4 — Experience (unknown duration)
-  Technical Support — L4 — Experience (unknown duration)
+Skills detected: 6
+  Encryption — L5 — Experience (unknown duration)
+  Technical Support — L5 — Experience (unknown duration)
   Azure — L1 — Technical Skills (unknown duration)
   Project Management — L1 — Technical Skills (unknown duration)
+  Technical Writing — L1 — Summary (unknown duration)
+  PMP — Lcertified — Certifications (unknown duration)
 Behavioral: Communication, Reliability, Technical Writing, Troubleshooting
 ⚠️  2 skill(s) possibly misclassified
 
@@ -180,37 +201,43 @@ Behavioral: Communication, Reliability, Technical Writing, Troubleshooting
 FILE: sysengineer1.txt
 Skills detected: 4
   Testing — L4 — Experience (unknown duration)
-  C — L3 — Experience (unknown duration)
-  Technical Writing — L3 — Experience (unknown duration)
+  C — L4 — Experience (unknown duration)
+  Technical Writing — L4 — Experience (unknown duration)
   Systems Analysis — L1 — Technical Skills (unknown duration)
 Behavioral: Collaboration, Communication, Cross-Functional Collaboration, Problem-Solving, Technical Writing
 ⚠️  1 skill(s) possibly misclassified
 
 ══════════════════════════════════
 FILE: systemanalyst1.txt
-Skills detected: 2
-  Business Analysis — L2 — Experience (unknown duration)
-  Functional Analysis — L2 — Experience (unknown duration)
+Skills detected: 5
+  Business Analysis — L3 — Experience (unknown duration)
+  Functional Analysis — L3 — Experience (unknown duration)
+  Functional Testing — L3 — Experience (unknown duration)
+  Systems Analysis — L1 — Summary (unknown duration)
+  PMP — Lcertified — Certifications (unknown duration)
 Behavioral: Attention to Detail, Collaboration, Troubleshooting
 
 ══════════════════════════════════
 FILE: systemanalyst2.txt
-Skills detected: 5
-  Business Analysis — L2 — Experience (unknown duration)
+Skills detected: 7
+  Business Analysis — L3 — Experience (unknown duration)
   Jenkins — L2 — Experience (unknown duration)
   Statistics — L1 — Education (unknown duration)
   HTML — L1 — Technical Skills (unknown duration)
   SharePoint — L1 — Technical Skills (unknown duration)
+  Systems Analysis — L1 — Summary (unknown duration)
+  PMP — Lcertified — Certifications (unknown duration)
 Behavioral: Communication
 ⚠️  2 skill(s) possibly misclassified
 
 ══════════════════════════════════
 FILE: technicalprogrammanager.txt
-Skills detected: 4
+Skills detected: 5
   Documentation — L2 — Experience (unknown duration)
   Jenkins — L2 — Experience (unknown duration)
   Microsoft Office — L1 — Technical Skills (unknown duration)
   Microsoft Project — L1 — Technical Skills (unknown duration)
+  PMP — Lcertified — Certifications (unknown duration)
 Behavioral: Collaboration
 ⚠️  2 skill(s) possibly misclassified
 
@@ -223,7 +250,7 @@ Behavioral: Attention to Detail, Collaboration, Communication, Time Management
 ══════════════════════════════════
 SUMMARY
 Total resumes: 24
-Total skills detected: 84
-Avg skills per resume: 3.5
+Total skills detected: 111
+Avg skills per resume: 4.6
 Resumes with 0 skills: 0
 Resumes with misclassified evidence: 16

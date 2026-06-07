@@ -142,9 +142,22 @@ describe('classifyEvidenceType()', () => {
     expect(classifyEvidenceType('experience', 'Temp Data Analyst')).toBe(0.65)
   })
 
-  // Personal project → 0.5
-  test('projects section → 0.5', () => {
-    expect(classifyEvidenceType('projects', '')).toBe(0.5)
+  // Personal project — no measurable outcome → 0.30
+  test('projects section, no outcome text → 0.30', () => {
+    expect(classifyEvidenceType('projects', '')).toBe(0.30)
+  })
+
+  // Personal project — with measurable outcome → 0.50
+  test('projects section, percentage outcome → 0.50', () => {
+    expect(classifyEvidenceType('projects', '', 'Reduced load time by 40%')).toBe(0.50)
+  })
+
+  test('projects section, user count outcome → 0.50', () => {
+    expect(classifyEvidenceType('projects', '', 'Deployed app used by 500+ users')).toBe(0.50)
+  })
+
+  test('projects section, impact verb + number → 0.50', () => {
+    expect(classifyEvidenceType('projects', '', 'Improved throughput by 3x, serving 200 customers')).toBe(0.50)
   })
 
   // Academic / coursework → 0.4
@@ -170,9 +183,9 @@ describe('classifyEvidenceType()', () => {
     expect(classifyEvidenceType('bootcamp', '')).toBe(0.55)
   })
 
-  // Project with no-outcome marker → 0.30
-  test('projects section, no-outcome marker → 0.30', () => {
-    expect(classifyEvidenceType('projects', 'no-outcome')).toBe(0.30)
+  // Project with no outcome text → 0.30
+  test('projects section, empty blockText → 0.30', () => {
+    expect(classifyEvidenceType('projects', '', '')).toBe(0.30)
   })
 
   // Case-insensitive section names
@@ -180,8 +193,8 @@ describe('classifyEvidenceType()', () => {
     expect(classifyEvidenceType('Experience', 'Data Scientist')).toBe(1.0)
   })
 
-  test('Projects (capitalised) → 0.5', () => {
-    expect(classifyEvidenceType('Projects', '')).toBe(0.5)
+  test('Projects (capitalised), no outcome text → 0.30', () => {
+    expect(classifyEvidenceType('Projects', '')).toBe(0.30)
   })
 
   // Work history / employment variants

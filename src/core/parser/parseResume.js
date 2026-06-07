@@ -202,11 +202,13 @@ function extractSkillsFromEducation(text) {
 }
 
 function extractSkillsFromProjects(text) {
+    const wType = classifyEvidenceType('projects', '', text)
     return matchSkillsInText(text).map(({ canonical, category }) => ({
         canonical, category,
-        wType: classifyEvidenceType('projects', ''),
+        wType,
         durationMonths: null,
         sectionName: 'projects',
+        bulletText: text,
     }))
 }
 
@@ -282,7 +284,8 @@ function extractSkillsFromExperience(text) {
     for (const block of jobBlocks) {
         const titleLine = block.split('\n')[0]
         const roleTitle = titleLine.split('|')[0].split(',')[0].trim()
-        const durationMonths = parseDateRange(block.split('\n').slice(0, 3).find(l => MONTH_PATTERN.test(l.trim()) || YEAR_PATTERN.test(l.trim()))?.trim() ?? '') ?? extractDateFromTitleLine(titleLine)
+        const dateLine = block.split('\n').slice(0, 3).find(l => MONTH_PATTERN.test(l.trim()) || YEAR_PATTERN.test(l.trim()))?.trim() ?? ''
+        const durationMonths = parseDateRange(dateLine) ?? extractDateFromTitleLine(titleLine)
         const wType = classifyEvidenceType('experience', roleTitle)
 
         for (const { canonical, category } of matchSkillsInText(block)) {
@@ -338,7 +341,10 @@ export function parseResume(text) {
         const { score, level: levelStr, confidence, primarySignal, suggestion } = scoreSkillEvidence(instances)
         const level = levelStr === 'certified' ? 'certified' : parseInt(levelStr.slice(1), 10)
         const source = SECTION_SOURCE_LABEL[primarySignal] ?? primarySignal
-        return { name, category, level, score, confidence, source, suggestion }
+        const durationMonths = instances.reduce((max, i) =>
+            (i.durationMonths != null && (max == null || i.durationMonths > max)) ? i.durationMonths : max
+        , null)
+        return { name, category, level, score, confidence, source, suggestion, durationMonths }
     }).sort((a, b) => {
         const aLvl = a.level === 'certified' ? -1 : a.level
         const bLvl = b.level === 'certified' ? -1 : b.level

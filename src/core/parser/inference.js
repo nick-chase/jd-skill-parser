@@ -125,13 +125,14 @@ export function parseDateRange(text) {
 // B2 — classifyEvidenceType
 // ---------------------------------------------------------------------------
 
-const CONTRACT_RE   = /\b(intern|internship|contract|contractor|temp|temporary|co-?op)\b/i
-const NO_OUTCOME_RE = /\bno[- ]?outcome\b/i
+const CONTRACT_RE    = /\b(intern|internship|contract|contractor|temp|temporary|co-?op)\b/i
+const HAS_OUTCOME_RE = /\d+%|\$[\d,]+|\b\d{2,}[+]?\s*(users|customers|clients|projects|applications|transactions|requests|employees|team members|servers|endpoints)\b|\b(increased|decreased|reduced|improved|saved|generated|grew|scaled)\b.*\d/i
 
 /**
  * Returns the E weight for a resume evidence instance.
+ * blockText is used for project outcome detection only.
  */
-export function classifyEvidenceType(sectionName, roleTitle = '') {
+export function classifyEvidenceType(sectionName, roleTitle = '', blockText = '') {
   // Strip HTML entities (&nbsp; etc.) and normalise whitespace from copy-paste artefacts
   const raw = (sectionName || '').replace(/&[a-z]+;|&#\d+;/gi, ' ').replace(/ /g, ' ')
   const section = raw.toLowerCase().trim().replace(/\s+/g, ' ')
@@ -142,7 +143,7 @@ export function classifyEvidenceType(sectionName, roleTitle = '') {
   const isCert       = /^(certifications?|bootcamp)$/.test(section)
 
   if (isExperience) return CONTRACT_RE.test(roleTitle) ? 0.65 : 1.0
-  if (isProjects)   return NO_OUTCOME_RE.test(roleTitle) ? 0.30 : 0.50
+  if (isProjects)   return HAS_OUTCOME_RE.test(blockText) ? 0.50 : 0.30
   if (isEducation)  return 0.4
   if (isCert)       return 0.55
   return 0.05
