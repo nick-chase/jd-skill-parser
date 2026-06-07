@@ -67,8 +67,10 @@ export default function AccountPage() {
   if (loading) {
     return (
       <>
-        <div className="text-center py-16 text-slate-400 text-sm">
-          Loading...
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="text-center py-16 text-slate-400 text-sm">
+            Loading...
+          </div>
         </div>
         <AppFooter />
       </>
@@ -78,18 +80,20 @@ export default function AccountPage() {
   if (!user) {
     return (
       <>
-        <div className="max-w-md mx-auto py-16 text-center space-y-4">
-          <div className="text-2xl">🔐</div>
-          <div className="font-medium text-slate-800">Sign in to view your account</div>
-          <div className="text-sm text-slate-500">
-            Save your resume profile and track your skill progress
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="max-w-md mx-auto py-16 text-center space-y-4">
+            <div className="text-2xl">🔐</div>
+            <div className="font-medium text-slate-800">Sign in to view your account</div>
+            <div className="text-sm text-slate-500">
+              Save your resume profile and track your skill progress
+            </div>
+            <div className="flex justify-center pt-2">
+              {paymentsEnabled && <SignInButton />}
+            </div>
+            <Link to="/app" className="block text-xs text-slate-400 hover:underline">
+              ← Back to parser
+            </Link>
           </div>
-          <div className="flex justify-center pt-2">
-            {paymentsEnabled && <SignInButton />}
-          </div>
-          <Link to="/app" className="block text-xs text-slate-400 hover:underline">
-            ← Back to parser
-          </Link>
         </div>
         <AppFooter />
       </>
@@ -107,7 +111,7 @@ export default function AccountPage() {
 
   return (
     <>
-    <div className="max-w-2xl mx-auto py-8 space-y-6 px-4">
+    <div className="max-w-4xl mx-auto py-8 space-y-6 px-4">
 
       {/* Back link */}
       <Link to="/app" className="text-xs text-slate-400 hover:underline">

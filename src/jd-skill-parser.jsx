@@ -448,6 +448,32 @@ function getGapSuggestion(name, resumeLevel, requiredLevel) {
     return `Add duration and a specific outcome to your ${name} experience to close the one-level gap.`;
 }
 
+function formatDuration(months) {
+    if (months == null) return null;
+    const yrs = Math.floor(months / 12);
+    const mos = months % 12;
+    if (yrs >= 1 && mos === 0) return `${yrs} yr${yrs !== 1 ? 's' : ''}`;
+    if (yrs >= 1) return `${yrs} yr${yrs !== 1 ? 's' : ''} ${mos} mo`;
+    return `${months} mo`;
+}
+
+function evidenceSummary(skill) {
+    const isListedOnly = skill.source === 'Technical Skills' || skill.source === 'Summary';
+    if (isListedOnly) return 'listed only';
+    const parts = [];
+    const dur = formatDuration(skill.durationMonths);
+    parts.push(dur ?? 'no duration stated');
+    const count = skill.contextCount ?? 1;
+    if (count >= 3) parts.push('3+ contexts');
+    else if (count >= 2) parts.push('2 contexts');
+    return parts.join(' · ');
+}
+
+function ConfidenceDot({ confidence }) {
+    const color = confidence === 'high' ? '#22c55e' : confidence === 'medium' ? '#f59e0b' : '#94a3b8';
+    return <span style={{ color, fontSize: '10px', marginLeft: '2px', lineHeight: 1 }}>●</span>;
+}
+
 // ============================================================
 // SHARED UI PRIMITIVES
 // ============================================================
@@ -778,10 +804,13 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                         const jdLabel = LEVEL_NAMES[skill.level] ?? `L${skill.level}`;
                         return (
                             <div key={skill.name}
-                                 className="flex items-center justify-between py-1 px-2.5 rounded-lg bg-emerald-50 text-sm mb-1">
-                                <span className="font-medium text-emerald-800">{skill.name}</span>
-                                <span className="text-xs text-emerald-600 ml-2 shrink-0">
-                                    You: {resumeLabel} · JD: {jdLabel}
+                                 className="flex items-start justify-between gap-2 py-1.5 px-2.5 rounded-lg bg-emerald-50 mb-1">
+                                <div className="min-w-0">
+                                    <div className="font-medium text-emerald-800 text-sm">{skill.name}</div>
+                                    <div className="text-xs text-gray-400">{evidenceSummary(skill)}</div>
+                                </div>
+                                <span className="text-xs text-emerald-600 shrink-0 flex items-center mt-0.5">
+                                    You: {resumeLabel}<ConfidenceDot confidence={skill.confidence} /> · JD: {jdLabel}
                                 </span>
                             </div>
                         );
@@ -840,10 +869,13 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
 
                                     {/* Skill header */}
                                     <div className="flex items-start justify-between gap-2 mb-2">
-                                        <span className="font-semibold text-slate-800 text-sm">{skill.name}</span>
+                                        <div className="min-w-0">
+                                            <div className="font-semibold text-slate-800 text-sm">{skill.name}</div>
+                                            <div className="text-xs text-gray-400 mt-0.5">{evidenceSummary(skill)}</div>
+                                        </div>
                                         <div className="flex items-center gap-2 shrink-0">
-                                            <span className="text-xs text-amber-600 font-medium">
-                                                {resumeLabel} → {jdLabel}
+                                            <span className="text-xs text-amber-600 font-medium flex items-center">
+                                                {resumeLabel}<ConfidenceDot confidence={skill.confidence} /> → {jdLabel}
                                             </span>
                                             <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full border border-amber-200">
                                                 {IMPORTANCE_NAMES[skill.importance] ?? 'Required'}
@@ -913,18 +945,16 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                                 <div className="border border-slate-100 rounded-xl overflow-hidden">
                                     {remainingGaps.map((skill, index) => (
                                         <div key={skill.name}
-                                             className={`flex items-center justify-between px-3 py-2.5 text-sm
+                                             className={`flex items-center gap-3 px-3 py-2.5 text-sm
                                                          ${index < remainingGaps.length - 1 ? 'border-b border-slate-100' : ''}
                                                          hover:bg-slate-50 transition`}>
-                                            <span className="font-medium text-slate-600">{skill.name}</span>
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-xs text-slate-400">
-                                                    {skill.resumeLevel
-                                                        ? (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`)
-                                                        : '—'} → {LEVEL_NAMES[skill.level] ?? `L${skill.level}`}
-                                                </span>
-                                                <span className="text-xs text-slate-400">{skill.category}</span>
-                                            </div>
+                                            <span className="font-medium text-slate-600 shrink-0">{skill.name}</span>
+                                            <span className="text-xs text-gray-400 flex-1 min-w-0 truncate">{evidenceSummary(skill)}</span>
+                                            <span className="text-xs text-slate-400 shrink-0 flex items-center">
+                                                {skill.resumeLevel
+                                                    ? (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`)
+                                                    : '—'}<ConfidenceDot confidence={skill.confidence} /> → {LEVEL_NAMES[skill.level] ?? `L${skill.level}`}
+                                            </span>
                                         </div>
                                     ))}
                                 </div>
@@ -1109,19 +1139,23 @@ export function runGapAnalysis(jdSkills, resumeSkills) {
             // Have it but below required level
             levelGaps.push({
                 ...jdSkill,
-                resumeLevel: resumeSkill.level,
-                gap: jdSkill.level - resumeSkill.level,
-                confidence: resumeSkill.confidence ?? null,
-                source: resumeSkill.source ?? null,
+                resumeLevel:   resumeSkill.level,
+                gap:           jdSkill.level - resumeSkill.level,
+                confidence:    resumeSkill.confidence    ?? null,
+                source:        resumeSkill.source        ?? null,
+                durationMonths: resumeSkill.durationMonths ?? null,
+                contextCount:  resumeSkill.contextCount  ?? null,
             });
         } else {
             // Have it at or above required level (includes 'certified' — credential counts as met)
             matched.push({
                 ...jdSkill,
-                resumeLevel: resumeSkill.level,
-                gap: 0,
-                confidence: resumeSkill.confidence ?? null,
-                source: resumeSkill.source ?? null,
+                resumeLevel:   resumeSkill.level,
+                gap:           0,
+                confidence:    resumeSkill.confidence    ?? null,
+                source:        resumeSkill.source        ?? null,
+                durationMonths: resumeSkill.durationMonths ?? null,
+                contextCount:  resumeSkill.contextCount  ?? null,
             });
         }
     }

@@ -344,7 +344,7 @@ export function parseResume(text) {
         const durationMonths = instances.reduce((max, i) =>
             (i.durationMonths != null && (max == null || i.durationMonths > max)) ? i.durationMonths : max
         , null)
-        return { name, category, level, score, confidence, source, suggestion, durationMonths }
+        return { name, category, level, score, confidence, source, suggestion, durationMonths, contextCount: instances.length }
     }).sort((a, b) => {
         const aLvl = a.level === 'certified' ? -1 : a.level
         const bLvl = b.level === 'certified' ? -1 : b.level
