@@ -59,6 +59,12 @@ describe('extractDegree()', () => {
     expect(result.graduationYear).toBe(2026)
   })
 
+  test('marks in-progress when year precedes Expected — "May 2028 (Expected)"', () => {
+    const result = extractDegree('Master of Science — Artificial Intelligence | NJIT — Newark, NJ Jan 2026 –\nMay 2028 (Expected)')
+    expect(result.graduationStatus).toBe('in_progress')
+    expect(result.graduationYear).toBe(2028)
+  })
+
   test('marks in-progress when "– Present" present', () => {
     const result = extractDegree('Master of Science in Computer Science\nState University, 2024 – Present')
     expect(result.graduationStatus).toBe('in_progress')

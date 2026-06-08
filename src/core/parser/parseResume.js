@@ -544,12 +544,10 @@ function extractGraduationYearFromBlock(lines, startIdx, maxLook = 4) {
             }
             if (isNewDegree) break
         }
-        // "Expected [year]" — explicit in-progress marker
-        const expectM = trimmed.match(/\bExpected\b.*\b(20\d{2}|19[89]\d)\b/i)
-        if (expectM) {
-            year = parseInt(expectM[1])
+        // "Expected" anywhere on the line (before or after year — handles "May 2028 (Expected)")
+        if (/\bExpected\b/i.test(trimmed)) {
             inProgress = true
-            continue
+            // fall through — year extracted below by generic year scan
         }
         // "– Present" / "- Present" / "to Present" — currently enrolled
         if (/(?:–|-|to)\s*Present\b/i.test(trimmed)) {
