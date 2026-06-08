@@ -52,6 +52,39 @@ describe('extractDegree()', () => {
     const result = extractDegree('B.A. English\nState College, 2022')
     expect(result.graduationYear).toBe(2022)
   })
+
+  test('marks in-progress when "Expected [year]" present', () => {
+    const result = extractDegree('M.S. Data Science\nState University\nExpected May 2026')
+    expect(result.graduationStatus).toBe('in_progress')
+    expect(result.graduationYear).toBe(2026)
+  })
+
+  test('marks in-progress when "– Present" present', () => {
+    const result = extractDegree('Master of Science in Computer Science\nState University, 2024 – Present')
+    expect(result.graduationStatus).toBe('in_progress')
+  })
+
+  test('marks in-progress when "currently enrolled" present', () => {
+    const result = extractDegree('M.S. Data Science\nCurrently enrolled, State University')
+    expect(result.graduationStatus).toBe('in_progress')
+  })
+
+  test('marks in-progress when "(In Progress)" present', () => {
+    const result = extractDegree('Master of Science in X (In Progress)\nState University')
+    expect(result.graduationStatus).toBe('in_progress')
+  })
+
+  test('does NOT mark in-progress for a completed degree', () => {
+    const result = extractDegree('B.A. English\nState College, 2022')
+    expect(result.graduationStatus).toBeUndefined()
+  })
+
+  test('picks highest degree and marks it in-progress when master is current', () => {
+    const resume = 'B.A. English, State College, 2021\nM.S. Data Science, 2023 – Present'
+    const result = extractDegree(resume)
+    expect(result.degreeLevel).toBe(3)
+    expect(result.graduationStatus).toBe('in_progress')
+  })
 })
 
 // ---------------------------------------------------------------------------

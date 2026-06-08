@@ -526,7 +526,8 @@ function extractInstitutionFromLine(line) {
 
 // GROUP 3.3 FIX — Extract graduation year from lines following a degree match.
 // The graduation year is the LAST 4-digit year found in the lookahead range.
-// Handles "Expected May 2026" → { year: 2026, inProgress: true }.
+// inProgress triggers on: "Expected [year]", "– Present", "In Progress",
+// "currently", "pursuing", "enrolled".
 function extractGraduationYearFromBlock(lines, startIdx, maxLook = 4) {
     let year = null
     let inProgress = false
@@ -543,12 +544,21 @@ function extractGraduationYearFromBlock(lines, startIdx, maxLook = 4) {
             }
             if (isNewDegree) break
         }
-        // Look for "Expected" marker
+        // "Expected [year]" — explicit in-progress marker
         const expectM = trimmed.match(/\bExpected\b.*\b(20\d{2}|19[89]\d)\b/i)
         if (expectM) {
             year = parseInt(expectM[1])
             inProgress = true
             continue
+        }
+        // "– Present" / "- Present" / "to Present" — currently enrolled
+        if (/(?:–|-|to)\s*Present\b/i.test(trimmed)) {
+            inProgress = true
+            // still fall through to pick up any year on the same line
+        }
+        // "In Progress", "currently", "pursuing", "enrolled" — explicit in-progress phrases
+        if (/\bin\s+progress\b|\bcurrently\b|\bpursuing\b|\benrolled\b/i.test(trimmed)) {
+            inProgress = true
         }
         // All 4-digit years in this line; keep updating to get the LAST one
         const yearMatches = [...trimmed.matchAll(/\b(20\d{2}|19[89]\d)\b/g)]
