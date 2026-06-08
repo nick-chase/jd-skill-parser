@@ -54,44 +54,44 @@
       { "title": "Microsoft Excel — Beginner to Advanced", "url": "[UDEMY_AFFILIATE_URL]", "platform": "Udemy", "type": "paid", "affiliate": true, "level_min": 1, "level_max": 3, "industry_tags": ["tech", "business"] }
     ],
     "kubernetes": [
-      { "title": "Kubernetes Official Tutorials", "url": "https://kubernetes.io/docs/tutorials/", "platform": "Kubernetes.io", "type": "free", "affiliate": false },
-      { "title": "Kubernetes Basics Interactive", "url": "https://kubernetes.io/docs/tutorials/kubernetes-basics/", "platform": "Kubernetes.io", "type": "free", "affiliate": false }
+      { "title": "Kubernetes Official Tutorials", "url": "https://kubernetes.io/docs/tutorials/", "platform": "Kubernetes.io", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 },
+      { "title": "Kubernetes Basics Interactive", "url": "https://kubernetes.io/docs/tutorials/kubernetes-basics/", "platform": "Kubernetes.io", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 }
     ],
     "nodejs": [
-      { "title": "Node.js Official Learn Guide", "url": "https://nodejs.org/en/learn/getting-started/introduction-to-nodejs", "platform": "Node.js", "type": "free", "affiliate": false },
-      { "title": "The Odin Project — NodeJS", "url": "https://www.theodinproject.com/paths/full-stack-javascript/courses/nodejs", "platform": "The Odin Project", "type": "free", "affiliate": false }
+      { "title": "Node.js Official Learn Guide", "url": "https://nodejs.org/en/learn/getting-started/introduction-to-nodejs", "platform": "Node.js", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 },
+      { "title": "The Odin Project — NodeJS", "url": "https://www.theodinproject.com/paths/full-stack-javascript/courses/nodejs", "platform": "The Odin Project", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 }
     ],
     "postgresql": [
-      { "title": "PostgreSQL Official Tutorial", "url": "https://www.postgresql.org/docs/current/tutorial.html", "platform": "PostgreSQL.org", "type": "free", "affiliate": false },
-      { "title": "PGExercises — Interactive Practice", "url": "https://pgexercises.com/", "platform": "PGExercises", "type": "free", "affiliate": false }
+      { "title": "PostgreSQL Official Tutorial", "url": "https://www.postgresql.org/docs/current/tutorial.html", "platform": "PostgreSQL.org", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 },
+      { "title": "PGExercises — Interactive Practice", "url": "https://pgexercises.com/", "platform": "PGExercises", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 }
     ],
     "machine-learning": [
-      { "title": "Google ML Crash Course", "url": "https://developers.google.com/machine-learning/crash-course", "platform": "Google", "type": "free", "affiliate": false },
-      { "title": "fast.ai — Practical Deep Learning", "url": "https://course.fast.ai/", "platform": "fast.ai", "type": "free", "affiliate": false }
+      { "title": "Google ML Crash Course", "url": "https://developers.google.com/machine-learning/crash-course", "platform": "Google", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 },
+      { "title": "fast.ai — Practical Deep Learning", "url": "https://course.fast.ai/", "platform": "fast.ai", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 }
     ],
     "tensorflow": [
-      { "title": "TensorFlow Official Tutorials", "url": "https://www.tensorflow.org/tutorials", "platform": "TensorFlow.org", "type": "free", "affiliate": false },
-      { "title": "TensorFlow Beginner Quickstart", "url": "https://www.tensorflow.org/tutorials/quickstart/beginner", "platform": "TensorFlow.org", "type": "free", "affiliate": false }
+      { "title": "TensorFlow Official Tutorials", "url": "https://www.tensorflow.org/tutorials", "platform": "TensorFlow.org", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 },
+      { "title": "TensorFlow Beginner Quickstart", "url": "https://www.tensorflow.org/tutorials/quickstart/beginner", "platform": "TensorFlow.org", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 }
     ],
     "pytorch": [
-      { "title": "PyTorch Official Tutorials", "url": "https://pytorch.org/tutorials/", "platform": "PyTorch.org", "type": "free", "affiliate": false },
-      { "title": "PyTorch 60-Minute Blitz", "url": "https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html", "platform": "PyTorch.org", "type": "free", "affiliate": false }
+      { "title": "PyTorch Official Tutorials", "url": "https://pytorch.org/tutorials/", "platform": "PyTorch.org", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 },
+      { "title": "PyTorch 60-Minute Blitz", "url": "https://pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html", "platform": "PyTorch.org", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 }
     ],
     "ci-cd": [
-      { "title": "GitHub Actions Docs", "url": "https://docs.github.com/en/actions", "platform": "GitHub", "type": "free", "affiliate": false },
-      { "title": "GitLab CI/CD Docs", "url": "https://docs.gitlab.com/ee/ci/", "platform": "GitLab", "type": "free", "affiliate": false }
+      { "title": "GitHub Actions Docs", "url": "https://docs.github.com/en/actions", "platform": "GitHub", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 },
+      { "title": "GitLab CI/CD Docs", "url": "https://docs.gitlab.com/ee/ci/", "platform": "GitLab", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 }
     ],
     "linux": [
-      { "title": "Linux Journey — Interactive Guide", "url": "https://linuxjourney.com/", "platform": "Linux Journey", "type": "free", "affiliate": false },
-      { "title": "The Linux Command Line — Free Book", "url": "https://linuxcommand.org/tlcl.php", "platform": "LinuxCommand.org", "type": "free", "affiliate": false }
+      { "title": "Linux Journey — Interactive Guide", "url": "https://linuxjourney.com/", "platform": "Linux Journey", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 },
+      { "title": "The Linux Command Line — Free Book", "url": "https://linuxcommand.org/tlcl.php", "platform": "LinuxCommand.org", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 }
     ],
     "rest-api": [
-      { "title": "MDN — HTTP Overview", "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview", "platform": "MDN", "type": "free", "affiliate": false },
-      { "title": "RESTful API Tutorial", "url": "https://restfulapi.net/", "platform": "RESTfulAPI.net", "type": "free", "affiliate": false }
+      { "title": "MDN — HTTP Overview", "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview", "platform": "MDN", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 },
+      { "title": "RESTful API Tutorial", "url": "https://restfulapi.net/", "platform": "RESTfulAPI.net", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 }
     ],
     "graphql": [
-      { "title": "GraphQL Official Learn", "url": "https://graphql.org/learn/", "platform": "GraphQL.org", "type": "free", "affiliate": false },
-      { "title": "How to GraphQL", "url": "https://www.howtographql.com/", "platform": "HowToGraphQL", "type": "free", "affiliate": false }
+      { "title": "GraphQL Official Learn", "url": "https://graphql.org/learn/", "platform": "GraphQL.org", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 },
+      { "title": "How to GraphQL", "url": "https://www.howtographql.com/", "platform": "HowToGraphQL", "type": "free", "affiliate": false, "level_min": 1, "level_max": 3 }
     ]
   }
 }

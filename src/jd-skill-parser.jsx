@@ -823,6 +823,13 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
             {/* Degree requirement flag */}
             <DegreeFlagCard degreeFlag={degreeFlag} />
 
+            {/* Both-sides empty: user has not pasted/parsed yet, or nothing was detected */}
+            {critical.length === 0 && levelGaps.length === 0 && matched.length === 0 && bonus.length === 0 && (
+                <p className="text-sm text-slate-500 text-center py-8">
+                    Paste a job description and resume above, then parse both to see your gap analysis.
+                </p>
+            )}
+
             {/* Zero match warning */}
             {critical.length === 0 && levelGaps.length === 0 && matched.length === 0 && bonus.length > 0 && (
                 <div style={{ backgroundColor: '#fefce8', border: '1px solid #fde047', borderRadius: '8px', padding: '12px 16px', fontSize: '13px', color: '#854d0e' }}>
@@ -1352,6 +1359,9 @@ function ResultsView({ results, companyName, jobRole, jobMeta, behavioralSignals
 // GAP ANALYSIS
 // ============================================================
 
+// runGapAnalysis() — owns: levelGaps, matched, critical, bonus arrays
+// matchScore and isEntryLevel come from decision.js (getDecision()).
+// Keep gap array logic here; keep score logic in decision.js.
 export function runGapAnalysis(jdSkills, resumeSkills) {
     if (!jdSkills || !resumeSkills) return null;
 
