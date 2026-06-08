@@ -536,14 +536,10 @@ function SectionHeader({ label, count, color = 'text-slate-500', subtitle }) {
     );
 }
 
-function SkillLine({ name, meta, color = 'text-slate-700', bg = 'bg-slate-50', metaColor, evidenceText, level, confidence }) {
-    const hasEvidence = evidenceText != null || level != null;
+function SkillLine({ name, meta, color = 'text-slate-700', bg = 'bg-slate-50', metaColor, level, confidence }) {
     return (
         <div className={`flex items-center gap-2 py-1 px-2.5 rounded-lg ${bg} text-sm mb-1`}>
             <span className={`font-medium ${color} shrink-0`}>{name}</span>
-            {hasEvidence && (
-                <span className="text-xs text-gray-400 flex-1 min-w-0 truncate">{evidenceText}</span>
-            )}
             <div className="flex items-center gap-2 ml-auto shrink-0">
                 {level != null && (
                     <span className="text-xs text-slate-500 flex items-center">
@@ -1237,8 +1233,8 @@ function ResumeResultsView({ results, behavioralSignals, degree }) {
                 return null;
             })()}
 
-            {/* Skills grouped by evidence band */}
-            {EVIDENCE_BANDS.map(band => {
+            {/* Skills grouped by evidence band (strong, supported, mentioned) */}
+            {EVIDENCE_BANDS.filter(band => band.key !== 'limited').map(band => {
                 const bandSkills = skillResults.filter(s => band.levels.includes(s.level));
                 if (bandSkills.length === 0) return null;
 
@@ -1248,44 +1244,73 @@ function ResumeResultsView({ results, behavioralSignals, degree }) {
                             {bandSkills.map(skill => (
                                 <SkillLine key={skill.name} name={skill.name}
                                            meta={skill.source} color="text-slate-400"
-                                           evidenceText={evidenceSummary(skill)}
                                            level={skill.level} confidence={skill.confidence} />
                             ))}
                         </CollapsibleSection>
                     );
                 }
 
-                // CHANGE 1: For the Limited Evidence band, check whether every skill
-                // in the section lacks duration context. If so, show one note on the
-                // section header and suppress the per-row "no duration stated" text.
-                const isLimitedBand = band.key === 'limited';
-                const allMissingDuration = isLimitedBand && bandSkills.every(s =>
-                    s.source !== 'Technical Skills' && s.source !== 'Summary' && s.durationMonths == null
-                );
-                const sectionSubtitle = allMissingDuration
-                    ? 'No duration context found in this section'
-                    : undefined;
-
                 return (
                     <div key={band.key} className="mb-3">
-                        <SectionHeader label={band.label} count={bandSkills.length} color={band.color} subtitle={sectionSubtitle} />
-                        {bandSkills.map(skill => {
-                            const summary = evidenceSummary(skill);
-                            // When all rows are missing duration, suppress the per-row "no duration stated"
-                            const displayEvidence = (allMissingDuration && summary === 'no duration stated')
-                                ? null
-                                : summary;
-                            return (
-                                <SkillLine key={skill.name} name={skill.name}
-                                           meta={skill.source}
-                                           metaColor={SOURCE_COLORS[skill.source]}
-                                           evidenceText={displayEvidence}
-                                           level={skill.level} confidence={skill.confidence} />
-                            );
-                        })}
+                        <SectionHeader label={band.label} count={bandSkills.length} color={band.color} />
+                        {bandSkills.map(skill => (
+                            <SkillLine key={skill.name} name={skill.name}
+                                       meta={skill.source}
+                                       metaColor={SOURCE_COLORS[skill.source]}
+                                       level={skill.level} confidence={skill.confidence} />
+                        ))}
                     </div>
                 );
             })}
+
+            {/* Grouped coaching sections — Limited Evidence (L2) skills by limitingFactor */}
+            {(() => {
+                const limitedSkills = skillResults.filter(s => s.level === 2);
+                if (limitedSkills.length === 0) return null;
+
+                const GROUP_ORDER = ['no_context', 'no_duration', 'weak_verb', 'single_context'];
+                const GROUP_CONFIG = {
+                    no_context: {
+                        header: 'ADD CONTEXT',
+                        subtext: 'Listed but no job or project behind them. Move these into a role or project description.',
+                    },
+                    no_duration: {
+                        header: 'ADD DURATION',
+                        subtext: 'Add how long you used each one — months or years is enough.',
+                    },
+                    weak_verb: {
+                        header: 'STRENGTHEN YOUR VERBS',
+                        subtext: 'Describe what you built or led, not just that you used it.',
+                    },
+                    single_context: {
+                        header: 'APPEARS ONCE',
+                        subtext: 'Referencing a skill in more than one place raises its score.',
+                    },
+                };
+
+                return GROUP_ORDER.map(factor => {
+                    const group = limitedSkills.filter(s => s.limitingFactor === factor);
+                    if (group.length === 0) return null;
+                    const cfg = GROUP_CONFIG[factor];
+                    return (
+                        <div key={factor} className="mb-3">
+                            <SectionHeader
+                                label={`${cfg.header} — ${group.length} skill${group.length !== 1 ? 's' : ''}`}
+                                color="text-amber-700"
+                                subtitle={cfg.subtext}
+                            />
+                            <div className="flex flex-wrap gap-1 mt-1">
+                                {group.map(skill => (
+                                    <span key={skill.name}
+                                          className="text-xs px-2.5 py-0.5 bg-amber-50 text-amber-800 border border-amber-200 rounded-full font-medium">
+                                        {skill.name}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                });
+            })()}
         </div>
     );
 }
