@@ -523,10 +523,15 @@ function ConfidenceDot({ confidence }) {
 // SHARED UI PRIMITIVES
 // ============================================================
 
-function SectionHeader({ label, count, color = 'text-slate-500' }) {
+function SectionHeader({ label, count, color = 'text-slate-500', subtitle }) {
     return (
-        <div className={`text-xs font-semibold uppercase tracking-wide mb-1.5 ${color}`}>
-            {label}{count !== undefined ? ` — ${count}` : ''}
+        <div className="mb-1.5">
+            <div className={`text-xs font-semibold uppercase tracking-wide ${color}`}>
+                {label}{count !== undefined ? ` — ${count}` : ''}
+            </div>
+            {subtitle && (
+                <div className="text-xs text-amber-600 mt-0.5 font-normal normal-case tracking-normal">{subtitle}</div>
+            )}
         </div>
     );
 }
@@ -884,6 +889,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                     <div>
                         <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Level Gaps</div>
                         <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#d97706' }}>{levelGaps.length}</div>
+                        <div style={{ fontSize: '10px', color: '#92400e', marginTop: '2px', lineHeight: '1.3' }}>fastest wins — skill is present, evidence needs strengthening</div>
                     </div>
                     <div>
                         <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Bonus</div>
@@ -931,6 +937,26 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                             ? 'Certified'
                             : (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`);
                         const jdLabel = LEVEL_NAMES[skill.level] ?? `L${skill.level}`;
+
+                        // CHANGE 2: When both resume and JD are L1/Mentioned, use a
+                        // weaker neutral treatment instead of the standard green match.
+                        const isBothMentioned = skill.resumeLevel === 1 && skill.level === 1;
+
+                        if (isBothMentioned) {
+                            return (
+                                <div key={skill.name}
+                                     className="flex items-start justify-between gap-2 py-1.5 px-2.5 rounded-lg bg-slate-50 border border-slate-200 mb-1">
+                                    <div className="min-w-0">
+                                        <div className="font-medium text-slate-600 text-sm">{skill.name}</div>
+                                        <div className="text-xs text-slate-400">Add evidence to strengthen this signal</div>
+                                    </div>
+                                    <span className="text-xs text-slate-400 shrink-0 flex items-center mt-0.5">
+                                        Both sides: Mentioned
+                                    </span>
+                                </div>
+                            );
+                        }
+
                         return (
                             <div key={skill.name}
                                  className="flex items-start justify-between gap-2 py-1.5 px-2.5 rounded-lg bg-emerald-50 mb-1">
@@ -1009,6 +1035,9 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                                             <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full border border-amber-200">
                                                 {IMPORTANCE_NAMES[skill.importance] ?? 'Required'}
                                             </span>
+                                            <span className="text-xs px-2 py-0.5 bg-teal-50 text-teal-700 rounded-full border border-teal-200 font-medium">
+                                                Fast fix
+                                            </span>
                                         </div>
                                     </div>
 
@@ -1084,6 +1113,9 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                                                     ? (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`)
                                                     : '—'}<ConfidenceDot confidence={skill.confidence} /> → {LEVEL_NAMES[skill.level] ?? `L${skill.level}`}
                                             </span>
+                                            <span className="text-xs px-1.5 py-0.5 bg-teal-50 text-teal-700 rounded border border-teal-200 font-medium shrink-0">
+                                                Fast fix
+                                            </span>
                                         </div>
                                     ))}
                                 </div>
@@ -1095,7 +1127,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
 
             {/* Bonus skills — collapsed */}
             {bonus.length > 0 && (
-                <CollapsibleSection label="Bonus Skills" count={bonus.length} color="text-violet-600">
+                <CollapsibleSection label="Also Mentioned — no evidence found" count={bonus.length} color="text-violet-600">
                     <div className="flex flex-wrap gap-1">
                         {bonus.map(skill => (
                             <span key={skill.name}
@@ -1192,6 +1224,19 @@ function ResumeResultsView({ results, behavioralSignals, degree }) {
                 )}
             </div>
 
+            {/* Coaching banner — low-evidence warning */}
+            {(() => {
+                const l1Count = skillResults.filter(s => s.level === 1).length;
+                if (skillResults.length > 0 && l1Count / skillResults.length > 0.5) {
+                    return (
+                        <div style={{ backgroundColor: '#eff6ff', border: '1px solid #93c5fd', borderRadius: '8px', padding: '12px 16px', fontSize: '13px', color: '#1e40af', marginBottom: '4px' }}>
+                            Most of your skills are listed without evidence. Skills without a job or project behind them score at L1 regardless of your actual ability. The gap cards in the Match tab show exactly what to add.
+                        </div>
+                    );
+                }
+                return null;
+            })()}
+
             {/* Skills grouped by evidence band */}
             {EVIDENCE_BANDS.map(band => {
                 const bandSkills = skillResults.filter(s => band.levels.includes(s.level));
@@ -1210,16 +1255,34 @@ function ResumeResultsView({ results, behavioralSignals, degree }) {
                     );
                 }
 
+                // CHANGE 1: For the Limited Evidence band, check whether every skill
+                // in the section lacks duration context. If so, show one note on the
+                // section header and suppress the per-row "no duration stated" text.
+                const isLimitedBand = band.key === 'limited';
+                const allMissingDuration = isLimitedBand && bandSkills.every(s =>
+                    s.source !== 'Technical Skills' && s.source !== 'Summary' && s.durationMonths == null
+                );
+                const sectionSubtitle = allMissingDuration
+                    ? 'No duration context found in this section'
+                    : undefined;
+
                 return (
                     <div key={band.key} className="mb-3">
-                        <SectionHeader label={band.label} count={bandSkills.length} color={band.color} />
-                        {bandSkills.map(skill => (
-                            <SkillLine key={skill.name} name={skill.name}
-                                       meta={skill.source}
-                                       metaColor={SOURCE_COLORS[skill.source]}
-                                       evidenceText={evidenceSummary(skill)}
-                                       level={skill.level} confidence={skill.confidence} />
-                        ))}
+                        <SectionHeader label={band.label} count={bandSkills.length} color={band.color} subtitle={sectionSubtitle} />
+                        {bandSkills.map(skill => {
+                            const summary = evidenceSummary(skill);
+                            // When all rows are missing duration, suppress the per-row "no duration stated"
+                            const displayEvidence = (allMissingDuration && summary === 'no duration stated')
+                                ? null
+                                : summary;
+                            return (
+                                <SkillLine key={skill.name} name={skill.name}
+                                           meta={skill.source}
+                                           metaColor={SOURCE_COLORS[skill.source]}
+                                           evidenceText={displayEvidence}
+                                           level={skill.level} confidence={skill.confidence} />
+                            );
+                        })}
                     </div>
                 );
             })}
