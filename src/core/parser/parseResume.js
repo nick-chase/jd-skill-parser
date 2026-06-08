@@ -34,7 +34,10 @@ export function extractBehavioralSignals(text) {
             pattern = isRegex
                 ? new RegExp(alias, 'gi')
                 : new RegExp(`\\b${escapeRegex(alias)}\\b`, 'gi')
-        } catch { continue }
+        } catch (err) {
+            console.warn('[parseResume] skipped malformed skill entry:', err.message, '— check skills.json for invalid regex');
+            continue;
+        }
 
         let m
         while ((m = pattern.exec(text)) !== null) {
@@ -67,8 +70,8 @@ export function extractBehavioralSignals(text) {
 // All known aliases — used both to locate a section and to find where it ends.
 const SECTION_ALIASES = {
     summary:        ['PROFESSIONAL SUMMARY', 'SUMMARY', 'PROFILE', 'OBJECTIVE', 'ABOUT ME', 'OVERVIEW'],
-    experience:     ['PROFESSIONAL EXPERIENCE', 'WORK EXPERIENCE', 'EXPERIENCE', 'EMPLOYMENT HISTORY', 'EMPLOYMENT', 'CAREER HISTORY'],
-    technicalSkills:['TECHNICAL SKILLS', 'SKILLS', 'CORE SKILLS', 'KEY SKILLS', 'TECHNOLOGIES', 'TOOLS & TECHNOLOGIES', 'COMPETENCIES', 'TECHNICAL EXPERTISE'],
+    experience:     ['PROFESSIONAL EXPERIENCE', 'WORK EXPERIENCE', 'EXPERIENCE', 'EMPLOYMENT HISTORY', 'EMPLOYMENT', 'CAREER HISTORY', 'RELEVANT EXPERIENCE', 'RELATED EXPERIENCE', 'WORK HISTORY'],
+    technicalSkills:['TECHNICAL SKILLS', 'SKILLS', 'CORE SKILLS', 'KEY SKILLS', 'TECHNOLOGIES', 'TOOLS & TECHNOLOGIES', 'COMPETENCIES', 'TECHNICAL EXPERTISE', 'PROGRAMMING LANGUAGES', 'CORE COMPETENCIES', 'AREAS OF EXPERTISE'],
     projects:       ['PROJECTS', 'PERSONAL PROJECTS', 'SIDE PROJECTS', 'PORTFOLIO', 'ACADEMIC PROJECTS'],
     education:      ['EDUCATION', 'ACADEMIC BACKGROUND', 'EDUCATIONAL BACKGROUND', 'DEGREES'],
     certifications: ['CERTIFICATIONS', 'CERTIFICATES', 'LICENSES', 'CREDENTIALS', 'ADDITIONAL INFORMATION'],
