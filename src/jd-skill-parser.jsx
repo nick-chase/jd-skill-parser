@@ -889,7 +889,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                     <div>
                         <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Level Gaps</div>
                         <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#d97706' }}>{levelGaps.length}</div>
-                        <div style={{ fontSize: '10px', color: '#92400e', marginTop: '2px', lineHeight: '1.3' }}>fastest wins — skill is present, evidence needs strengthening</div>
+                        <div style={{ fontSize: '10px', color: '#92400e', marginTop: '2px', lineHeight: '1.3' }}>fastest wins</div>
                     </div>
                     <div>
                         <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Bonus</div>
