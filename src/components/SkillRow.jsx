@@ -10,6 +10,7 @@
 
 import ResourceLink from './ResourceLink.jsx'
 import { getResources } from '@utils/resources.js'
+import { LEVEL_NAMES, IMPORTANCE_NAMES } from '@utils/constants.js'
 
 function nameToResourceId(name) {
   return (name || '')
@@ -20,8 +21,6 @@ function nameToResourceId(name) {
     .replace(/[^a-z0-9-]/g, '')
 }
 
-const LEVEL_NAMES  = ['—', 'Mentioned', 'Limited evidence', 'Supported', 'Strong evidence', 'Extensive evidence']
-
 const LEVEL_TIPS = [
   '',
   'L1 Mentioned — skill appears on resume with no supporting context.',
@@ -30,8 +29,6 @@ const LEVEL_TIPS = [
   'L4 Strong evidence — skill backed by sustained job history or multiple contexts.',
   'L5 Extensive evidence — skill backed by multi-year professional history across roles.',
 ]
-
-const IMPORTANCE_NAMES = ['—', 'Optional', 'Nice-to-have', 'Preferred', 'Required', 'Critical']
 
 const IMPORTANCE_STYLES = {
   5: { bg: '#fff1f2', text: '#be123c',  border: '#fda4af' },

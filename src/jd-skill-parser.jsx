@@ -18,6 +18,7 @@ import HowToTour from './components/HowToTour.jsx'
 import FeedbackForm from './components/FeedbackForm.jsx';
 import resourceData from '@data/resources.json';
 import { getResources } from '@utils/resources.js';
+import { LEVEL_NAMES, IMPORTANCE_NAMES } from '@utils/constants.js';
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
 const betaFeedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
@@ -29,9 +30,6 @@ const betaFeedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true
 // Skill names: Lightcast-style canonical names (industry standard)
 // Importance: inferred from JD section structure
 // ============================================================
-
-const LEVEL_NAMES = ['—', 'Mentioned', 'Limited evidence', 'Supported', 'Strong evidence', 'Extensive evidence'];
-const IMPORTANCE_NAMES = ['—', 'Optional', 'Nice-to-have', 'Preferred', 'Required', 'Critical'];
 
 const IMPORTANCE_STYLES = {
     5: 'bg-rose-50 text-rose-700 border-rose-200',
@@ -732,8 +730,23 @@ const DEGREE_LEVEL_LABELS = { 1: "Associate's", 2: "Bachelor's", 3: "Master's", 
 export function computeDegreeFlag(resumeDegree, jdDegree) {
     if (!jdDegree?.requiredDegreeLevel) return { status: 'not_stated' }
 
-    const required = jdDegree.requiredDegreeLevel
-    const found    = resumeDegree?.degreeLevel ?? null
+    const required           = jdDegree.requiredDegreeLevel
+    const found              = resumeDegree?.degreeLevel ?? null
+    const graduationStatus   = resumeDegree?.graduationStatus ?? null
+    const graduationYear     = resumeDegree?.graduationYear ?? null
+
+    // In-progress degree: show a neutral status regardless of level match
+    if (graduationStatus === 'in_progress') {
+        const fieldSuffix = resumeDegree.field ? ` in ${resumeDegree.field}` : ''
+        const levelLabel  = found !== null ? (DEGREE_LEVEL_LABELS[found] ?? `Level ${found}`) : 'Degree'
+        return {
+            status:          'in_progress',
+            required:        DEGREE_LEVEL_LABELS[required] ?? 'Degree',
+            found:           levelLabel + fieldSuffix,
+            graduationYear:  graduationYear,
+            note:            null,
+        }
+    }
 
     if (found === null) {
         return {
@@ -765,29 +778,56 @@ export function computeDegreeFlag(resumeDegree, jdDegree) {
 
 function DegreeFlagCard({ degreeFlag }) {
     if (!degreeFlag || degreeFlag.status === 'not_stated') return null
-    const isMatch = degreeFlag.status === 'match'
+
+    const isMatch      = degreeFlag.status === 'match'
+    const isInProgress = degreeFlag.status === 'in_progress'
+
+    let borderColor, bgColor, iconColor, labelColor
+    if (isMatch) {
+        borderColor = '#bbf7d0'; bgColor = '#f0fdf4'; iconColor = '#166534'; labelColor = '#166534'
+    } else if (isInProgress) {
+        borderColor = '#bae6fd'; bgColor = '#f0f9ff'; iconColor = '#0369a1'; labelColor = '#0369a1'
+    } else {
+        borderColor = '#fde68a'; bgColor = '#fffbeb'; iconColor = '#92400e'; labelColor = '#92400e'
+    }
+
+    const icon = isMatch ? '✓' : isInProgress ? '⏳' : '!'
+
+    const inProgressSuffix = isInProgress
+        ? (degreeFlag.graduationYear
+            ? ` · Expected ${degreeFlag.graduationYear}`
+            : '')
+        : null
+
     return (
         <div style={{
             padding: '10px 14px',
             borderRadius: '8px',
-            border: `1px solid ${isMatch ? '#bbf7d0' : '#fde68a'}`,
-            backgroundColor: isMatch ? '#f0fdf4' : '#fffbeb',
+            border: `1px solid ${borderColor}`,
+            backgroundColor: bgColor,
             fontSize: '13px',
             display: 'flex',
             alignItems: 'flex-start',
             gap: '10px',
             marginBottom: '4px',
         }}>
-            <span style={{ fontSize: '15px', flexShrink: 0, lineHeight: '1.6' }}>{isMatch ? '✓' : '!'}</span>
+            <span style={{ fontSize: '15px', flexShrink: 0, lineHeight: '1.6' }}>{icon}</span>
             <div>
-                <div style={{ fontWeight: '600', color: isMatch ? '#166534' : '#92400e' }}>
+                <div style={{ fontWeight: '600', color: labelColor }}>
                     Degree required: {degreeFlag.required}
-                    {isMatch
-                        ? <span style={{ marginLeft: '8px', color: '#059669', fontWeight: '400' }}>— {degreeFlag.found} · Matches</span>
-                        : degreeFlag.found
+                    {isMatch && (
+                        <span style={{ marginLeft: '8px', color: '#059669', fontWeight: '400' }}>— {degreeFlag.found} · Matches</span>
+                    )}
+                    {isInProgress && (
+                        <span style={{ marginLeft: '8px', color: '#0284c7', fontWeight: '400' }}>
+                            — In Progress — {degreeFlag.found}{inProgressSuffix}
+                        </span>
+                    )}
+                    {!isMatch && !isInProgress && (
+                        degreeFlag.found
                             ? <span style={{ marginLeft: '8px', color: '#d97706', fontWeight: '400' }}>— {degreeFlag.found} found · Gap</span>
                             : <span style={{ marginLeft: '8px', color: '#d97706', fontWeight: '400' }}>— Not detected · Gap</span>
-                    }
+                    )}
                 </div>
                 {degreeFlag.note && (
                     <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '2px' }}>→ {degreeFlag.note}</div>
