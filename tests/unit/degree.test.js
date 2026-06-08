@@ -136,6 +136,22 @@ describe('extractAllDegrees()', () => {
     expect(extractAllDegrees('')).toHaveLength(0)
     expect(extractAllDegrees(null)).toHaveLength(0)
   })
+
+  test('captures startYear from date range "2026 – 2028"', () => {
+    const resume = 'M.S. Artificial Intelligence\nState University\n2026 – 2028'
+    const result = extractAllDegrees(resume)
+    expect(result).toHaveLength(1)
+    expect(result[0].startYear).toBe(2026)
+    expect(result[0].graduationYear).toBe(2028)
+  })
+
+  test('startYear is null for a single-year completed degree', () => {
+    const resume = 'B.S. Computer Science\nState University\n2023'
+    const result = extractAllDegrees(resume)
+    expect(result).toHaveLength(1)
+    expect(result[0].startYear).toBeNull()
+    expect(result[0].graduationYear).toBe(2023)
+  })
 })
 
 describe('extractDegree() ranking: completed beats in-progress of higher level', () => {

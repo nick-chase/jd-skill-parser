@@ -1267,9 +1267,23 @@ function ResumeResultsView({ results, behavioralSignals, degree, allDegrees }) {
                     <div className="flex flex-col gap-1">
                         {allDegrees.map((deg, idx) => {
                             const isInProgress = deg.graduationStatus === 'in_progress'
-                            const yearLabel = isInProgress
-                                ? (deg.graduationYear ? `Expected ${deg.graduationYear}` : 'In Progress')
-                                : (deg.graduationYear ? String(deg.graduationYear) : null)
+                            // Build the date portion according to the spec:
+                            // Completed:              "· 2023"
+                            // In-progress with range: "· 2026 – Expected 2028"
+                            // In-progress single:     "· Expected 2028"
+                            // No year at all:         omit date part
+                            let yearLabel = null
+                            if (deg.graduationYear) {
+                                if (isInProgress && deg.startYear) {
+                                    yearLabel = `${deg.startYear} – Expected ${deg.graduationYear}`
+                                } else if (isInProgress) {
+                                    yearLabel = `Expected ${deg.graduationYear}`
+                                } else {
+                                    yearLabel = String(deg.graduationYear)
+                                }
+                            } else if (isInProgress) {
+                                yearLabel = 'In Progress'
+                            }
                             return (
                                 <div key={idx} className="text-xs text-slate-600">
                                     <span className="font-medium">{DEGREE_LEVEL_LABELS[deg.degreeLevel]}</span>
@@ -1277,7 +1291,7 @@ function ResumeResultsView({ results, behavioralSignals, degree, allDegrees }) {
                                     {deg.institution && <span className="text-slate-400"> · {deg.institution}</span>}
                                     {yearLabel && (
                                         <span className="text-slate-400">
-                                            {' '}· {isInProgress ? `⏳ ${yearLabel}` : yearLabel}
+                                            {' '}· {yearLabel}
                                         </span>
                                     )}
                                 </div>

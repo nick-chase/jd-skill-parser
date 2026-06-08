@@ -526,10 +526,15 @@ function extractInstitutionFromLine(line) {
 
 // GROUP 3.3 FIX — Extract graduation year from lines following a degree match.
 // The graduation year is the LAST 4-digit year found in the lookahead range.
+// startYear is the FIRST year found when a date range is present (two years separated
+// by a dash/en-dash). startYear is null when only a single year is found.
 // inProgress triggers on: "Expected [year]", "– Present", "In Progress",
 // "currently", "pursuing", "enrolled".
+// IMPORTANT: A date range alone (e.g. "2020 – 2023") does NOT set inProgress.
+// Only the explicit markers above set inProgress.
 function extractGraduationYearFromBlock(lines, startIdx, maxLook = 4) {
     let year = null
+    let startYear = null
     let inProgress = false
     for (let offset = 0; offset <= maxLook; offset++) {
         const idx = startIdx + offset
@@ -563,8 +568,16 @@ function extractGraduationYearFromBlock(lines, startIdx, maxLook = 4) {
         for (const ym of yearMatches) {
             year = parseInt(ym[1])
         }
+        // Detect a date range: two years separated by dash/en-dash/em-dash.
+        // The FIRST year in the range becomes startYear; the second becomes graduationYear (year above).
+        // Only capture startYear from this line if it actually contains a range pattern.
+        const rangeMatch = trimmed.match(/\b(20\d{2}|19[89]\d)\b\s*(?:–|—|-{1,2})\s*(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+)?(20\d{2}|19[89]\d)\b/i)
+        if (rangeMatch) {
+            startYear = parseInt(rangeMatch[1])
+            // year is already set to the last year in the line above, which is rangeMatch[2]
+        }
     }
-    return { year, inProgress }
+    return { year, startYear, inProgress }
 }
 
 /**
@@ -605,13 +618,14 @@ export function extractAllDegrees(educationText) {
             if (candidate) { institution = candidate; break }
         }
 
-        // Extract graduation year and in-progress status
-        const { year, inProgress } = extractGraduationYearFromBlock(lines, i, 4)
+        // Extract graduation year, start year (for date ranges), and in-progress status
+        const { year, startYear, inProgress } = extractGraduationYearFromBlock(lines, i, 4)
 
         const entry = {
             degreeLevel:    matchedLevel,
             field:          field,
             institution:    institution,
+            startYear:      startYear ?? null,
             graduationYear: year,
         }
         if (inProgress) entry.graduationStatus = 'in_progress'
