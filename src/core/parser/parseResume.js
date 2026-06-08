@@ -305,11 +305,75 @@ const SECTION_SOURCE_LABEL = {
 }
 
 // ---------------------------------------------------------------------------
+// Degree extraction
+// ---------------------------------------------------------------------------
+
+const RESUME_DEGREE_LEVELS = [
+    { level: 4, re: /\b(ph\.?d\.?|doctor(?:ate|al)?|d\.?sc\.?)\b/i },
+    { level: 3, re: /\b(master'?s?|m\.?s\.?(?!\s*shift)|m\.?a\.?\b|m\.?eng\.?|m\.?b\.?a\.?|msc)\b/i },
+    { level: 2, re: /\b(bachelor'?s?|b\.?s\.?\b|b\.?a\.?\b|b\.?eng\.?|b\.?sc\.?)\b/i },
+    { level: 1, re: /\b(associate'?s?|a\.?s\.?\b|a\.?a\.?\b)\b/i },
+]
+
+function extractDegreeField(line) {
+    // "degree in X", "Bachelor's in X", "Bachelor of X", "B.S. in X"
+    let m = line.match(/\b(?:degree\s+(?:in|of)|bachelor'?s?\s+(?:in|of)|master'?s?\s+(?:in|of)|b\.?s\.?\s+in|m\.?s\.?\s+in)\s+([A-Za-z][A-Za-z\s,&\/]+?)(?=\s*(?:–|—|-{1,2}|,\s|\(|\bfrom\b|\bat\b|\d{4})|\s*$)/i)
+    if (m) return m[1].trim().replace(/\s+/g, ' ')
+
+    // "B.S. Computer Science" — field immediately after abbreviation, stopped by separator or year
+    m = line.match(/\b(?:B\.S|B\.A|M\.S|M\.A|B\.Eng|M\.Eng|M\.B\.A|B\.Sc|M\.Sc)\.?\s+([A-Z][A-Za-z][A-Za-z\s&,]+?)(?=\s*(?:–|—|-{1,2}|\bfrom\b|\bat\b|\d{4})|\s*$)/i)
+    if (m) {
+        const candidate = m[1].trim().replace(/\s+/g, ' ')
+        if (candidate.length <= 60) return candidate
+    }
+
+    return null
+}
+
+export function extractDegree(educationText) {
+    if (!educationText || !educationText.trim()) {
+        return { degreeLevel: null, field: null, institution: null, graduationYear: null }
+    }
+
+    let degreeLevel = null
+    let field = null
+    let institution = null
+    let graduationYear = null
+
+    for (const line of educationText.split('\n')) {
+        const trimmed = line.trim()
+        if (!trimmed) continue
+
+        if (degreeLevel === null) {
+            for (const { level, re } of RESUME_DEGREE_LEVELS) {
+                if (re.test(trimmed)) {
+                    degreeLevel = level
+                    if (!field) field = extractDegreeField(trimmed)
+                    break
+                }
+            }
+        }
+
+        if (!institution) {
+            const instM = trimmed.match(/(?:–|—|-{1,2}|\bfrom\b|\bat\b)\s*([A-Z][A-Za-z\s]+?(?:University|College|Institute|School|Academy))/i)
+            if (instM) institution = instM[1].trim()
+        }
+
+        if (!graduationYear) {
+            const yearM = trimmed.match(/\b(20\d{2}|19[89]\d)\b/)
+            if (yearM) graduationYear = parseInt(yearM[1])
+        }
+    }
+
+    return { degreeLevel, field, institution, graduationYear }
+}
+
+// ---------------------------------------------------------------------------
 // Main export
 // ---------------------------------------------------------------------------
 
 export function parseResume(text) {
-    if (!text || !text.trim()) return { technicalSignals: [], behavioralSignals: [] }
+    if (!text || !text.trim()) return { technicalSignals: [], behavioralSignals: [], degree: null }
 
     const sections = extractResumeSections(text)
 
@@ -338,13 +402,13 @@ export function parseResume(text) {
     }
 
     const technicalSignals = [...skillMap.entries()].map(([name, { category, instances }]) => {
-        const { score, level: levelStr, confidence, primarySignal, suggestion } = scoreSkillEvidence(instances)
+        const { score, level: levelStr, confidence, primarySignal, primarySection, suggestion } = scoreSkillEvidence(instances)
         const level = levelStr === 'certified' ? 'certified' : parseInt(levelStr.slice(1), 10)
-        const source = SECTION_SOURCE_LABEL[primarySignal] ?? primarySignal
+        const source = SECTION_SOURCE_LABEL[primarySection] ?? primarySection
         const durationMonths = instances.reduce((max, i) =>
             (i.durationMonths != null && (max == null || i.durationMonths > max)) ? i.durationMonths : max
         , null)
-        return { name, category, level, score, confidence, source, suggestion, durationMonths, contextCount: instances.length }
+        return { name, category, level, score, confidence, source, primarySignal, suggestion, durationMonths, contextCount: instances.length }
     }).sort((a, b) => {
         const aLvl = a.level === 'certified' ? -1 : a.level
         const bLvl = b.level === 'certified' ? -1 : b.level
@@ -356,5 +420,6 @@ export function parseResume(text) {
     return {
         technicalSignals,
         behavioralSignals: extractBehavioralSignals(text),
+        degree: extractDegree(sections.education),
     }
 }

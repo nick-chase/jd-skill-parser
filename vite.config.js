@@ -10,8 +10,9 @@ export default defineConfig({
   plugins: [tailwindcss(), react()],
   resolve: {
     alias: {
-      '@core': path.resolve(__dirname, './src/core'),
-      '@data': path.resolve(__dirname, './data'),
+      '@core':  path.resolve(__dirname, './src/core'),
+      '@data':  path.resolve(__dirname, './data'),
+      '@utils': path.resolve(__dirname, './src/utils'),
     }
   },
   test: {
@@ -22,9 +23,10 @@ export default defineConfig({
     },
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, 'src'),
-        '@core': path.resolve(__dirname, './src/core'),
-        '@data': path.resolve(__dirname, './data'),
+        '@':      path.resolve(__dirname, 'src'),
+        '@core':  path.resolve(__dirname, './src/core'),
+        '@data':  path.resolve(__dirname, './data'),
+        '@utils': path.resolve(__dirname, './src/utils'),
       }
     }
   },

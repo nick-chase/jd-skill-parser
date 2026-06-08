@@ -1,43 +1,61 @@
 {
-  "version": "2026.1",
-  "updated": "2026-05-31",
-  "note": "All resources are free and official. affiliate=false until Phase D/E. skill_id values must match data/skills.json ids.",
+  "version": "2026.2",
+  "updated": "2026-06-07",
+  "note": "skill_id values must match data/skills.json ids. Affiliate URLs are placeholders — replace with real tracking links before launch.",
   "resources": {
     "python": [
-      { "title": "Python Official Tutorial", "url": "https://docs.python.org/3/tutorial/", "platform": "Python.org", "type": "free", "affiliate": false },
-      { "title": "CS50P — Introduction to Programming with Python", "url": "https://cs50.harvard.edu/python/", "platform": "Harvard / edX", "type": "free", "affiliate": false }
-    ],
-    "javascript": [
-      { "title": "MDN JavaScript Guide", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide", "platform": "MDN", "type": "free", "affiliate": false },
-      { "title": "The Odin Project — Foundations", "url": "https://www.theodinproject.com/paths/foundations/courses/foundations", "platform": "The Odin Project", "type": "free", "affiliate": false }
-    ],
-    "typescript": [
-      { "title": "TypeScript Handbook", "url": "https://www.typescriptlang.org/docs/handbook/intro.html", "platform": "TypeScript.org", "type": "free", "affiliate": false },
-      { "title": "TypeScript Official Docs", "url": "https://www.typescriptlang.org/docs/", "platform": "TypeScript.org", "type": "free", "affiliate": false }
+      { "title": "Python Official Tutorial", "url": "https://docs.python.org/3/tutorial/", "platform": "Python.org", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech"] },
+      { "title": "CS50P — Intro to Python", "url": "https://cs50.harvard.edu/python/", "platform": "Harvard / edX", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech"] },
+      { "title": "100 Days of Code: Python Bootcamp", "url": "[UDEMY_AFFILIATE_URL]", "platform": "Udemy", "type": "paid", "affiliate": true, "level_min": 1, "level_max": 3, "industry_tags": ["tech"] }
     ],
     "sql": [
-      { "title": "SQLZoo — Interactive SQL Tutorial", "url": "https://sqlzoo.net/", "platform": "SQLZoo", "type": "free", "affiliate": false },
-      { "title": "W3Schools SQL Tutorial", "url": "https://www.w3schools.com/sql/", "platform": "W3Schools", "type": "free", "affiliate": false }
+      { "title": "SQLZoo — Interactive SQL Tutorial", "url": "https://sqlzoo.net/", "platform": "SQLZoo", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech"] },
+      { "title": "W3Schools SQL Tutorial", "url": "https://www.w3schools.com/sql/", "platform": "W3Schools", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech"] },
+      { "title": "The Complete SQL Bootcamp", "url": "[UDEMY_AFFILIATE_URL]", "platform": "Udemy", "type": "paid", "affiliate": true, "level_min": 1, "level_max": 3, "industry_tags": ["tech"] }
+    ],
+    "javascript": [
+      { "title": "MDN JavaScript Guide", "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide", "platform": "MDN", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech"] },
+      { "title": "The Odin Project — Foundations", "url": "https://www.theodinproject.com/paths/foundations/courses/foundations", "platform": "The Odin Project", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech"] },
+      { "title": "The Complete JavaScript Course", "url": "[UDEMY_AFFILIATE_URL]", "platform": "Udemy", "type": "paid", "affiliate": true, "level_min": 1, "level_max": 3, "industry_tags": ["tech"] }
+    ],
+    "typescript": [
+      { "title": "TypeScript Handbook", "url": "https://www.typescriptlang.org/docs/handbook/intro.html", "platform": "TypeScript.org", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech"] },
+      { "title": "TypeScript Official Docs", "url": "https://www.typescriptlang.org/docs/", "platform": "TypeScript.org", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech"] },
+      { "title": "Understanding TypeScript", "url": "[UDEMY_AFFILIATE_URL]", "platform": "Udemy", "type": "paid", "affiliate": true, "level_min": 1, "level_max": 3, "industry_tags": ["tech"] }
     ],
     "react": [
-      { "title": "React Official Docs — Learn React", "url": "https://react.dev/learn", "platform": "React.dev", "type": "free", "affiliate": false },
-      { "title": "The Odin Project — React", "url": "https://www.theodinproject.com/paths/full-stack-javascript/courses/react", "platform": "The Odin Project", "type": "free", "affiliate": false }
+      { "title": "React Official Docs — Learn React", "url": "https://react.dev/learn", "platform": "React.dev", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech"] },
+      { "title": "The Odin Project — React", "url": "https://www.theodinproject.com/paths/full-stack-javascript/courses/react", "platform": "The Odin Project", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech"] },
+      { "title": "React — The Complete Guide", "url": "[UDEMY_AFFILIATE_URL]", "platform": "Udemy", "type": "paid", "affiliate": true, "level_min": 1, "level_max": 3, "industry_tags": ["tech"] }
     ],
     "aws": [
-      { "title": "AWS Skill Builder — Free Tier", "url": "https://skillbuilder.aws/", "platform": "AWS", "type": "free", "affiliate": false },
-      { "title": "AWS Getting Started", "url": "https://aws.amazon.com/getting-started/", "platform": "AWS", "type": "free", "affiliate": false }
+      { "title": "AWS Skill Builder — Free Tier", "url": "https://skillbuilder.aws/", "platform": "AWS", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech"] },
+      { "title": "AWS Getting Started", "url": "https://aws.amazon.com/getting-started/", "platform": "AWS", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech"] },
+      { "title": "AWS Certified Solutions Architect", "url": "[UDEMY_AFFILIATE_URL]", "platform": "Udemy", "type": "paid", "affiliate": true, "level_min": 1, "level_max": 3, "industry_tags": ["tech"] }
     ],
     "docker": [
-      { "title": "Docker Official Get Started", "url": "https://docs.docker.com/get-started/", "platform": "Docker Docs", "type": "free", "affiliate": false },
-      { "title": "Play with Docker — Browser Sandbox", "url": "https://labs.play-with-docker.com/", "platform": "Docker", "type": "free", "affiliate": false }
+      { "title": "Docker Official Get Started", "url": "https://docs.docker.com/get-started/", "platform": "Docker Docs", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech"] },
+      { "title": "Play with Docker — Browser Sandbox", "url": "https://labs.play-with-docker.com/", "platform": "Docker", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech"] },
+      { "title": "Docker & Kubernetes: The Practical Guide", "url": "[UDEMY_AFFILIATE_URL]", "platform": "Udemy", "type": "paid", "affiliate": true, "level_min": 1, "level_max": 3, "industry_tags": ["tech"] }
+    ],
+    "git": [
+      { "title": "Pro Git — Free Book", "url": "https://git-scm.com/book/en/v2", "platform": "Git-SCM", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech"] },
+      { "title": "GitHub Skills", "url": "https://skills.github.com/", "platform": "GitHub", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech"] },
+      { "title": "Git & GitHub — The Practical Guide", "url": "[UDEMY_AFFILIATE_URL]", "platform": "Udemy", "type": "paid", "affiliate": true, "level_min": 1, "level_max": 3, "industry_tags": ["tech"] }
+    ],
+    "java": [
+      { "title": "Java Tutorial for Beginners", "url": "https://docs.oracle.com/javase/tutorial/", "platform": "Oracle", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech"] },
+      { "title": "MOOC.fi Java Programming", "url": "https://java-programming.mooc.fi/", "platform": "University of Helsinki", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech"] },
+      { "title": "Java Programming Masterclass", "url": "[UDEMY_AFFILIATE_URL]", "platform": "Udemy", "type": "paid", "affiliate": true, "level_min": 1, "level_max": 3, "industry_tags": ["tech"] }
+    ],
+    "microsoft-excel": [
+      { "title": "Excel for Beginners — GCFGlobal", "url": "https://edu.gcfglobal.org/en/excel/", "platform": "GCFGlobal", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech", "business"] },
+      { "title": "Excel Easy — Free Online Tutorial", "url": "https://www.excel-easy.com/", "platform": "Excel Easy", "type": "free", "affiliate": false, "level_min": 1, "level_max": 2, "industry_tags": ["tech", "business"] },
+      { "title": "Microsoft Excel — Beginner to Advanced", "url": "[UDEMY_AFFILIATE_URL]", "platform": "Udemy", "type": "paid", "affiliate": true, "level_min": 1, "level_max": 3, "industry_tags": ["tech", "business"] }
     ],
     "kubernetes": [
       { "title": "Kubernetes Official Tutorials", "url": "https://kubernetes.io/docs/tutorials/", "platform": "Kubernetes.io", "type": "free", "affiliate": false },
       { "title": "Kubernetes Basics Interactive", "url": "https://kubernetes.io/docs/tutorials/kubernetes-basics/", "platform": "Kubernetes.io", "type": "free", "affiliate": false }
-    ],
-    "git": [
-      { "title": "Pro Git — Free Book", "url": "https://git-scm.com/book/en/v2", "platform": "Git-SCM", "type": "free", "affiliate": false },
-      { "title": "GitHub Skills", "url": "https://skills.github.com/", "platform": "GitHub", "type": "free", "affiliate": false }
     ],
     "nodejs": [
       { "title": "Node.js Official Learn Guide", "url": "https://nodejs.org/en/learn/getting-started/introduction-to-nodejs", "platform": "Node.js", "type": "free", "affiliate": false },

@@ -174,6 +174,43 @@ export function classifyBloomLevel(bulletText) {
   return 1.0
 }
 
+function getBloomVerb(bulletText) {
+  if (!bulletText) return null
+  for (const { pattern } of BLOOM_LEVELS) {
+    const m = bulletText.match(pattern)
+    if (m) return m[0].toLowerCase()
+  }
+  return null
+}
+
+function buildPrimarySignal(primaryInst, primaryBloomC, instanceCount) {
+  const { wType, durationMonths, bulletText } = primaryInst
+
+  if (wType <= 0.05) return 'skills section only'
+
+  if (wType >= 0.4 && durationMonths === null) return 'no duration detected'
+
+  if (wType >= 0.4 && durationMonths < 6) {
+    return `${durationMonths} month${durationMonths !== 1 ? 's' : ''} detected`
+  }
+
+  if (instanceCount === 1) return '1 context only'
+
+  if (primaryBloomC < 1.0) {
+    const verb = getBloomVerb(bulletText || '')
+    if (verb) return `strongest verb: ${verb}`
+    return 'weak action verbs'
+  }
+
+  if (durationMonths !== null) {
+    const yrs = Math.floor(durationMonths / 12)
+    if (yrs > 0) return `${yrs} yr${yrs !== 1 ? 's' : ''} detected`
+    return `${durationMonths} month${durationMonths !== 1 ? 's' : ''} detected`
+  }
+
+  return `${instanceCount} context${instanceCount !== 1 ? 's' : ''}`
+}
+
 // ---------------------------------------------------------------------------
 // B3 — scoreSkillEvidence
 // ---------------------------------------------------------------------------
@@ -269,7 +306,7 @@ function computeConfidence(instances, bloomCs) {
  */
 export function scoreSkillEvidence(instances) {
   if (!instances || instances.length === 0) {
-    return { score: 0, level: 'L1', confidence: 'low', primarySignal: null, suggestion: SUGGESTIONS.L1 }
+    return { score: 0, level: 'L1', confidence: 'low', primarySignal: null, primarySection: null, suggestion: SUGGESTIONS.L1 }
   }
 
   // Bloom multiplier per instance (C); defaults to 1.0 when no bulletText
@@ -278,7 +315,7 @@ export function scoreSkillEvidence(instances) {
   // Per-instance contribution: E × C × D
   const contributions = instances.map((inst, i) => {
     const d = getDurationModifier(inst.wType, inst.durationMonths)
-    return { inst, contribution: inst.wType * bloomCs[i] * d }
+    return { inst, bloomC: bloomCs[i], contribution: inst.wType * bloomCs[i] * d }
   })
 
   const sum = contributions.reduce((acc, { contribution }) => acc + contribution, 0)
@@ -290,16 +327,18 @@ export function scoreSkillEvidence(instances) {
   const level      = mapLevel(score)
   const confidence = computeConfidence(instances, bloomCs)
 
-  const primary = contributions.reduce((best, cur) =>
+  const primaryEntry = contributions.reduce((best, cur) =>
     cur.contribution > best.contribution ? cur : best
-  ).inst
-  const primarySignal = primary.sectionName
+  )
+  const primary        = primaryEntry.inst
+  const primarySection = primary.sectionName
+  const primarySignal  = buildPrimarySignal(primary, primaryEntry.bloomC, count)
 
   // Certifications don't map to L1–L5 — you either hold the credential or you don't.
   const allFromCerts = instances.every(i => i.sectionName === 'certifications')
   if (allFromCerts) {
-    return { score, level: 'certified', confidence: 'high', primarySignal: 'certifications', suggestion: null }
+    return { score, level: 'certified', confidence: 'high', primarySignal: 'certifications', primarySection: 'certifications', suggestion: null }
   }
 
-  return { score, level, confidence, primarySignal, suggestion: SUGGESTIONS[level] }
+  return { score, level, confidence, primarySignal, primarySection, suggestion: SUGGESTIONS[level] }
 }

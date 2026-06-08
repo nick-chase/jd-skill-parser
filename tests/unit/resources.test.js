@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'vitest'
 import resourceData from '@data/resources.json'
+import { getResources } from '@utils/resources.js'
 
 const { resources } = resourceData
 
@@ -13,8 +14,8 @@ describe('resources.json — structure', () => {
     expect(typeof resources).toBe('object')
   })
 
-  test('has at least 18 skill entries', () => {
-    expect(Object.keys(resources).length).toBeGreaterThanOrEqual(18)
+  test('has at least 20 skill entries', () => {
+    expect(Object.keys(resources).length).toBeGreaterThanOrEqual(20)
   })
 
   test('every entry is a non-empty array', () => {
@@ -36,18 +37,20 @@ describe('resources.json — structure', () => {
     }
   })
 
-  test('all affiliate flags are false (no live affiliate links yet)', () => {
+  test('affiliate flag is a boolean on every resource', () => {
     for (const [id, list] of Object.entries(resources)) {
       for (const r of list) {
-        expect(r.affiliate, `${id} should have affiliate=false`).toBe(false)
+        expect(typeof r.affiliate, `${id} affiliate must be boolean`).toBe('boolean')
       }
     }
   })
 
-  test('all urls are https', () => {
+  test('non-affiliate urls are https', () => {
     for (const [id, list] of Object.entries(resources)) {
       for (const r of list) {
-        expect(r.url, `${id} url should start with https`).toMatch(/^https:\/\//)
+        if (!r.affiliate) {
+          expect(r.url, `${id} free url should start with https`).toMatch(/^https:\/\//)
+        }
       }
     }
   })
@@ -67,6 +70,7 @@ describe('resources.json — coverage for top gap skills', () => {
     'aws', 'docker', 'kubernetes', 'git', 'nodejs',
     'postgresql', 'machine-learning', 'tensorflow', 'pytorch',
     'ci-cd', 'linux', 'rest-api', 'graphql',
+    'java', 'microsoft-excel',
   ]
 
   for (const id of REQUIRED) {
@@ -75,4 +79,67 @@ describe('resources.json — coverage for top gap skills', () => {
       expect(resources[id].length).toBeGreaterThan(0)
     })
   }
+})
+
+describe('resources.json — affiliate entries', () => {
+  const AFFILIATE_SKILLS = ['python', 'sql', 'javascript', 'typescript', 'react', 'aws', 'docker', 'git', 'java', 'microsoft-excel']
+
+  for (const id of AFFILIATE_SKILLS) {
+    test(`"${id}" has at least one affiliate entry`, () => {
+      const list = resources[id] ?? []
+      expect(list.some(r => r.affiliate)).toBe(true)
+    })
+
+    test(`"${id}" has at least one free entry`, () => {
+      const list = resources[id] ?? []
+      expect(list.some(r => !r.affiliate)).toBe(true)
+    })
+  }
+})
+
+// ---------------------------------------------------------------------------
+// getResources() utility
+// ---------------------------------------------------------------------------
+
+describe('getResources()', () => {
+  test('returns up to 3 results for python at level 2', () => {
+    const results = getResources('python', 2)
+    expect(results.length).toBeGreaterThan(0)
+    expect(results.length).toBeLessThanOrEqual(3)
+  })
+
+  test('free resources come before paid/affiliate', () => {
+    const results = getResources('python', 2)
+    const firstAffiliate = results.findIndex(r => r.affiliate)
+    if (firstAffiliate === -1) return
+    const lastFree = results.map(r => !r.affiliate).lastIndexOf(true)
+    expect(lastFree).toBeLessThan(firstAffiliate)
+  })
+
+  test('returns empty array for unknown skill', () => {
+    expect(getResources('unknown-skill-xyz', 2)).toEqual([])
+  })
+
+  test('level filter excludes resources outside range', () => {
+    // Level 5 user should not see level_max=3 resources
+    const results = getResources('python', 5)
+    for (const r of results) {
+      if (r.level_max != null) {
+        expect(r.level_max).toBeGreaterThanOrEqual(5)
+      }
+    }
+  })
+
+  test('returns empty array for null/undefined skill', () => {
+    expect(getResources(null, 2)).toEqual([])
+    expect(getResources(undefined, 2)).toEqual([])
+  })
+
+  test('affiliate entries have placeholder URLs', () => {
+    const pythonResources = resources['python'] ?? []
+    const affiliateOnes   = pythonResources.filter(r => r.affiliate)
+    for (const r of affiliateOnes) {
+      expect(r.url).toBe('[UDEMY_AFFILIATE_URL]')
+    }
+  })
 })

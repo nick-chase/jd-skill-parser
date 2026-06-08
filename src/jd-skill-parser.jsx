@@ -232,6 +232,50 @@ function extractJobDuties(text) {
     return duties.slice(0, 10);
 }
 
+const JD_DEGREE_LEVELS = [
+    { level: 4, re: /\b(ph\.?d\.?|doctor(?:ate|al)?)\b/i },
+    { level: 3, re: /\b(master'?s?|m\.?s\.?(?!\s*shift)|m\.?a\.?\b|m\.?b\.?a\.?|msc)\b/i },
+    { level: 2, re: /\b(bachelor'?s?|b\.?s\.?\b|b\.?a\.?\b|undergraduate|4[\s-]?year\s+degree)\b/i },
+    { level: 1, re: /\b(associate'?s?|a\.?s\.?\b|a\.?a\.?\b)\b/i },
+]
+
+function extractJDDegreeField(line) {
+    let m = line.match(/\b(?:degree|bachelor'?s?|master'?s?|ph\.?d\.?|associate'?s?)\s+(?:of|in)\s+([A-Za-z][A-Za-z\s,&\/]+?)(?=\s*(?:,\s*(?:or|and)\s*[a-z]|\s*\(|\s*\.|\s*$))/i)
+    if (m) return m[1].trim().replace(/\s+/g, ' ')
+    return null
+}
+
+export function extractJDDegree(text) {
+    if (!text) return { requiredDegreeLevel: null, preferredField: null }
+
+    let requiredDegreeLevel = null
+    let preferredField = null
+    let foundRequired = false
+
+    for (const line of text.split('\n')) {
+        const trimmed = line.trim()
+        if (!trimmed) continue
+        const lower = trimmed.toLowerCase()
+        if (!/\b(?:degree|bachelor|master|phd|ph\.d|associate|graduate|undergraduate)\b/.test(lower)) continue
+
+        let level = null
+        for (const { level: lvl, re } of JD_DEGREE_LEVELS) {
+            if (re.test(trimmed)) { level = lvl; break }
+        }
+        if (level === null) continue
+
+        const isRequired = /\b(?:required|must\s+have|essential|minimum)\b/.test(lower)
+
+        if (requiredDegreeLevel === null || (isRequired && !foundRequired)) {
+            requiredDegreeLevel = level
+            foundRequired = isRequired
+            preferredField = extractJDDegreeField(trimmed)
+        }
+    }
+
+    return { requiredDegreeLevel, preferredField }
+}
+
 export function parseJobDescription(text) {
     if (!text || !text.trim()) return [];
 
@@ -309,6 +353,7 @@ export function parseJobDescription(text) {
         technicalSignals,
         behavioralSignals: extractBehavioralSignals(text),
         jobDuties:         extractJobDuties(text),
+        degree:            extractJDDegree(text),
     };
 }
 
@@ -678,7 +723,77 @@ function JobDutiesPanel({ duties }) {
     );
 }
 
-function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, jobMeta, decisionResult }) {
+const DEGREE_LEVEL_LABELS = { 1: "Associate's", 2: "Bachelor's", 3: "Master's", 4: 'PhD' }
+
+export function computeDegreeFlag(resumeDegree, jdDegree) {
+    if (!jdDegree?.requiredDegreeLevel) return { status: 'not_stated' }
+
+    const required = jdDegree.requiredDegreeLevel
+    const found    = resumeDegree?.degreeLevel ?? null
+
+    if (found === null) {
+        return {
+            status: 'gap',
+            required: DEGREE_LEVEL_LABELS[required] ?? 'Degree',
+            found:    null,
+            note:     'Not detected on resume — consider highlighting relevant experience',
+        }
+    }
+
+    if (found >= required) {
+        const foundLabel  = DEGREE_LEVEL_LABELS[found] ?? `Level ${found}`
+        const fieldSuffix = resumeDegree.field ? ` in ${resumeDegree.field}` : ''
+        return {
+            status: 'match',
+            required: DEGREE_LEVEL_LABELS[required] ?? 'Degree',
+            found:    foundLabel + fieldSuffix,
+            note:     null,
+        }
+    }
+
+    return {
+        status: 'gap',
+        required: DEGREE_LEVEL_LABELS[required] ?? 'Degree',
+        found:    DEGREE_LEVEL_LABELS[found] ?? `Level ${found}`,
+        note:     'Resume shows a lower degree — consider highlighting relevant experience',
+    }
+}
+
+function DegreeFlagCard({ degreeFlag }) {
+    if (!degreeFlag || degreeFlag.status === 'not_stated') return null
+    const isMatch = degreeFlag.status === 'match'
+    return (
+        <div style={{
+            padding: '10px 14px',
+            borderRadius: '8px',
+            border: `1px solid ${isMatch ? '#bbf7d0' : '#fde68a'}`,
+            backgroundColor: isMatch ? '#f0fdf4' : '#fffbeb',
+            fontSize: '13px',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '10px',
+            marginBottom: '4px',
+        }}>
+            <span style={{ fontSize: '15px', flexShrink: 0, lineHeight: '1.6' }}>{isMatch ? '✓' : '!'}</span>
+            <div>
+                <div style={{ fontWeight: '600', color: isMatch ? '#166534' : '#92400e' }}>
+                    Degree required: {degreeFlag.required}
+                    {isMatch
+                        ? <span style={{ marginLeft: '8px', color: '#059669', fontWeight: '400' }}>— {degreeFlag.found} · Matches</span>
+                        : degreeFlag.found
+                            ? <span style={{ marginLeft: '8px', color: '#d97706', fontWeight: '400' }}>— {degreeFlag.found} found · Gap</span>
+                            : <span style={{ marginLeft: '8px', color: '#d97706', fontWeight: '400' }}>— Not detected · Gap</span>
+                    }
+                </div>
+                {degreeFlag.note && (
+                    <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '2px' }}>→ {degreeFlag.note}</div>
+                )}
+            </div>
+        </div>
+    )
+}
+
+function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, jobMeta, decisionResult, degreeFlag }) {
     if (!gap) return null;
 
     const { critical, levelGaps, matched, bonus } = gap;
@@ -700,6 +815,9 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
 
     return (
         <div className="flex flex-col gap-4">
+
+            {/* Degree requirement flag */}
+            <DegreeFlagCard degreeFlag={degreeFlag} />
 
             {/* Zero match warning */}
             {critical.length === 0 && levelGaps.length === 0 && matched.length === 0 && bonus.length > 0 && (
@@ -993,7 +1111,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
     );
 }
 
-function ResumeResultsView({ results, behavioralSignals }) {
+function ResumeResultsView({ results, behavioralSignals, degree }) {
     const SOURCE_COLORS = {
         'Technical Skills': '#0369a1',
         'Education':        '#7c3aed',
@@ -1062,12 +1180,16 @@ function ResumeResultsView({ results, behavioralSignals }) {
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1.5">
                     Education &amp; Degrees
                 </div>
-                <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-400 italic">Degree detection coming soon</span>
-                    <span className="text-[10px] px-2 py-0.5 bg-slate-100 text-slate-400 rounded-full border border-slate-200">
-                        in development
-                    </span>
-                </div>
+                {degree?.degreeLevel ? (
+                    <div className="text-xs text-slate-600">
+                        <span className="font-medium">{DEGREE_LEVEL_LABELS[degree.degreeLevel]}</span>
+                        {degree.field && <span className="text-slate-500"> in {degree.field}</span>}
+                        {degree.institution && <span className="text-slate-400"> · {degree.institution}</span>}
+                        {degree.graduationYear && <span className="text-slate-400"> ({degree.graduationYear})</span>}
+                    </div>
+                ) : (
+                    <span className="text-xs text-slate-400">No degree detected in Education section</span>
+                )}
             </div>
 
             {/* Skills grouped by evidence band */}
@@ -1565,6 +1687,7 @@ export default function App() {
                                     <ResumeResultsView
                                         results={resumeResults.technicalSignals}
                                         behavioralSignals={resumeResults.behavioralSignals}
+                                        degree={resumeResults.degree}
                                     />
                                 </>
                             )
@@ -1602,6 +1725,7 @@ export default function App() {
                                     jobRole={jobRole}
                                     jobMeta={jobMeta}
                                     decisionResult={getDecision(results, resumeResults)}
+                                    degreeFlag={computeDegreeFlag(resumeResults.degree, results.degree)}
                                 />
                                 <AdSlot isPaid={isPaidStatus} />
                             </>

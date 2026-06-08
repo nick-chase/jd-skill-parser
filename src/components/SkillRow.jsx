@@ -9,7 +9,7 @@
  */
 
 import ResourceLink from './ResourceLink.jsx'
-import resourceData from '@data/resources.json'
+import { getResources } from '@utils/resources.js'
 
 function nameToResourceId(name) {
   return (name || '')
@@ -19,8 +19,6 @@ function nameToResourceId(name) {
     .replace(/-+/g, '-')
     .replace(/[^a-z0-9-]/g, '')
 }
-
-const RESOURCE_MAP = resourceData.resources
 
 const LEVEL_NAMES  = ['—', 'Mentioned', 'Limited evidence', 'Supported', 'Strong evidence', 'Extensive evidence']
 
@@ -91,8 +89,11 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
   const isMissing = variant === 'missing'
   const isMatched = variant === 'matched'
 
-  const skillResources = (isMissing || isGap)
-    ? (RESOURCE_MAP[nameToResourceId(skill.name)] ?? [])
+  // TODO: Huntr placement at bottom of results page (Phase E)
+  const skillLevel     = isMissing ? 1 : (skill.resumeLevel ?? 1)
+  const showResources  = isMissing || (isGap && (skill.resumeLevel ?? 0) <= 2)
+  const skillResources = showResources
+    ? getResources(nameToResourceId(skill.name), skillLevel)
     : []
 
   // Row-level background tints
@@ -110,13 +111,29 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
     ? <span style={{ color: '#94a3b8', fontWeight: '400' }}> ({skill.confidence} confidence)</span>
     : null
 
+  const isLimitedEvidence =
+    (isMatched && typeof skill.level === 'number' && skill.level <= 2) ||
+    (isGap && typeof skill.resumeLevel === 'number' && skill.resumeLevel <= 2) ||
+    skill.confidence === 'low'
+
   // Evidence explanation line — shown for matched and gap rows only
   const evidenceLine = (isMatched || isGap) && skill.confidence && skill.source
-    ? (
-      <div className="text-xs text-gray-400 mt-0.5">
-        ({skill.confidence.toLowerCase()} confidence: {skill.source})
-      </div>
-    )
+    ? isLimitedEvidence && skill.primarySignal
+      ? (
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline', flexWrap: 'wrap', marginTop: '3px' }}>
+          <span style={{ fontSize: '11px', color: '#b45309', fontStyle: 'italic' }}>
+            {skill.primarySignal}
+          </span>
+          <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+            {skill.source}
+          </span>
+        </div>
+      )
+      : (
+        <div className="text-xs text-gray-400 mt-0.5">
+          ({skill.confidence.toLowerCase()} confidence: {skill.source})
+        </div>
+      )
     : null
 
   // Level cell text
