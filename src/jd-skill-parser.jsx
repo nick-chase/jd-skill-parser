@@ -474,6 +474,7 @@ function nameToResourceId(name) {
         .replace(/[^a-z0-9-]/g, '');
 }
 
+// Fallback only — used when inference suggestion is null or missing
 function getGapSuggestion(name, resumeLevel, requiredLevel) {
     if (!resumeLevel || resumeLevel <= 1) {
         return `Your resume lists ${name} but shows no context. ` +
@@ -503,7 +504,7 @@ function formatDuration(months) {
 }
 
 function evidenceSummary(skill) {
-    const isListedOnly = skill.source === 'Technical Skills' || skill.source === 'Summary';
+    const isListedOnly = skill.source != null && (skill.source === 'Technical Skills' || skill.source === 'Summary');
     if (isListedOnly) return 'listed only';
     const parts = [];
     const dur = formatDuration(skill.durationMonths);
@@ -515,6 +516,7 @@ function evidenceSummary(skill) {
 }
 
 function ConfidenceDot({ confidence }) {
+    if (!confidence) return null;
     const color = confidence === 'high' ? '#22c55e' : confidence === 'medium' ? '#f59e0b' : '#94a3b8';
     return <span style={{ color, fontSize: '10px', marginLeft: '2px', lineHeight: 1 }}>●</span>;
 }
@@ -1368,23 +1370,29 @@ export function runGapAnalysis(jdSkills, resumeSkills) {
             // Have it but below required level
             levelGaps.push({
                 ...jdSkill,
-                resumeLevel:   resumeSkill.level,
-                gap:           jdSkill.level - resumeSkill.level,
-                confidence:    resumeSkill.confidence    ?? null,
-                source:        resumeSkill.source        ?? null,
+                resumeLevel:    resumeSkill.level,
+                gap:            jdSkill.level - resumeSkill.level,
+                confidence:     resumeSkill.confidence     ?? null,
+                source:         resumeSkill.source         ?? null,
                 durationMonths: resumeSkill.durationMonths ?? null,
-                contextCount:  resumeSkill.contextCount  ?? null,
+                contextCount:   resumeSkill.contextCount   ?? null,
+                primarySignal:  resumeSkill.primarySignal  ?? null,
+                suggestion:     resumeSkill.suggestion     ?? null,
+                limitingFactor: resumeSkill.limitingFactor ?? null,
             });
         } else {
             // Have it at or above required level (includes 'certified' — credential counts as met)
             matched.push({
                 ...jdSkill,
-                resumeLevel:   resumeSkill.level,
-                gap:           0,
-                confidence:    resumeSkill.confidence    ?? null,
-                source:        resumeSkill.source        ?? null,
+                resumeLevel:    resumeSkill.level,
+                gap:            0,
+                confidence:     resumeSkill.confidence     ?? null,
+                source:         resumeSkill.source         ?? null,
                 durationMonths: resumeSkill.durationMonths ?? null,
-                contextCount:  resumeSkill.contextCount  ?? null,
+                contextCount:   resumeSkill.contextCount   ?? null,
+                primarySignal:  resumeSkill.primarySignal  ?? null,
+                suggestion:     resumeSkill.suggestion     ?? null,
+                limitingFactor: resumeSkill.limitingFactor ?? null,
             });
         }
     }

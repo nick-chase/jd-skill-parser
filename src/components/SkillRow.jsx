@@ -101,10 +101,11 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
     ? (isMissing ? '#fff5f5' : isGap ? '#fffbeb' : '#f0fdf4')
     : 'white'
 
+  // Prefer inference-computed suggestion over derived fallback
   const suggestion = isMissing
-    ? missingSuggestion(skill.name)
+    ? (skill.suggestion || missingSuggestion(skill.name))
     : isGap
-      ? gapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level)
+      ? (skill.suggestion || gapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level))
       : null
 
   const confidenceSuffix = skill.confidence
@@ -116,22 +117,25 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
     (isGap && typeof skill.resumeLevel === 'number' && skill.resumeLevel <= 2) ||
     skill.confidence === 'low'
 
-  // Evidence explanation line — shown for matched and gap rows only
-  const evidenceLine = (isMatched || isGap) && skill.confidence && skill.source
+  // Evidence explanation line — shown for matched and gap rows when confidence is present.
+  // source is optional: if null but primarySignal exists, show primarySignal alone.
+  const evidenceLine = (isMatched || isGap) && skill.confidence
     ? isLimitedEvidence && skill.primarySignal
       ? (
         <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline', flexWrap: 'wrap', marginTop: '3px' }}>
           <span style={{ fontSize: '11px', color: '#b45309', fontStyle: 'italic' }}>
             {skill.primarySignal}
           </span>
-          <span style={{ fontSize: '11px', color: '#94a3b8' }}>
-            {skill.source}
-          </span>
+          {skill.source != null && (
+            <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+              {skill.source}
+            </span>
+          )}
         </div>
       )
       : (
         <div className="text-xs text-gray-400 mt-0.5">
-          ({skill.confidence.toLowerCase()} confidence: {skill.source})
+          ({skill.confidence.toLowerCase()} confidence{skill.source != null ? `: ${skill.source}` : ''})
         </div>
       )
     : null
