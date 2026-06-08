@@ -9,6 +9,7 @@
  */
 
 import ResourceLink from './ResourceLink.jsx'
+import { getAffiliateResources, requiresFTCDisclosure } from '@utils/affiliateLoader.js'
 import { getResources } from '@utils/resources.js'
 
 function nameToResourceId(name) {
@@ -90,10 +91,27 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
   const isMatched = variant === 'matched'
 
   // TODO: Huntr placement at bottom of results page (Phase E)
-  const skillLevel     = isMissing ? 1 : (skill.resumeLevel ?? 1)
-  const showResources  = isMissing || (isGap && (skill.resumeLevel ?? 0) <= 2)
+  const skillLevel    = isMissing ? 1 : (skill.resumeLevel ?? 1)
+  const showResources = isMissing || (isGap && (skill.resumeLevel ?? 0) <= 2)
+
+  // Prefer affiliate resources from the plugin system; fall back to legacy getResources().
+  const rawAffiliate   = showResources ? getAffiliateResources(nameToResourceId(skill.name), skillLevel) : []
+  const hasFTCDisclosure = requiresFTCDisclosure(rawAffiliate)
+
+  // Map affiliate resources to the shape ResourceLink expects
+  const affiliateMapped = rawAffiliate.map(r => ({
+    title:         r.title,
+    url:           r.url,
+    platform:      r.program,
+    type:          r.type,
+    affiliate:     hasFTCDisclosure,
+    level_min:     r.level_min,
+    level_max:     r.level_max,
+    industry_tags: r.industry_tags,
+  }))
+
   const skillResources = showResources
-    ? getResources(nameToResourceId(skill.name), skillLevel)
+    ? (affiliateMapped.length > 0 ? affiliateMapped : getResources(nameToResourceId(skill.name), skillLevel))
     : []
 
   // Row-level background tints

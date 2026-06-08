@@ -1,0 +1,20 @@
+{
+  "program": "Udemy",
+  "enabled": false,
+  "priority": 2,
+  "ftc_disclosure": true,
+  "cookie_days": 7,
+  "commission_note": "15% per sale",
+  "resources": [
+    { "skill_id": "python", "title": "Complete Python Bootcamp", "url": "[UDEMY_AFFILIATE_URL]", "level_min": 1, "level_max": 3, "type": "paid", "industry_tags": ["tech"] },
+    { "skill_id": "sql", "title": "The Complete SQL Bootcamp", "url": "[UDEMY_AFFILIATE_URL]", "level_min": 1, "level_max": 2, "type": "paid", "industry_tags": ["tech", "finance"] },
+    { "skill_id": "javascript", "title": "The Complete JavaScript Course", "url": "[UDEMY_AFFILIATE_URL]", "level_min": 1, "level_max": 3, "type": "paid", "industry_tags": ["tech"] },
+    { "skill_id": "react", "title": "React - The Complete Guide", "url": "[UDEMY_AFFILIATE_URL]", "level_min": 1, "level_max": 3, "type": "paid", "industry_tags": ["tech"] },
+    { "skill_id": "aws", "title": "AWS Certified Solutions Architect", "url": "[UDEMY_AFFILIATE_URL]", "level_min": 1, "level_max": 3, "type": "paid", "industry_tags": ["tech"] },
+    { "skill_id": "docker", "title": "Docker and Kubernetes: The Complete Guide", "url": "[UDEMY_AFFILIATE_URL]", "level_min": 1, "level_max": 3, "type": "paid", "industry_tags": ["tech"] },
+    { "skill_id": "git", "title": "Git and GitHub Bootcamp", "url": "[UDEMY_AFFILIATE_URL]", "level_min": 1, "level_max": 2, "type": "paid", "industry_tags": ["tech"] },
+    { "skill_id": "typescript", "title": "Understanding TypeScript", "url": "[UDEMY_AFFILIATE_URL]", "level_min": 1, "level_max": 3, "type": "paid", "industry_tags": ["tech"] },
+    { "skill_id": "java", "title": "Java Programming Masterclass", "url": "[UDEMY_AFFILIATE_URL]", "level_min": 1, "level_max": 3, "type": "paid", "industry_tags": ["tech"] },
+    { "skill_id": "excel", "title": "Microsoft Excel - Excel from Beginner to Advanced", "url": "[UDEMY_AFFILIATE_URL]", "level_min": 1, "level_max": 3, "type": "paid", "industry_tags": ["tech", "finance"] }
+  ]
+}

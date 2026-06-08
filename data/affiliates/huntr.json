@@ -1,0 +1,10 @@
+{
+  "program": "Huntr",
+  "enabled": false,
+  "priority": 4,
+  "ftc_disclosure": true,
+  "cookie_days": 30,
+  "commission_note": "Check at signup",
+  "trigger": "results_page_bottom",
+  "resources": []
+}

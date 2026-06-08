@@ -1,0 +1,22 @@
+{
+  "description": "Schema reference for affiliate program files",
+  "fields": {
+    "program": "Display name of the affiliate program",
+    "enabled": "true/false — toggle without deleting the file",
+    "priority": "Integer — lower = shown first when multiple programs match",
+    "ftc_disclosure": "true/false — triggers FTC disclosure line in UI",
+    "cookie_days": "Integer — cookie window in days (for reference only)",
+    "commission_note": "Human-readable commission info (for reference only)",
+    "resources": [
+      {
+        "skill_id": "must match skills.json skill ID",
+        "title": "Display title shown to user",
+        "url": "Affiliate-tracked URL",
+        "level_min": "Integer 1-5 — minimum skill level to show this",
+        "level_max": "Integer 1-5 — maximum skill level to show this",
+        "type": "paid or free",
+        "industry_tags": ["tech", "finance", "general"]
+      }
+    ]
+  }
+}

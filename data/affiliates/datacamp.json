@@ -1,0 +1,13 @@
+{
+  "program": "DataCamp",
+  "enabled": true,
+  "priority": 1,
+  "ftc_disclosure": true,
+  "cookie_days": 30,
+  "commission_note": "50% first month, 15% recurring",
+  "resources": [
+    { "skill_id": "python", "title": "Python Fundamentals Track", "url": "https://datacamp.pxf.io/5kYR13", "level_min": 1, "level_max": 3, "type": "paid", "industry_tags": ["tech", "finance"] },
+    { "skill_id": "sql", "title": "Introduction to SQL", "url": "https://datacamp.pxf.io/5kYR13", "level_min": 1, "level_max": 2, "type": "paid", "industry_tags": ["tech", "finance"] },
+    { "skill_id": "r", "title": "R Programming Track", "url": "https://datacamp.pxf.io/5kYR13", "level_min": 1, "level_max": 3, "type": "paid", "industry_tags": ["tech", "finance"] }
+  ]
+}
