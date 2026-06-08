@@ -57,3 +57,4 @@ tests/diagnostic-output/
 # Package manager
 package-lock.json.backup
 yarn-error.log
+.claude/settings.local.json
