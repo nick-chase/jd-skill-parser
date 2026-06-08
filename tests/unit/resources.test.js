@@ -142,4 +142,16 @@ describe('getResources()', () => {
       expect(r.url).toBe('[UDEMY_AFFILIATE_URL]')
     }
   })
+
+  test('filters out entries with placeholder URLs (brackets)', () => {
+    // getResources() must never return a resource whose URL contains [ or ]
+    // This ensures unreplaced affiliate placeholders like [UDEMY_AFFILIATE_URL]
+    // are not rendered as live broken links.
+    for (const skillId of Object.keys(resources)) {
+      const results = getResources(skillId, 3)
+      for (const r of results) {
+        expect(r.url, `${skillId}: placeholder URL leaked through getResources`).not.toMatch(/[\[\]]/)
+      }
+    }
+  })
 })

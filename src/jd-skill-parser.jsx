@@ -17,6 +17,7 @@ import AppFooter from './components/AppFooter.jsx';
 import HowToTour from './components/HowToTour.jsx'
 import FeedbackForm from './components/FeedbackForm.jsx';
 import resourceData from '@data/resources.json';
+import { getResources } from '@utils/resources.js';
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
 const betaFeedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
@@ -1007,14 +1008,14 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                         </div>
 
                         {topGaps.map((skill, index) => {
-                            const resources = RESOURCE_MAP[nameToResourceId(skill.name)] ?? [];
+                            const resources = getResources(nameToResourceId(skill.name), skill.resumeLevel ?? 1, 'tech');
                             const freeResources = resources.filter(r => !r.affiliate).slice(0, 2);
                             const affiliateResource = resources.find(r => r.affiliate);
                             const resumeLabel = skill.resumeLevel
                                 ? (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`)
                                 : 'Not evidenced';
                             const jdLabel = LEVEL_NAMES[skill.level] ?? `L${skill.level}`;
-                            const suggestion = getGapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level);
+                            const suggestion = skill.suggestion || getGapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level);
 
                             return (
                                 <div key={skill.name}
@@ -1082,6 +1083,11 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                                                         {affiliateResource.platform} · affiliate
                                                     </span>
                                                 </a>
+                                            )}
+                                            {affiliateResource && (
+                                                <p className="text-xs text-slate-400 mt-1">
+                                                    Some resources above are affiliate links. We earn a small commission if you enroll — at no extra cost to you.
+                                                </p>
                                             )}
                                         </div>
                                     )}

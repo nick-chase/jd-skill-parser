@@ -21,7 +21,9 @@ export function getResources(skillId, level = 1, industryTag = 'tech') {
         const levelOk = (r.level_min == null || level >= r.level_min) &&
                         (r.level_max == null || level <= r.level_max)
         const tagOk   = !r.industry_tags || r.industry_tags.includes(industryTag)
-        return levelOk && tagOk
+        // Guard: filter out unreplaced placeholder URLs
+        const urlOk   = !r.url.includes('[') && !r.url.includes(']')
+        return levelOk && tagOk && urlOk
     })
 
     // Free resources first, then paid/affiliate
