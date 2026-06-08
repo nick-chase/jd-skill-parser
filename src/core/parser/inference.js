@@ -306,7 +306,7 @@ function computeConfidence(instances, bloomCs) {
  */
 export function scoreSkillEvidence(instances) {
   if (!instances || instances.length === 0) {
-    return { score: 0, level: 'L1', confidence: 'low', primarySignal: null, primarySection: null, suggestion: SUGGESTIONS.L1 }
+    return { score: 0, level: 'L1', confidence: 'low', primarySignal: null, primarySection: null, suggestion: SUGGESTIONS.L1, limitingFactor: 'no_context' }
   }
 
   // Bloom multiplier per instance (C); defaults to 1.0 when no bulletText
@@ -334,11 +334,33 @@ export function scoreSkillEvidence(instances) {
   const primarySection = primary.sectionName
   const primarySignal  = buildPrimarySignal(primary, primaryEntry.bloomC, count)
 
+  // ---------------------------------------------------------------------------
+  // Derive limitingFactor — priority order: no_context > no_duration > weak_verb
+  //                                         > single_context > none
+  // ---------------------------------------------------------------------------
+  const maxE = Math.max(...contributions.map(({ inst }) => inst.wType))
+  const avgC = bloomCs.reduce((s, c) => s + c, 0) / bloomCs.length
+  const allUnknownDuration = contributions.every(({ inst }) => inst.durationMonths === null)
+  const anyKnownDuration   = contributions.some(({ inst }) => inst.durationMonths !== null)
+
+  let limitingFactor
+  if (maxE <= 0.05) {
+    limitingFactor = 'no_context'
+  } else if (allUnknownDuration) {
+    limitingFactor = 'no_duration'
+  } else if (avgC <= 0.70 && anyKnownDuration) {
+    limitingFactor = 'weak_verb'
+  } else if (mRecurrence === 1.0) {
+    limitingFactor = 'single_context'
+  } else {
+    limitingFactor = 'none'
+  }
+
   // Certifications don't map to L1–L5 — you either hold the credential or you don't.
   const allFromCerts = instances.every(i => i.sectionName === 'certifications')
   if (allFromCerts) {
-    return { score, level: 'certified', confidence: 'high', primarySignal: 'certifications', primarySection: 'certifications', suggestion: null }
+    return { score, level: 'certified', confidence: 'high', primarySignal: 'certifications', primarySection: 'certifications', suggestion: null, limitingFactor: 'none' }
   }
 
-  return { score, level, confidence, primarySignal, primarySection, suggestion: SUGGESTIONS[level] }
+  return { score, level, confidence, primarySignal, primarySection, suggestion: SUGGESTIONS[level], limitingFactor }
 }
