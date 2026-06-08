@@ -12,7 +12,14 @@
       "Bash(npm run *)",
       "Bash(curl -s http://localhost:5999)",
       "Bash(npx playwright *)",
-      "PowerShell(*)"
+      "PowerShell(*)",
+      "Bash(node -e \"const d = JSON.parse\\(require\\('fs'\\).readFileSync\\('data/skills.json','utf8'\\)\\); console.log\\(typeof d, Array.isArray\\(d\\), Object.keys\\(d\\).slice\\(0,5\\)\\)\")",
+      "Bash(node -e \"const d = JSON.parse\\(require\\('fs'\\).readFileSync\\('data/skills.json','utf8'\\)\\); const skills = d.skills; const ts = skills.find\\(s=>s.canonical.toLowerCase\\(\\).includes\\('typescript'\\)\\); console.log\\(JSON.stringify\\(ts,null,2\\)\\)\")",
+      "Bash(node -e \"const d = JSON.parse\\(require\\('fs'\\).readFileSync\\('data/skills.json','utf8'\\)\\); const skills = d.skills; ['Express', 'Flask', 'Go', 'Remix', 'Regression', 'Data Wrangling', 'A/B Testing'].forEach\\(name => { const s = skills.find\\(s=>s.canonical.toLowerCase\\(\\).includes\\(name.toLowerCase\\(\\)\\)\\); if\\(s\\) console.log\\(name,':', JSON.stringify\\({canonical:s.canonical,aliases:s.aliases,guardWords:s.guardWords}\\)\\) }\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(node --experimental-vm-modules -e ' *)",
+      "Bash(npx vitest *)",
+      "Bash(node *)"
     ]
   },
   "hooks": {

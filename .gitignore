@@ -50,6 +50,10 @@ build/
 coverage/
 .nyc_output/
 
+# Diagnostic runs — private resume fixtures, parsed outputs, and analysis reports
+# These reference or derive from private resume data in nat20-core and must not be public
+tests/diagnostic-output/
+
 # Package manager
 package-lock.json.backup
 yarn-error.log

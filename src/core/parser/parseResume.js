@@ -225,6 +225,39 @@ function matchCertificationLine(line) {
     return matchSkillsInText(line)
 }
 
+// GROUP 2 FIX — Determine whether a certifications section line is a description
+// bullet or pure-issuer/date/metadata line (as opposed to a cert name line).
+// We exclude:
+//   - Bullet-marker lines (-, •, *, etc.)
+//   - Digit-starting description lines (e.g. "8-course program covering...")
+//   - Date lines: "Issued April 2024", "Valid through ...", "Expires ..."
+//   - Credential ID lines
+//   - Pipe-separated metadata lines
+//   - PURE issuer-only lines: the issuer name alone on a line (e.g. "Coursera",
+//     "The Linux Foundation"). Lines like "freeCodeCamp — JavaScript Cert" contain
+//     a cert name after " — " and MUST NOT be excluded.
+// NOTE: We do NOT filter on "starts with lowercase" because some legitimate cert
+// issuers (freeCodeCamp, edX) use lowercase-starting brand names.
+function isCertDescriptionLine(trimmedLine) {
+    // Bullet markers (-, •, *, but NOT – which is en-dash sometimes used in cert names)
+    if (/^[-•\*‣◦→]/.test(trimmedLine)) return true
+    // Digit-starting lines are description prose (e.g. "8-course program covering SQL, R")
+    // Distinguish from year-only lines — those would be caught by "Issued" pattern
+    if (/^\d/.test(trimmedLine) && !/^\d{4}\s*$/.test(trimmedLine)) return true
+    // Date-only lines: "Issued ...", "Valid through ...", "Expires ..."
+    if (/^(Issued|Valid through|Expires?|Renewed?|Completed)\b/i.test(trimmedLine)) return true
+    // Credential ID lines
+    if (/^Credential (ID|#)/i.test(trimmedLine)) return true
+    // Pipe-separated metadata lines (e.g. "Credential ID: X  |  Issued: Y  |  Valid through: Z")
+    if (/\bIssued\b.*\||\|\s*\bIssued\b/i.test(trimmedLine)) return true
+    // Pure issuer-only lines: a known issuer name with NO cert-content after it.
+    // Lines like "freeCodeCamp — JavaScript Cert" have " — CertName" after the issuer and PASS.
+    // Only pure-issuer lines (e.g. "Coursera" alone) are filtered.
+    const PURE_ISSUER_RE = /^(Coursera|edX|Udemy|LinkedIn Learning|Pluralsight|The Linux Foundation|Pearson VUE|SANS Institute|CompTIA|PMI|ISC2|ISACA)(\s*[,|]\s*\S.*)?$/i
+    if (PURE_ISSUER_RE.test(trimmedLine) && !/—|–/.test(trimmedLine)) return true
+    return false
+}
+
 function extractSkillsFromCertifications(text) {
     if (!text) return []
     const wType = classifyEvidenceType('certifications', '')
@@ -232,6 +265,8 @@ function extractSkillsFromCertifications(text) {
     for (const line of text.split('\n')) {
         const trimmed = line.trim().replace(/&nbsp;/g, ' ').trim()
         if (!trimmed) continue
+        // GROUP 2 FIX — Skip description/metadata lines; only process cert name lines.
+        if (isCertDescriptionLine(trimmed)) continue
         for (const { canonical, category } of matchCertificationLine(trimmed)) {
             instances.push({ canonical, category, wType, durationMonths: null, sectionName: 'certifications' })
         }
@@ -242,18 +277,76 @@ function extractSkillsFromCertifications(text) {
 const MONTH_PATTERN = /^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|January|February|March|April|June|July|August|September|October|November|December)\.?\s/i
 const YEAR_PATTERN  = /^\d{4}/
 
+// GROUP 1 FIX — Strip trailing parenthetical duration suffix before parsing.
+// e.g. "February 2019 – March 2022 (3 years, 1 month)" → "February 2019 – March 2022"
+// The calculated duration from the date range is the source of truth.
+function stripParentheticalSuffix(text) {
+    return text.replace(/\s*\([^)]*\)\s*$/, '').trim()
+}
+
+function isDateLine(trimmedLine) {
+    return MONTH_PATTERN.test(trimmedLine) || YEAR_PATTERN.test(trimmedLine)
+}
+
+function isBlankLine(trimmedLine) {
+    return !trimmedLine
+}
+
+// Checks whether a line is likely a section header (all-caps or known section keywords).
+// Used to stop lookahead when we've left the block header area.
+function isSectionHeaderLine(trimmedLine) {
+    return /^[A-Z][A-Z\s&]+$/.test(trimmedLine) && trimmedLine.length > 4
+}
+
+// GROUP 1 FIX — Find the index (relative to titleIdx) of the first date line
+// within maxLookAhead lines. Returns -1 if not found.
+// Stops early on blank lines or section headers to avoid false positives.
+function findDateLineIndex(lines, titleIdx, maxLookAhead = 3) {
+    for (let offset = 1; offset <= maxLookAhead; offset++) {
+        const idx = titleIdx + offset
+        if (idx >= lines.length) break
+        const trimmed = lines[idx].trim()
+        if (isBlankLine(trimmed)) break
+        if (isSectionHeaderLine(trimmed)) break
+        if (isDateLine(trimmed)) return idx
+    }
+    return -1
+}
+
+// Returns true if a line looks like a "Company Name — Location" line.
+// These lines should NOT be treated as block title lines, as they are
+// the second line of a 3-line header (title / company / date).
+// Pattern: contains em-dash (—) or en-dash (–) followed by a city/state,
+// OR contains a comma followed by a 2-letter state code.
+function isCompanyLocationLine(trimmedLine) {
+    // Contains em-dash or en-dash with surrounding whitespace (location separator)
+    if (/\s[—–]\s/.test(trimmedLine)) return true
+    // Ends with City, ST pattern (2-letter state code)
+    if (/,\s*[A-Z]{2}\s*$/.test(trimmedLine)) return true
+    return false
+}
+
 function splitExperienceBlocks(text) {
     const lines = text.split('\n')
     const blockStarts = []
 
-    // Pattern B: non-date line immediately followed by a date line
-    for (let i = 0; i < lines.length - 1; i++) {
+    // Pattern B (extended): non-date title line followed by a date line within 3 lines.
+    // Handles 3-line formats like:
+    //   Software Engineer II        ← title (titleIdx)
+    //   Northbridge Logistics — NJ  ← company (intermediate, not date)
+    //   February 2019 – March 2022  ← date (titleIdx + 2)
+    //
+    // Guard: skip company/location lines so "Aegis Financial Services — Jersey City, NJ"
+    // doesn't create a duplicate block start alongside "Senior Software Engineer".
+    for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim()
-        const next = lines[i + 1].trim()
         if (!line) continue
-        const nextIsDate = MONTH_PATTERN.test(next) || YEAR_PATTERN.test(next)
-        const lineIsDate = MONTH_PATTERN.test(line) || YEAR_PATTERN.test(line)
-        if (nextIsDate && !lineIsDate && line.length > 5) {
+        if (isDateLine(line)) continue
+        if (line.length <= 5) continue
+        if (isCompanyLocationLine(line)) continue  // skip company/location lines
+
+        const dateIdx = findDateLineIndex(lines, i, 3)
+        if (dateIdx !== -1 && !blockStarts.includes(i)) {
             blockStarts.push(i)
         }
     }
@@ -282,10 +375,22 @@ function extractSkillsFromExperience(text) {
     const jobBlocks = splitExperienceBlocks(text)
 
     for (const block of jobBlocks) {
-        const titleLine = block.split('\n')[0]
+        const blockLines = block.split('\n')
+        const titleLine = blockLines[0]
         const roleTitle = titleLine.split('|')[0].split(',')[0].trim()
-        const dateLine = block.split('\n').slice(0, 3).find(l => MONTH_PATTERN.test(l.trim()) || YEAR_PATTERN.test(l.trim()))?.trim() ?? ''
-        const durationMonths = parseDateRange(dateLine) ?? extractDateFromTitleLine(titleLine)
+
+        // GROUP 1 FIX — Search up to 4 lines ahead (increased from 3) to find the date line.
+        // Strip parenthetical suffix like "(3 years, 1 month)" before parsing.
+        let durationMonths = extractDateFromTitleLine(titleLine)
+        if (durationMonths === null) {
+            const dateIdx = findDateLineIndex(blockLines, 0, 4)
+            if (dateIdx !== -1) {
+                const rawDateLine = blockLines[dateIdx].trim()
+                const cleanedDateLine = stripParentheticalSuffix(rawDateLine)
+                durationMonths = parseDateRange(cleanedDateLine)
+            }
+        }
+
         const wType = classifyEvidenceType('experience', roleTitle)
 
         for (const { canonical, category } of matchSkillsInText(block)) {
@@ -315,19 +420,98 @@ const RESUME_DEGREE_LEVELS = [
     { level: 1, re: /\b(associate'?s?|a\.?s\.?\b|a\.?a\.?\b)\b/i },
 ]
 
+// GROUP 3.1 FIX — Strip degree-type prefix from field string.
+// "Arts in Data Science" → "Data Science"
+// "Science in Cybersecurity" → "Cybersecurity"
+const FIELD_PREFIXES_RE = /^(?:Arts in|Science in|Engineering in|Business Administration in|Fine Arts in|Philosophy in|Applied Science in|Applied Arts in)\s+/i
+
+function stripFieldPrefix(raw) {
+    if (!raw) return raw
+    return raw.replace(FIELD_PREFIXES_RE, '').trim()
+}
+
 function extractDegreeField(line) {
     // "degree in X", "Bachelor's in X", "Bachelor of X", "B.S. in X"
+    // "Master of Science in X" — captures everything after the final "in"
     let m = line.match(/\b(?:degree\s+(?:in|of)|bachelor'?s?\s+(?:in|of)|master'?s?\s+(?:in|of)|b\.?s\.?\s+in|m\.?s\.?\s+in)\s+([A-Za-z][A-Za-z\s,&\/]+?)(?=\s*(?:–|—|-{1,2}|,\s|\(|\bfrom\b|\bat\b|\d{4})|\s*$)/i)
-    if (m) return m[1].trim().replace(/\s+/g, ' ')
+    if (m) return stripFieldPrefix(m[1].trim().replace(/\s+/g, ' '))
+
+    // "Master of Science in X" and similar long-form patterns not caught above
+    m = line.match(/\bMaster\s+of\s+(?:Science|Arts|Engineering|Business Administration|Fine Arts|Philosophy)\s+in\s+([A-Za-z][A-Za-z\s,&\/]+?)(?=\s*(?:–|—|-{1,2}|,\s|\(|\bfrom\b|\bat\b|\d{4})|\s*$)/i)
+    if (m) return stripFieldPrefix(m[1].trim().replace(/\s+/g, ' '))
+
+    m = line.match(/\bBachelor\s+of\s+(?:Science|Arts|Engineering|Business Administration|Fine Arts|Philosophy)\s+in\s+([A-Za-z][A-Za-z\s,&\/]+?)(?=\s*(?:–|—|-{1,2}|,\s|\(|\bfrom\b|\bat\b|\d{4})|\s*$)/i)
+    if (m) return stripFieldPrefix(m[1].trim().replace(/\s+/g, ' '))
 
     // "B.S. Computer Science" — field immediately after abbreviation, stopped by separator or year
     m = line.match(/\b(?:B\.S|B\.A|M\.S|M\.A|B\.Eng|M\.Eng|M\.B\.A|B\.Sc|M\.Sc)\.?\s+([A-Z][A-Za-z][A-Za-z\s&,]+?)(?=\s*(?:–|—|-{1,2}|\bfrom\b|\bat\b|\d{4})|\s*$)/i)
     if (m) {
         const candidate = m[1].trim().replace(/\s+/g, ' ')
-        if (candidate.length <= 60) return candidate
+        if (candidate.length <= 60) return stripFieldPrefix(candidate)
     }
 
     return null
+}
+
+// GROUP 3.2 FIX — Detect institution names on a following line.
+// Looks for: University, College, Institute, School, Academy, Polytechnic, Conservatory
+// OR: a 3–5 capital-letter acronym in parens like (NJIT) or (MIT).
+// Strips parenthetical acronym aliases from the institution name.
+const INSTITUTION_KEYWORDS_RE = /\b(University|College|Institute|School|Academy|Polytechnic|Conservatory)\b/i
+const INSTITUTION_ACRONYM_RE  = /\(([A-Z]{2,5})\)/
+
+function extractInstitutionFromLine(line) {
+    const trimmed = line.trim()
+    if (!trimmed) return null
+    // Must contain institution keyword OR acronym-in-parens
+    if (!INSTITUTION_KEYWORDS_RE.test(trimmed) && !INSTITUTION_ACRONYM_RE.test(trimmed)) return null
+    // Strip parenthetical acronym alias: "New Jersey Institute of Technology (NJIT)" → "New Jersey Institute of Technology"
+    // Also strip location suffix after em-dash or en-dash: "Rutgers University–New Brunswick — New Brunswick, NJ" → keep name
+    // We want everything before a " —" location separator or after the initial institution name
+    let inst = trimmed
+        .replace(INSTITUTION_ACRONYM_RE, '')  // remove (ACRONYM)
+        .trim()
+    // Strip trailing location after ` — City, ST` or ` | City` patterns
+    inst = inst.replace(/\s*(?:—|-{2}|\|)\s+[A-Z][a-zA-Z\s]+,?\s*[A-Z]{2}.*$/, '').trim()
+    // Clean up trailing punctuation
+    inst = inst.replace(/[,\s]+$/, '').trim()
+    if (inst.length < 3) return null
+    return inst
+}
+
+// GROUP 3.3 FIX — Extract graduation year from lines following a degree match.
+// The graduation year is the LAST 4-digit year found in the lookahead range.
+// Handles "Expected May 2026" → { year: 2026, inProgress: true }.
+function extractGraduationYearFromBlock(lines, startIdx, maxLook = 4) {
+    let year = null
+    let inProgress = false
+    for (let offset = 0; offset <= maxLook; offset++) {
+        const idx = startIdx + offset
+        if (idx >= lines.length) break
+        const trimmed = lines[idx].trim()
+        if (!trimmed) continue
+        // Stop at next degree-level match (new degree block)
+        if (offset > 0) {
+            let isNewDegree = false
+            for (const { re } of RESUME_DEGREE_LEVELS) {
+                if (re.test(trimmed)) { isNewDegree = true; break }
+            }
+            if (isNewDegree) break
+        }
+        // Look for "Expected" marker
+        const expectM = trimmed.match(/\bExpected\b.*\b(20\d{2}|19[89]\d)\b/i)
+        if (expectM) {
+            year = parseInt(expectM[1])
+            inProgress = true
+            continue
+        }
+        // All 4-digit years in this line; keep updating to get the LAST one
+        const yearMatches = [...trimmed.matchAll(/\b(20\d{2}|19[89]\d)\b/g)]
+        for (const ym of yearMatches) {
+            year = parseInt(ym[1])
+        }
+    }
+    return { year, inProgress }
 }
 
 export function extractDegree(educationText) {
@@ -335,37 +519,61 @@ export function extractDegree(educationText) {
         return { degreeLevel: null, field: null, institution: null, graduationYear: null }
     }
 
-    let degreeLevel = null
-    let field = null
-    let institution = null
-    let graduationYear = null
+    const lines = educationText.split('\n')
 
-    for (const line of educationText.split('\n')) {
-        const trimmed = line.trim()
+    // GROUP 3.3 FIX — Process degrees in order, finding the HIGHEST-level degree.
+    // For each degree match, look up to 4 following lines for institution and year.
+    let bestDegreeLevel = null
+    let bestField       = null
+    let bestInstitution = null
+    let bestYear        = null
+    let bestInProgress  = false
+
+    for (let i = 0; i < lines.length; i++) {
+        const trimmed = lines[i].trim()
         if (!trimmed) continue
 
-        if (degreeLevel === null) {
-            for (const { level, re } of RESUME_DEGREE_LEVELS) {
-                if (re.test(trimmed)) {
-                    degreeLevel = level
-                    if (!field) field = extractDegreeField(trimmed)
-                    break
-                }
+        let matchedLevel = null
+        for (const { level, re } of RESUME_DEGREE_LEVELS) {
+            if (re.test(trimmed)) {
+                matchedLevel = level
+                break
             }
         }
+        if (matchedLevel === null) continue
 
-        if (!institution) {
-            const instM = trimmed.match(/(?:–|—|-{1,2}|\bfrom\b|\bat\b)\s*([A-Z][A-Za-z\s]+?(?:University|College|Institute|School|Academy))/i)
-            if (instM) institution = instM[1].trim()
+        // Only update if this degree is higher level (or first found)
+        if (bestDegreeLevel !== null && matchedLevel < bestDegreeLevel) continue
+
+        const field = extractDegreeField(trimmed)
+
+        // GROUP 3.2 FIX — Look for institution in the following 1-2 lines
+        let institution = null
+        for (let offset = 1; offset <= 2; offset++) {
+            const idx = i + offset
+            if (idx >= lines.length) break
+            const candidate = extractInstitutionFromLine(lines[idx])
+            if (candidate) { institution = candidate; break }
         }
 
-        if (!graduationYear) {
-            const yearM = trimmed.match(/\b(20\d{2}|19[89]\d)\b/)
-            if (yearM) graduationYear = parseInt(yearM[1])
-        }
+        // GROUP 3.3 FIX — Extract graduation year from the block following this degree
+        const { year, inProgress } = extractGraduationYearFromBlock(lines, i, 4)
+
+        bestDegreeLevel = matchedLevel
+        bestField       = field
+        bestInstitution = institution
+        bestYear        = year
+        bestInProgress  = inProgress
     }
 
-    return { degreeLevel, field, institution, graduationYear }
+    const result = {
+        degreeLevel:      bestDegreeLevel,
+        field:            bestField,
+        institution:      bestInstitution,
+        graduationYear:   bestYear,
+    }
+    if (bestInProgress) result.graduationStatus = 'in_progress'
+    return result
 }
 
 // ---------------------------------------------------------------------------

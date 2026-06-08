@@ -19,5 +19,12 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script type="text/javascript" src="https://js.codedrink.com/snippet.min.js" defer></script>
+    <script type="text/javascript" defer>
+      document.addEventListener("LSAFFEventLoaded",
+        function(e) {
+          e.detail.init();
+        });
+    </script>
   </body>
 </html>
