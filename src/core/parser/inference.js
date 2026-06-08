@@ -309,8 +309,14 @@ export function scoreSkillEvidence(instances) {
     return { score: 0, level: 'L1', confidence: 'low', primarySignal: null, primarySection: null, suggestion: SUGGESTIONS.L1, limitingFactor: 'no_context' }
   }
 
-  // Bloom multiplier per instance (C); defaults to 1.0 when no bulletText
-  const bloomCs = instances.map(inst => classifyBloomLevel(inst.bulletText || ''))
+  // Bloom multiplier per instance (C).
+  // Use pre-computed per-bullet average (inst.bloomC) when available — this
+  // prevents a high-Bloom verb in one bullet from inflating every skill in the
+  // same block. Falls back to classifyBloomLevel(bulletText) for older callers
+  // that do not supply bloomC, and to 1.0 when neither is present.
+  const bloomCs = instances.map(inst =>
+    inst.bloomC != null ? inst.bloomC : classifyBloomLevel(inst.bulletText || '')
+  )
 
   // Per-instance contribution: E × C × D
   const contributions = instances.map((inst, i) => {
