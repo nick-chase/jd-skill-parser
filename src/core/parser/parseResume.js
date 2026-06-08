@@ -10,7 +10,7 @@
  */
 
 import * as registry from '../registry.js'
-import { parseDateRange, classifyEvidenceType, scoreSkillEvidence } from './inference.js'
+import { parseDateRange, classifyEvidenceType, classifyBloomLevel, scoreSkillEvidence } from './inference.js'
 
 function escapeRegex(s) {
     return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -201,14 +201,51 @@ function extractSkillsFromEducation(text) {
     }))
 }
 
+// ---------------------------------------------------------------------------
+// Per-bullet Bloom scoring helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Splits a block of text into individual bullet lines.
+ * Recognises lines starting with common bullet markers (-, •, *, –, —)
+ * or any non-empty line. Returns an array of non-empty trimmed strings.
+ */
+function splitIntoBulletLines(blockText) {
+    if (!blockText) return []
+    return blockText.split('\n')
+        .map(l => l.trim())
+        .filter(l => l.length > 0)
+}
+
+/**
+ * Averages the Bloom multiplier across bullet lines that mention skillName.
+ * If no line mentions the skill, falls back to averaging across ALL lines.
+ * This prevents a high-Bloom verb in one bullet from inflating every skill
+ * in the same block.
+ *
+ * @param {string} skillName   - canonical skill name (case-insensitive match)
+ * @param {string[]} bulletLines - array of individual bullet line strings
+ * @returns {number} averaged Bloom multiplier (1.0 default when empty)
+ */
+function averageBloomForSkill(skillName, bulletLines) {
+    if (!bulletLines || bulletLines.length === 0) return 1.0
+    const needle = skillName.toLowerCase()
+    const matchingLines = bulletLines.filter(l => l.toLowerCase().includes(needle))
+    const targetLines = matchingLines.length > 0 ? matchingLines : bulletLines
+    const sum = targetLines.reduce((acc, l) => acc + classifyBloomLevel(l), 0)
+    return sum / targetLines.length
+}
+
 function extractSkillsFromProjects(text) {
     const wType = classifyEvidenceType('projects', '', text)
+    const bulletLines = splitIntoBulletLines(text)
     return matchSkillsInText(text).map(({ canonical, category }) => ({
         canonical, category,
         wType,
         durationMonths: null,
         sectionName: 'projects',
         bulletText: text,
+        bloomC: averageBloomForSkill(canonical, bulletLines),
     }))
 }
 
@@ -392,9 +429,14 @@ function extractSkillsFromExperience(text) {
         }
 
         const wType = classifyEvidenceType('experience', roleTitle)
+        const bulletLines = splitIntoBulletLines(block)
 
         for (const { canonical, category } of matchSkillsInText(block)) {
-            instances.push({ canonical, category, wType, durationMonths, sectionName: 'experience', bulletText: block })
+            instances.push({
+                canonical, category, wType, durationMonths, sectionName: 'experience',
+                bulletText: block,
+                bloomC: averageBloomForSkill(canonical, bulletLines),
+            })
         }
     }
     return instances

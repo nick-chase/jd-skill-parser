@@ -15,9 +15,22 @@ const CRITICAL_IMPORTANCE = 5
 // Internal helpers
 // ---------------------------------------------------------------------------
 
+/**
+ * Coerce a skill level value to a plain integer for numeric comparisons.
+ * 'certified' maps to 5 (Expert — a certification implies top-tier knowledge).
+ * Any other string is parsed as base-10 integer (falls back to 0).
+ * Numbers are returned as-is. Null/undefined return 0.
+ */
+function normalizeLevel(level) {
+  if (level === 'certified') return 5
+  if (typeof level === 'string') return parseInt(level, 10) || 0
+  if (typeof level === 'number') return level
+  return 0
+}
+
 function isEntryLevelResume(resumeSkills) {
   if (!resumeSkills || resumeSkills.length === 0) return true
-  const maxLevel = Math.max(...resumeSkills.map(s => s.level === 'certified' ? 3 : (s.level ?? 0)))
+  const maxLevel = Math.max(...resumeSkills.map(s => normalizeLevel(s.level)))
   return maxLevel <= 2
 }
 
@@ -42,9 +55,9 @@ function computeGap(jdSkills, resumeSkills, entryLevel = false) {
           missing.push(jd)
         }
       }
-    } else if (resume.level < jd.level) {
+    } else if (normalizeLevel(resume.level) < normalizeLevel(jd.level)) {
       if (isRequired) {
-        const gap = jd.level - resume.level
+        const gap = normalizeLevel(jd.level) - normalizeLevel(resume.level)
         // Entry-level calibration: relax required (non-critical) 1-level gap → treat as matched
         if (entryLevel && !isCritical && gap === 1) {
           matched.push({ ...jd, resumeLevel: resume.level })

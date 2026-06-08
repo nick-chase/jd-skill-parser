@@ -17,6 +17,7 @@ import AppFooter from './components/AppFooter.jsx';
 import HowToTour from './components/HowToTour.jsx'
 import FeedbackForm from './components/FeedbackForm.jsx';
 import resourceData from '@data/resources.json';
+import { getResources } from '@utils/resources.js';
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
 const betaFeedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
@@ -277,7 +278,7 @@ export function extractJDDegree(text) {
 }
 
 export function parseJobDescription(text) {
-    if (!text || !text.trim()) return [];
+    if (!text || !text.trim()) return { technicalSignals: [], behavioralSignals: [], jobDuties: [], degree: null };
 
     const sections = getSections(text);
     const skills = new Map();
@@ -474,6 +475,7 @@ function nameToResourceId(name) {
         .replace(/[^a-z0-9-]/g, '');
 }
 
+// Fallback only — used when inference suggestion is null or missing
 function getGapSuggestion(name, resumeLevel, requiredLevel) {
     if (!resumeLevel || resumeLevel <= 1) {
         return `Your resume lists ${name} but shows no context. ` +
@@ -503,7 +505,7 @@ function formatDuration(months) {
 }
 
 function evidenceSummary(skill) {
-    const isListedOnly = skill.source === 'Technical Skills' || skill.source === 'Summary';
+    const isListedOnly = skill.source != null && (skill.source === 'Technical Skills' || skill.source === 'Summary');
     if (isListedOnly) return 'listed only';
     const parts = [];
     const dur = formatDuration(skill.durationMonths);
@@ -515,6 +517,7 @@ function evidenceSummary(skill) {
 }
 
 function ConfidenceDot({ confidence }) {
+    if (!confidence) return null;
     const color = confidence === 'high' ? '#22c55e' : confidence === 'medium' ? '#f59e0b' : '#94a3b8';
     return <span style={{ color, fontSize: '10px', marginLeft: '2px', lineHeight: 1 }}>●</span>;
 }
@@ -1005,14 +1008,14 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                         </div>
 
                         {topGaps.map((skill, index) => {
-                            const resources = RESOURCE_MAP[nameToResourceId(skill.name)] ?? [];
+                            const resources = getResources(nameToResourceId(skill.name), skill.resumeLevel ?? 1, 'tech');
                             const freeResources = resources.filter(r => !r.affiliate).slice(0, 2);
                             const affiliateResource = resources.find(r => r.affiliate);
                             const resumeLabel = skill.resumeLevel
                                 ? (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`)
                                 : 'Not evidenced';
                             const jdLabel = LEVEL_NAMES[skill.level] ?? `L${skill.level}`;
-                            const suggestion = getGapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level);
+                            const suggestion = skill.suggestion || getGapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level);
 
                             return (
                                 <div key={skill.name}
@@ -1021,8 +1024,8 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                                     {/* Skill header */}
                                     <div className="flex items-start justify-between gap-2 mb-2">
                                         <div className="min-w-0">
-                                            <div className="font-semibold text-slate-800 text-sm">{skill.name}</div>
-                                            <div className="text-xs text-gray-400 mt-0.5">{evidenceSummary(skill)}</div>
+                                            <div className="font-semibold text-slate-800 text-sm truncate">{skill.name}</div>
+                                            <div className="text-xs text-gray-400 mt-0.5 truncate">{evidenceSummary(skill)}</div>
                                         </div>
                                         <div className="flex items-center gap-2 shrink-0">
                                             <span className="text-xs text-amber-600 font-medium flex items-center">
@@ -1080,6 +1083,11 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                                                         {affiliateResource.platform} · affiliate
                                                     </span>
                                                 </a>
+                                            )}
+                                            {affiliateResource && (
+                                                <p className="text-xs text-slate-400 mt-1">
+                                                    Some resources above are affiliate links. We earn a small commission if you enroll — at no extra cost to you.
+                                                </p>
                                             )}
                                         </div>
                                     )}
@@ -1368,23 +1376,29 @@ export function runGapAnalysis(jdSkills, resumeSkills) {
             // Have it but below required level
             levelGaps.push({
                 ...jdSkill,
-                resumeLevel:   resumeSkill.level,
-                gap:           jdSkill.level - resumeSkill.level,
-                confidence:    resumeSkill.confidence    ?? null,
-                source:        resumeSkill.source        ?? null,
+                resumeLevel:    resumeSkill.level,
+                gap:            jdSkill.level - resumeSkill.level,
+                confidence:     resumeSkill.confidence     ?? null,
+                source:         resumeSkill.source         ?? null,
                 durationMonths: resumeSkill.durationMonths ?? null,
-                contextCount:  resumeSkill.contextCount  ?? null,
+                contextCount:   resumeSkill.contextCount   ?? null,
+                primarySignal:  resumeSkill.primarySignal  ?? null,
+                suggestion:     resumeSkill.suggestion     ?? null,
+                limitingFactor: resumeSkill.limitingFactor ?? null,
             });
         } else {
             // Have it at or above required level (includes 'certified' — credential counts as met)
             matched.push({
                 ...jdSkill,
-                resumeLevel:   resumeSkill.level,
-                gap:           0,
-                confidence:    resumeSkill.confidence    ?? null,
-                source:        resumeSkill.source        ?? null,
+                resumeLevel:    resumeSkill.level,
+                gap:            0,
+                confidence:     resumeSkill.confidence     ?? null,
+                source:         resumeSkill.source         ?? null,
                 durationMonths: resumeSkill.durationMonths ?? null,
-                contextCount:  resumeSkill.contextCount  ?? null,
+                contextCount:   resumeSkill.contextCount   ?? null,
+                primarySignal:  resumeSkill.primarySignal  ?? null,
+                suggestion:     resumeSkill.suggestion     ?? null,
+                limitingFactor: resumeSkill.limitingFactor ?? null,
             });
         }
     }

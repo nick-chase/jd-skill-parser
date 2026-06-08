@@ -61,6 +61,31 @@ describe('parseJobDescription() -- result shape', () => {
   });
 });
 
+describe('parseJobDescription() -- empty / whitespace input returns correct shape', () => {
+  test('empty string returns object with empty arrays, not []', () => {
+    const result = parseJobDescription('');
+    expect(result).toHaveProperty('technicalSignals');
+    expect(result).toHaveProperty('behavioralSignals');
+    expect(result).toHaveProperty('jobDuties');
+    expect(result).toHaveProperty('degree');
+    expect(Array.isArray(result.technicalSignals)).toBe(true);
+    expect(result.technicalSignals).toHaveLength(0);
+  });
+
+  test('whitespace-only string returns object with empty arrays, not []', () => {
+    const result = parseJobDescription('   \n\t  ');
+    expect(result).toHaveProperty('technicalSignals');
+    expect(Array.isArray(result.technicalSignals)).toBe(true);
+    expect(result.technicalSignals).toHaveLength(0);
+  });
+
+  test('null returns object with empty arrays, not []', () => {
+    const result = parseJobDescription(null);
+    expect(result).toHaveProperty('technicalSignals');
+    expect(Array.isArray(result.technicalSignals)).toBe(true);
+  });
+});
+
 describe('parseJobDescription() -- technicalSignals extraction from sample JD', () => {
   const { technicalSignals: jdSkills } = parseJobDescription(jdText);
 

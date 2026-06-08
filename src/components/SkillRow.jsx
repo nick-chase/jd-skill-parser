@@ -101,10 +101,11 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
     ? (isMissing ? '#fff5f5' : isGap ? '#fffbeb' : '#f0fdf4')
     : 'white'
 
+  // Prefer inference-computed suggestion over derived fallback
   const suggestion = isMissing
-    ? missingSuggestion(skill.name)
+    ? (skill.suggestion || missingSuggestion(skill.name))
     : isGap
-      ? gapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level)
+      ? (skill.suggestion || gapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level))
       : null
 
   const confidenceSuffix = skill.confidence
@@ -116,22 +117,25 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
     (isGap && typeof skill.resumeLevel === 'number' && skill.resumeLevel <= 2) ||
     skill.confidence === 'low'
 
-  // Evidence explanation line — shown for matched and gap rows only
-  const evidenceLine = (isMatched || isGap) && skill.confidence && skill.source
+  // Evidence explanation line — shown for matched and gap rows when confidence is present.
+  // source is optional: if null but primarySignal exists, show primarySignal alone.
+  const evidenceLine = (isMatched || isGap) && skill.confidence
     ? isLimitedEvidence && skill.primarySignal
       ? (
         <div style={{ display: 'flex', gap: '8px', alignItems: 'baseline', flexWrap: 'wrap', marginTop: '3px' }}>
           <span style={{ fontSize: '11px', color: '#b45309', fontStyle: 'italic' }}>
             {skill.primarySignal}
           </span>
-          <span style={{ fontSize: '11px', color: '#94a3b8' }}>
-            {skill.source}
-          </span>
+          {skill.source != null && (
+            <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+              {skill.source}
+            </span>
+          )}
         </div>
       )
       : (
         <div className="text-xs text-gray-400 mt-0.5">
-          ({skill.confidence.toLowerCase()} confidence: {skill.source})
+          ({skill.confidence.toLowerCase()} confidence{skill.source != null ? `: ${skill.source}` : ''})
         </div>
       )
     : null
@@ -175,14 +179,32 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
         backgroundColor: rowBg,
       }}
     >
-      {/* Main data row */}
-      <div style={{
-        padding:             '8px 16px',
-        display:             'grid',
-        gridTemplateColumns: '140px 1fr 160px 110px',
-        gap:                 '8px',
-        alignItems:          'center',
-      }}>
+      {/* Mobile layout — stacked 2-row, visible below sm breakpoint */}
+      <div className="block sm:hidden px-4 py-2">
+        <div className="flex justify-between items-start gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="font-semibold text-slate-900 text-sm truncate">{skill.name}</div>
+            <div className="text-xs text-slate-500 mt-0.5 truncate">{skill.category}</div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0 ml-2">
+            <ImportanceBadge importance={skill.importance} />
+          </div>
+        </div>
+        <div className="mt-1">
+          {levelCell}
+        </div>
+      </div>
+
+      {/* Desktop layout — 4-column grid, visible at sm and above */}
+      <div
+        className="hidden sm:grid"
+        style={{
+          padding:             '8px 16px',
+          gridTemplateColumns: '140px 1fr 160px 110px',
+          gap:                 '8px',
+          alignItems:          'center',
+        }}
+      >
         <div style={{ fontWeight: '600', color: '#0f172a', fontSize: '13px' }}>
           {skill.name}
         </div>
