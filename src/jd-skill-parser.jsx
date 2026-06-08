@@ -1235,7 +1235,9 @@ function ResumeResultsView({ results, behavioralSignals, degree }) {
 
             {/* Skills grouped by evidence band (strong, supported, mentioned) */}
             {EVIDENCE_BANDS.filter(band => band.key !== 'limited').map(band => {
-                const bandSkills = skillResults.filter(s => band.levels.includes(s.level));
+                const bandSkills = band.key === 'mentioned'
+                    ? skillResults.filter(s => band.levels.includes(s.level) && s.limitingFactor !== 'no_context')
+                    : skillResults.filter(s => band.levels.includes(s.level));
                 if (bandSkills.length === 0) return null;
 
                 if (band.key === 'mentioned') {
@@ -1263,10 +1265,11 @@ function ResumeResultsView({ results, behavioralSignals, degree }) {
                 );
             })}
 
-            {/* Grouped coaching sections — Limited Evidence (L2) skills by limitingFactor */}
+            {/* Grouped coaching sections — Limited Evidence (L1+L2) skills by limitingFactor */}
             {(() => {
-                const limitedSkills = skillResults.filter(s => s.level === 2);
-                if (limitedSkills.length === 0) return null;
+                const noContextSkills = skillResults.filter(s => s.limitingFactor === 'no_context');
+                const limitedSkills = skillResults.filter(s => s.level === 2 && s.limitingFactor !== 'no_context');
+                if (noContextSkills.length === 0 && limitedSkills.length === 0) return null;
 
                 const GROUP_ORDER = ['no_context', 'no_duration', 'weak_verb', 'single_context'];
                 const GROUP_CONFIG = {
@@ -1289,7 +1292,8 @@ function ResumeResultsView({ results, behavioralSignals, degree }) {
                 };
 
                 return GROUP_ORDER.map(factor => {
-                    const group = limitedSkills.filter(s => s.limitingFactor === factor);
+                    const sourcePool = factor === 'no_context' ? noContextSkills : limitedSkills;
+                    const group = sourcePool.filter(s => s.limitingFactor === factor);
                     if (group.length === 0) return null;
                     const cfg = GROUP_CONFIG[factor];
                     return (
