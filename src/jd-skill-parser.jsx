@@ -1194,7 +1194,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
     );
 }
 
-function ResumeResultsView({ results, behavioralSignals, degree }) {
+function ResumeResultsView({ results, behavioralSignals, degree, allDegrees }) {
     const SOURCE_COLORS = {
         'Technical Skills': '#0369a1',
         'Education':        '#7c3aed',
@@ -1263,15 +1263,29 @@ function ResumeResultsView({ results, behavioralSignals, degree }) {
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1.5">
                     Education &amp; Degrees
                 </div>
-                {degree?.degreeLevel ? (
-                    <div className="text-xs text-slate-600">
-                        <span className="font-medium">{DEGREE_LEVEL_LABELS[degree.degreeLevel]}</span>
-                        {degree.field && <span className="text-slate-500"> in {degree.field}</span>}
-                        {degree.institution && <span className="text-slate-400"> · {degree.institution}</span>}
-                        {degree.graduationYear && <span className="text-slate-400"> ({degree.graduationYear})</span>}
+                {(allDegrees && allDegrees.length > 0) ? (
+                    <div className="flex flex-col gap-1">
+                        {allDegrees.map((deg, idx) => {
+                            const isInProgress = deg.graduationStatus === 'in_progress'
+                            const yearLabel = isInProgress
+                                ? (deg.graduationYear ? `Expected ${deg.graduationYear}` : 'In Progress')
+                                : (deg.graduationYear ? String(deg.graduationYear) : null)
+                            return (
+                                <div key={idx} className="text-xs text-slate-600">
+                                    <span className="font-medium">{DEGREE_LEVEL_LABELS[deg.degreeLevel]}</span>
+                                    {deg.field && <span className="text-slate-500"> in {deg.field}</span>}
+                                    {deg.institution && <span className="text-slate-400"> · {deg.institution}</span>}
+                                    {yearLabel && (
+                                        <span className="text-slate-400">
+                                            {' '}· {isInProgress ? `⏳ ${yearLabel}` : yearLabel}
+                                        </span>
+                                    )}
+                                </div>
+                            )
+                        })}
                     </div>
                 ) : (
-                    <span className="text-xs text-slate-400">No degree detected in Education section</span>
+                    <span className="text-xs text-slate-400">None detected</span>
                 )}
             </div>
 
@@ -1844,6 +1858,7 @@ export default function App() {
                                         results={resumeResults.technicalSignals}
                                         behavioralSignals={resumeResults.behavioralSignals}
                                         degree={resumeResults.degree}
+                                        allDegrees={resumeResults.allDegrees}
                                     />
                                 </>
                             )

@@ -567,20 +567,19 @@ function extractGraduationYearFromBlock(lines, startIdx, maxLook = 4) {
     return { year, inProgress }
 }
 
-export function extractDegree(educationText) {
-    if (!educationText || !educationText.trim()) {
-        return { degreeLevel: null, field: null, institution: null, graduationYear: null }
-    }
+/**
+ * Collects ALL degrees found in an education text block.
+ * Each entry: { degreeLevel, field, institution, graduationYear, graduationStatus? }
+ * graduationStatus is 'in_progress' only when in-progress markers are detected.
+ *
+ * Sorted: completed degrees by level DESC first, then in-progress by level DESC.
+ * Returns [] if no degrees found.
+ */
+export function extractAllDegrees(educationText) {
+    if (!educationText || !educationText.trim()) return []
 
     const lines = educationText.split('\n')
-
-    // GROUP 3.3 FIX — Process degrees in order, finding the HIGHEST-level degree.
-    // For each degree match, look up to 4 following lines for institution and year.
-    let bestDegreeLevel = null
-    let bestField       = null
-    let bestInstitution = null
-    let bestYear        = null
-    let bestInProgress  = false
+    const degrees = []
 
     for (let i = 0; i < lines.length; i++) {
         const trimmed = lines[i].trim()
@@ -595,12 +594,9 @@ export function extractDegree(educationText) {
         }
         if (matchedLevel === null) continue
 
-        // Only update if this degree is higher level (or first found)
-        if (bestDegreeLevel !== null && matchedLevel < bestDegreeLevel) continue
-
         const field = extractDegreeField(trimmed)
 
-        // GROUP 3.2 FIX — Look for institution in the following 1-2 lines
+        // Look for institution in the following 1-2 lines
         let institution = null
         for (let offset = 1; offset <= 2; offset++) {
             const idx = i + offset
@@ -609,24 +605,38 @@ export function extractDegree(educationText) {
             if (candidate) { institution = candidate; break }
         }
 
-        // GROUP 3.3 FIX — Extract graduation year from the block following this degree
+        // Extract graduation year and in-progress status
         const { year, inProgress } = extractGraduationYearFromBlock(lines, i, 4)
 
-        bestDegreeLevel = matchedLevel
-        bestField       = field
-        bestInstitution = institution
-        bestYear        = year
-        bestInProgress  = inProgress
+        const entry = {
+            degreeLevel:    matchedLevel,
+            field:          field,
+            institution:    institution,
+            graduationYear: year,
+        }
+        if (inProgress) entry.graduationStatus = 'in_progress'
+        degrees.push(entry)
     }
 
-    const result = {
-        degreeLevel:      bestDegreeLevel,
-        field:            bestField,
-        institution:      bestInstitution,
-        graduationYear:   bestYear,
+    // Sort: completed (no graduationStatus) before in-progress; within same status, higher level first.
+    degrees.sort((a, b) => {
+        const aInProgress = a.graduationStatus === 'in_progress' ? 1 : 0
+        const bInProgress = b.graduationStatus === 'in_progress' ? 1 : 0
+        if (aInProgress !== bInProgress) return aInProgress - bInProgress
+        return b.degreeLevel - a.degreeLevel
+    })
+
+    return degrees
+}
+
+export function extractDegree(educationText) {
+    if (!educationText || !educationText.trim()) {
+        return { degreeLevel: null, field: null, institution: null, graduationYear: null }
     }
-    if (bestInProgress) result.graduationStatus = 'in_progress'
-    return result
+
+    const best = extractAllDegrees(educationText)[0]
+    if (!best) return { degreeLevel: null, field: null, institution: null, graduationYear: null }
+    return best
 }
 
 // ---------------------------------------------------------------------------
@@ -682,5 +692,6 @@ export function parseResume(text) {
         technicalSignals,
         behavioralSignals: extractBehavioralSignals(text),
         degree: extractDegree(sections.education),
+        allDegrees: extractAllDegrees(sections.education),
     }
 }

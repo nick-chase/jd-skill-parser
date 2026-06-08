@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import { extractDegree } from '@core/parser/parseResume.js'
+import { extractDegree, extractAllDegrees } from '@core/parser/parseResume.js'
 import { extractJDDegree, computeDegreeFlag } from '../../src/jd-skill-parser.jsx'
 
 // ---------------------------------------------------------------------------
@@ -85,11 +85,72 @@ describe('extractDegree()', () => {
     expect(result.graduationStatus).toBeUndefined()
   })
 
-  test('picks highest degree and marks it in-progress when master is current', () => {
+  test('returns completed BA when master is in-progress (completed beats in-progress)', () => {
     const resume = 'B.A. English, State College, 2021\nM.S. Data Science, 2023 – Present'
     const result = extractDegree(resume)
-    expect(result.degreeLevel).toBe(3)
-    expect(result.graduationStatus).toBe('in_progress')
+    expect(result.degreeLevel).toBe(2)
+    expect(result.graduationStatus).toBeUndefined()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// extractAllDegrees — multi-degree collection and sorting
+// ---------------------------------------------------------------------------
+
+describe('extractAllDegrees()', () => {
+  test('returns both degrees for a two-degree resume (BA + Master\'s in-progress)', () => {
+    const resume = [
+      "B.A. English",
+      "State College",
+      "2021",
+      "M.S. Data Science",
+      "State University",
+      "Expected May 2026",
+    ].join('\n')
+    const result = extractAllDegrees(resume)
+    expect(result).toHaveLength(2)
+    const levels = result.map(d => d.degreeLevel)
+    expect(levels).toContain(2)
+    expect(levels).toContain(3)
+  })
+
+  test('sorts completed degrees before in-progress degrees', () => {
+    const resume = [
+      "M.S. Data Science",
+      "State University",
+      "Expected May 2026",
+      "B.A. English",
+      "State College",
+      "2021",
+    ].join('\n')
+    const result = extractAllDegrees(resume)
+    expect(result).toHaveLength(2)
+    expect(result[0].degreeLevel).toBe(2)
+    expect(result[0].graduationStatus).toBeUndefined()
+    expect(result[1].degreeLevel).toBe(3)
+    expect(result[1].graduationStatus).toBe('in_progress')
+  })
+
+  test('returns [] when no degrees found', () => {
+    expect(extractAllDegrees('Some training and coursework')).toHaveLength(0)
+    expect(extractAllDegrees('')).toHaveLength(0)
+    expect(extractAllDegrees(null)).toHaveLength(0)
+  })
+})
+
+describe('extractDegree() ranking: completed beats in-progress of higher level', () => {
+  test('returns completed BA (level 2) over in-progress Master\'s (level 3)', () => {
+    const resume = [
+      "M.S. Data Science",
+      "State University",
+      "Expected May 2026",
+      "B.A. English",
+      "State College",
+      "2021",
+    ].join('\n')
+    const result = extractDegree(resume)
+    expect(result.degreeLevel).toBe(2)
+    expect(result.graduationStatus).toBeUndefined()
   })
 })
 
