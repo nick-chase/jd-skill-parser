@@ -196,3 +196,28 @@ describe('getDecision() — entry-level calibration', () => {
     expect(result.matchScore).toBe(0)
   })
 })
+
+// ---------------------------------------------------------------------------
+// normalizeLevel — certified skill handling
+// ---------------------------------------------------------------------------
+
+describe('getDecision() — certified level coercion', () => {
+  test('certified resume skill meets any JD level requirement (counts as L5)', () => {
+    const jd = makeJD([jdSkill('Python', { importance: 5, level: 5 })])
+    const resume = makeResume([{ name: 'Python', category: 'Test', level: 'certified', score: 1.8, source: 'Experience', suggestion: '' }])
+    const result = getDecision(jd, resume)
+    expect(result.matchScore).toBe(100)
+  })
+
+  test('certified resume skill is not flagged as gapped when JD requires L3', () => {
+    const jd = makeJD([jdSkill('SQL', { importance: 4, level: 3 })])
+    const resume = makeResume([{ name: 'SQL', category: 'Test', level: 'certified', score: 1.8, source: 'Experience', suggestion: '' }])
+    const result = getDecision(jd, resume)
+    expect(result.matchScore).toBe(100)
+  })
+
+  test('isEntryLevel is false when resume contains a certified skill', () => {
+    const resume = makeResume([{ name: 'Python', category: 'Test', level: 'certified', score: 1.8, source: 'Experience', suggestion: '' }])
+    expect(getDecision(makeJD([]), resume).isEntryLevel).toBe(false)
+  })
+})

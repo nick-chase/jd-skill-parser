@@ -277,7 +277,7 @@ export function extractJDDegree(text) {
 }
 
 export function parseJobDescription(text) {
-    if (!text || !text.trim()) return [];
+    if (!text || !text.trim()) return { technicalSignals: [], behavioralSignals: [], jobDuties: [], degree: null };
 
     const sections = getSections(text);
     const skills = new Map();
