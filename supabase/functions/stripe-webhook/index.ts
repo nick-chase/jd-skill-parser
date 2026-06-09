@@ -47,7 +47,7 @@ export default {
           .select()
 
         console.log('Update result:', JSON.stringify(data))
-        console.log('Update error:', JSON.stringify(error))
+        console.error('[stripe-webhook] DB update error:', JSON.stringify(error))
         break
       }
 
@@ -64,7 +64,7 @@ export default {
           .eq('stripe_customer_id', customerId)
 
         console.log('Subscription cancelled for customer:', customerId)
-        console.log('Cancel error:', JSON.stringify(error))
+        console.error('[stripe-webhook] DB cancel error:', JSON.stringify(error))
         break
       }
     }
