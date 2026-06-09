@@ -162,6 +162,21 @@ describe('extractAllDegrees()', () => {
     expect(result[0].graduationStatus).toBe('in_progress')
   })
 
+  test('(In Progress) on degree line + end year on next line without Expected keyword', () => {
+    // "(In Progress)" in title, "Jan 2026 –" on same line, "May 2028" on next line with no Expected.
+    // Old yearLocked fired immediately on line 0 (inProgress+year) and blocked 2028.
+    const resume = [
+      'M.S. Artificial Intelligence (In Progress) | NJIT | Newark, NJJan 2026 –',
+      'May 2028',
+      '•',
+      'Ying Wu College of Computing | GPA: 3.7',
+    ].join('\n')
+    const result = extractAllDegrees(resume)
+    expect(result[0].graduationYear).toBe(2028)
+    expect(result[0].startYear).toBe(2026)
+    expect(result[0].graduationStatus).toBe('in_progress')
+  })
+
   test('course-bullet year does not overwrite graduation year (Ernest PDF pattern)', () => {
     // Real PDF produces bullet lines like "• Fall 2026: DS 675 Machine Learning" AFTER
     // the Expected line. Without yearLocked, "Fall 2026" overwrites graduationYear 2028 → 2026.

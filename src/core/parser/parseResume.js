@@ -559,19 +559,19 @@ function extractGraduationYearFromBlock(lines, startIdx, maxLook = 4) {
             }
             if (isNewDegree) break
         }
-        // Always check in-progress markers regardless of yearLocked —
-        // "Expected" / "Present" / "currently" etc. can appear on any line
-        if (/\bExpected\b/i.test(trimmed)) inProgress = true
+        // Always check in-progress markers — these can appear on any line
+        const lineHasExpected = /\bExpected\b/i.test(trimmed)
+        if (lineHasExpected) inProgress = true
         if (/(?:–|-|to)\s*Present\b/i.test(trimmed)) inProgress = true
         if (/\bin\s+progress\b|\bcurrently\b|\bpursuing\b|\benrolled\b/i.test(trimmed)) inProgress = true
 
-        // Once inProgress is confirmed and a year is known, stop scanning for years.
-        // This prevents lines like "• Fall 2026: DS 675 Machine Learning" from overwriting
-        // the graduation year already established from the Expected/date line.
         if (!yearLocked) {
-            // All 4-digit years in this line; keep updating to get the LAST one
+            // All 4-digit years in this line; keep updating to get the LAST one.
+            // Skip years that are course-semester labels: "Fall 2026: CS 601", "Spring 2027 ..."
             const yearMatches = [...trimmed.matchAll(/\b(20\d{2}|19[89]\d)\b/g)]
             for (const ym of yearMatches) {
+                const before = trimmed.substring(Math.max(0, ym.index - 10), ym.index)
+                if (/\b(?:Fall|Spring|Summer|Winter)\s*$/i.test(before)) continue
                 const y = parseInt(ym[1])
                 if (firstYearSeen === null) firstYearSeen = y
                 year = y
@@ -581,8 +581,10 @@ function extractGraduationYearFromBlock(lines, startIdx, maxLook = 4) {
             if (rangeMatch) {
                 startYear = parseInt(rangeMatch[1])
             }
-            // Lock once graduation year is established and in-progress status confirmed
-            if (inProgress && year !== null) yearLocked = true
+            // Lock ONLY when "Expected" + year appear together — that is the definitive
+            // graduation date signal. "(In Progress)" alone does NOT lock, because the
+            // end year may appear on the next line (e.g. "Jan 2026 –\nMay 2028").
+            if (lineHasExpected && year !== null) yearLocked = true
         }
     }
     // Multi-line date range: if in-progress and no same-line range found, infer startYear from
