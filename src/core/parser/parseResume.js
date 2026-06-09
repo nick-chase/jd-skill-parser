@@ -191,8 +191,10 @@ function extractDateFromTitleLine(titleLine) {
     return null
 }
 
-// Split projects text into per-project blocks.
-// A new block starts on any non-bullet, non-continuation, non-URL line.
+// A project title line ends with a date: "Project Name  Jan 2025 – Present" or "Project Name  2023"
+// Everything from one title line to the next belongs to the same block.
+const PROJECT_TITLE_DATE_RE = /(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+)?\d{4}(?:\s*(?:–|—|-|to)\s*(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+)?(?:\d{4}|Present|Current|Now))?\s*$/i
+
 function splitProjectBlocks(text) {
     if (!text) return []
     const lines = text.split('\n')
@@ -203,8 +205,8 @@ function splitProjectBlocks(text) {
         if (!trimmed) continue
         const isBullet = /^[•\-\*‣◦→]/.test(trimmed)
         const isUrl = /^(?:github|http|www)/i.test(trimmed)
-        const isContinuation = /^[a-z]/.test(trimmed)
-        if (!isBullet && !isUrl && !isContinuation && current.length > 0) {
+        const isTitle = !isBullet && !isUrl && PROJECT_TITLE_DATE_RE.test(trimmed)
+        if (isTitle && current.length > 0) {
             blocks.push(current.join('\n'))
             current = []
         }

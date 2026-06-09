@@ -83,4 +83,24 @@ describe('extractSkillsFromProjects() — date extraction from title line', () =
       expect(java.durationMonths).toBeNull()
     }
   })
+
+  test('v3 format: subtitle line with skills stays in same block as title+date', () => {
+    // Actual v3 PDF format: title+date on one line, stack on next line (no bullet)
+    const resume = [
+      'PROJECTS',
+      'Nat20 — Resume & JD Skill Parser Jan 2025 – Present',
+      'Personal Project · React, Vite, Tailwind CSS, Supabase, Stripe, Vercel',
+      '• Built a full-stack SaaS web application.',
+      'Inventrack v1 — Inventory Management System 2023',
+      'Champlain College: SDEV 435 · C#, Unity3D, SQLite, Git',
+      '• Built an inventory management app.',
+    ].join('\n')
+    const result = parseResume(resume)
+    const react = result.technicalSignals.find(s => s.name === 'React')
+    expect(react).toBeDefined()
+    expect(react.durationMonths).not.toBeNull()
+    expect(react.durationMonths).toBeGreaterThan(0)
+    const unity = result.technicalSignals.find(s => s.name === 'Unity')
+    if (unity) expect(unity.durationMonths).toBeNull()
+  })
 })
