@@ -773,6 +773,7 @@ export function computeDegreeFlag(resumeDegree, jdDegree) {
     const found              = resumeDegree?.degreeLevel ?? null
     const graduationStatus   = resumeDegree?.graduationStatus ?? null
     const graduationYear     = resumeDegree?.graduationYear ?? null
+    const startYear          = resumeDegree?.startYear ?? null
 
     // In-progress degree: show a neutral status regardless of level match
     if (graduationStatus === 'in_progress') {
@@ -782,6 +783,7 @@ export function computeDegreeFlag(resumeDegree, jdDegree) {
             status:          'in_progress',
             required:        DEGREE_LEVEL_LABELS[required] ?? 'Degree',
             found:           levelLabel + fieldSuffix,
+            startYear:       startYear,
             graduationYear:  graduationYear,
             note:            null,
         }
@@ -834,7 +836,9 @@ function DegreeFlagCard({ degreeFlag }) {
 
     const inProgressSuffix = isInProgress
         ? (degreeFlag.graduationYear
-            ? ` · Expected ${degreeFlag.graduationYear}`
+            ? (degreeFlag.startYear
+                ? ` · ${degreeFlag.startYear} – Expected ${degreeFlag.graduationYear}`
+                : ` · Expected ${degreeFlag.graduationYear}`)
             : '')
         : null
 
@@ -1298,7 +1302,7 @@ function ResumeResultsView({ results, behavioralSignals, degree, allDegrees }) {
             </div>
 
             {/* Education / Degrees */}
-            <div className="pl-3 border-l-2 border-slate-200 mb-4">
+            <div className="mb-4">
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1.5">
                     Education &amp; Degrees
                 </div>

@@ -290,3 +290,28 @@ describe('computeDegreeFlag()', () => {
     expect(result.status).toBe('not_stated')
   })
 })
+
+describe('extractAllDegrees() — Ernest resume date format', () => {
+  test('(Expected) in parens on same line as end year → in_progress', () => {
+    const result = extractAllDegrees('M.S. AI\nState Univ\nJan 2026 – May 2028 (Expected)')
+    expect(result[0].graduationStatus).toBe('in_progress')
+    expect(result[0].startYear).toBe(2026)
+    expect(result[0].graduationYear).toBe(2028)
+  })
+
+  test('NJJan fusion still extracts correct years', () => {
+    const result = extractAllDegrees(
+      'Master of Science — AI | NJIT — Newark, NJJan 2026 –\nMay 2028 (Expected)'
+    )
+    expect(result[0].startYear).toBe(2026)
+    expect(result[0].graduationYear).toBe(2028)
+    expect(result[0].graduationStatus).toBe('in_progress')
+  })
+
+  test('completed date range → startYear null, graduationYear is end year', () => {
+    const result = extractAllDegrees('B.S. Computer Science\nState Univ\nApr 2020 – Dec 2023')
+    expect(result[0].graduationStatus).toBeUndefined()
+    expect(result[0].startYear).toBe(2020)
+    expect(result[0].graduationYear).toBe(2023)
+  })
+})
