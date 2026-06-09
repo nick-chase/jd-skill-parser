@@ -17,7 +17,7 @@ import AppFooter from './components/AppFooter.jsx';
 import HowToTour from './components/HowToTour.jsx'
 import FeedbackForm from './components/FeedbackForm.jsx';
 import resourceData from '@data/resources.json';
-import { getResources } from '@utils/resources.js';
+import { getAffiliateResources } from './utils/affiliateLoader.js';
 import { LEVEL_NAMES, IMPORTANCE_NAMES } from '@utils/constants.js';
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
@@ -1098,7 +1098,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                         </div>
 
                         {topGaps.map((skill, index) => {
-                            const resources = getResources(nameToResourceId(skill.name), skill.resumeLevel ?? 1, 'tech');
+                            const resources = getAffiliateResources(nameToResourceId(skill.name), skill.resumeLevel ?? 1, 'tech');
                             const freeResources = resources.filter(r => !r.affiliate).slice(0, 2);
                             const affiliateResource = resources.find(r => r.affiliate);
                             const resumeLabel = skill.resumeLevel

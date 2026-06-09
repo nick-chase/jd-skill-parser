@@ -9,7 +9,7 @@
  */
 
 import ResourceLink from './ResourceLink.jsx'
-import { getResources } from '@utils/resources.js'
+import { getAffiliateResources } from '../utils/affiliateLoader.js'
 import { LEVEL_NAMES, IMPORTANCE_NAMES } from '@utils/constants.js'
 
 function nameToResourceId(name) {
@@ -90,7 +90,7 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
   const skillLevel     = isMissing ? 1 : (skill.resumeLevel ?? 1)
   const showResources  = isMissing || (isGap && (skill.resumeLevel ?? 0) <= 2)
   const skillResources = showResources
-    ? getResources(nameToResourceId(skill.name), skillLevel)
+    ? getAffiliateResources(nameToResourceId(skill.name), skillLevel)
     : []
 
   // Row-level background tints
