@@ -1,141 +1,82 @@
 {
   "program": "Udemy",
-  "network": "Udemy Affiliate",
-  "version": "2026.1",
-  "updated": "2026-06-09",
-  "note": "Affiliate URLs generated via Udemy affiliate dashboard. skill_id values match data/skills.json ids. Set enabled: false for any entry whose URL has not been verified.",
   "entries": [
+    {
+      "skill_id": "python",
+      "title": "Complete Python Bootcamp",
+      "url": "https://trk.udemy.com/vDQNVO",
+      "platform": "Udemy",
+      "industry_tags": ["tech", "skill"]
+    },
     {
       "skill_id": "sql",
       "title": "The Complete SQL Bootcamp",
       "url": "https://trk.udemy.com/n4PL2o",
       "platform": "Udemy",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 3,
-      "industry_tags": ["tech"]
+      "industry_tags": ["tech", "skill"]
     },
     {
       "skill_id": "javascript",
       "title": "The Complete JavaScript Course",
       "url": "https://trk.udemy.com/2Ry1Wg",
       "platform": "Udemy",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 3,
-      "industry_tags": ["tech"]
-    },
-    {
-      "skill_id": "aws",
-      "title": "AWS Certified Solutions Architect",
-      "url": "https://trk.udemy.com/NGRk6v",
-      "platform": "Udemy",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 3,
-      "industry_tags": ["tech"]
-    },
-    {
-      "skill_id": "git",
-      "title": "Git & GitHub — The Practical Guide",
-      "url": "https://trk.udemy.com/DWOKko",
-      "platform": "Udemy",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 3,
-      "industry_tags": ["tech"]
-    },
-    {
-      "skill_id": "typescript",
-      "title": "Understanding TypeScript",
-      "url": "https://trk.udemy.com/k490on",
-      "platform": "Udemy",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 3,
-      "industry_tags": ["tech"]
-    },
-    {
-      "skill_id": "java",
-      "title": "Java Programming Masterclass",
-      "url": "https://trk.udemy.com/VOAmNa",
-      "platform": "Udemy",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 3,
-      "industry_tags": ["tech"]
-    },
-    {
-      "skill_id": "excel",
-      "title": "Microsoft Excel — Beginner to Advanced",
-      "url": "https://trk.udemy.com/X4GYN4",
-      "platform": "Udemy",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 3,
-      "industry_tags": ["tech", "business"]
-    },
-    {
-      "skill_id": "power_bi",
-      "title": "Microsoft Power BI — Up & Running with Power BI Desktop",
-      "url": "https://trk.udemy.com/6kneEV",
-      "platform": "Udemy",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 3,
-      "industry_tags": ["tech", "business"]
-    },
-    {
-      "skill_id": "python",
-      "title": "100 Days of Code: Python Bootcamp",
-      "url": "https://trk.udemy.com/vDQNVO",
-      "platform": "Udemy",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 3,
-      "industry_tags": ["tech"]
+      "industry_tags": ["tech", "skill"]
     },
     {
       "skill_id": "react",
       "title": "React — The Complete Guide",
       "url": "https://trk.udemy.com/YVb9Nm",
       "platform": "Udemy",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 3,
-      "industry_tags": ["tech"]
+      "industry_tags": ["tech", "skill"]
+    },
+    {
+      "skill_id": "aws",
+      "title": "AWS Certified Solutions Architect",
+      "url": "https://trk.udemy.com/NGRk6v",
+      "platform": "Udemy",
+      "industry_tags": ["tech", "career"]
     },
     {
       "skill_id": "docker",
-      "title": "Docker & Kubernetes: The Practical Guide",
+      "title": "Docker and Kubernetes: The Practical Guide",
       "url": "https://trk.udemy.com/9VngE0",
       "platform": "Udemy",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 3,
-      "industry_tags": ["tech"]
+      "industry_tags": ["tech", "skill"]
+    },
+    {
+      "skill_id": "git",
+      "title": "Git and GitHub Bootcamp",
+      "url": "https://trk.udemy.com/DWOKko",
+      "platform": "Udemy",
+      "industry_tags": ["tech", "skill"]
+    },
+    {
+      "skill_id": "typescript",
+      "title": "Understanding TypeScript",
+      "url": "https://trk.udemy.com/k490on",
+      "platform": "Udemy",
+      "industry_tags": ["tech", "skill"]
+    },
+    {
+      "skill_id": "java",
+      "title": "Java Programming Masterclass",
+      "url": "https://trk.udemy.com/VOAmNa",
+      "platform": "Udemy",
+      "industry_tags": ["tech", "skill"]
+    },
+    {
+      "skill_id": "excel",
+      "title": "Microsoft Excel — Beginner to Advanced",
+      "url": "https://trk.udemy.com/X4GYN4",
+      "platform": "Udemy",
+      "industry_tags": ["data", "skill"]
+    },
+    {
+      "skill_id": "power-bi",
+      "title": "Microsoft Power BI Desktop",
+      "url": "https://trk.udemy.com/6kneEV",
+      "platform": "Udemy",
+      "industry_tags": ["data", "skill"]
     }
   ]
 }

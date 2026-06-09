@@ -4,7 +4,9 @@ import * as registry from '@core/registry.js';
 import { extractTextFromPdf } from './lib/pdfExtract.js';
 import { parseResume, extractBehavioralSignals } from './core/parser/parseResume.js';
 import { getDecision } from '@core/parser/decision.js';
-import SkillRow from './components/SkillRow.jsx';
+import SkillRow from './components/SkillRow.jsx'
+import BoostSection from './components/BoostSection.jsx'
+import { getResumeBoostSkills, getMatchBoostSkills } from './utils/boostSkills.js';
 import { getOrCreateUser, onAuthStateChange } from './lib/auth.js'
 import { analytics } from './lib/analytics.js';
 import { saveResumeProfile, loadResumeProfile, getUserPlanStatus } from './lib/supabase.js';
@@ -17,8 +19,6 @@ import AppFooter from './components/AppFooter.jsx';
 import HowToTour from './components/HowToTour.jsx'
 import FeedbackForm from './components/FeedbackForm.jsx';
 import resourceData from '@data/resources.json';
-import { getAffiliateResources, requiresFTCDisclosure } from './utils/affiliateLoader.js';
-import { LEVEL_NAMES, IMPORTANCE_NAMES } from '@utils/constants.js';
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
 const betaFeedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
@@ -30,6 +30,9 @@ const betaFeedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true
 // Skill names: Lightcast-style canonical names (industry standard)
 // Importance: inferred from JD section structure
 // ============================================================
+
+const LEVEL_NAMES = ['—', 'Mentioned', 'Limited evidence', 'Supported', 'Strong evidence', 'Extensive evidence'];
+const IMPORTANCE_NAMES = ['—', 'Optional', 'Nice-to-have', 'Preferred', 'Required', 'Critical'];
 
 const IMPORTANCE_STYLES = {
     5: 'bg-rose-50 text-rose-700 border-rose-200',
@@ -194,45 +197,28 @@ export function parseJobMeta(text) {
     }
     if (locationMatch) meta.location = locationMatch[1].trim();
 
-    // Years of Experience — extract number + years with context guards to
-    // avoid false positives from age-requirement boilerplate (e.g. "18 years of age").
+    // Years of Experience — scan all matches, skip age boilerplate
     const yearsPattern = /(\d+)\s*\+?\s*years?\b/gi;
     let yearsMatch;
     while ((yearsMatch = yearsPattern.exec(text)) !== null) {
         const num = parseInt(yearsMatch[1]);
-
-        // Guard: no real job requires more than 15 years of experience
         if (num > 15) continue;
-
-        // Use line-bounded context to avoid bleeding into adjacent lines.
-        // Find the newline before and after the match position.
         const matchIdx  = yearsMatch.index;
         const lineStart = text.lastIndexOf('\n', matchIdx - 1) + 1;
         const lineEndRaw = text.indexOf('\n', matchIdx + yearsMatch[0].length);
         const lineEnd   = lineEndRaw === -1 ? text.length : lineEndRaw;
-
-        // Within the line, allow ±80 chars around the match for inline context
-        const ctxStart = Math.max(lineStart, matchIdx - 80);
-        const ctxEnd   = Math.min(lineEnd,   matchIdx + yearsMatch[0].length + 80);
-        const ctx      = text.substring(ctxStart, ctxEnd).toLowerCase();
-
-        // Skip legal/age boilerplate:
-        //   "years of age", "years old", "at least N years" near "age", "must be N years"
-        if (ctx.includes('of age'))                          continue;
-        if (ctx.includes('years old'))                       continue;
+        const ctxStart  = Math.max(lineStart, matchIdx - 80);
+        const ctxEnd    = Math.min(lineEnd,   matchIdx + yearsMatch[0].length + 80);
+        const ctx       = text.substring(ctxStart, ctxEnd).toLowerCase();
+        if (ctx.includes('of age'))                           continue;
+        if (ctx.includes('years old'))                        continue;
         if (ctx.includes('at least') && ctx.includes('age')) continue;
         if (ctx.includes('must be')  && ctx.includes('age')) continue;
-
-        // Accept only if context confirms this is an experience requirement
         const isExperience =
-            ctx.includes('experience') ||
-            ctx.includes('working')    ||
-            ctx.includes('minimum')    ||
-            ctx.includes('at least')   ||
+            ctx.includes('experience') || ctx.includes('working') ||
+            ctx.includes('minimum')    || ctx.includes('at least') ||
             yearsMatch[0].includes('+');
-
         if (!isExperience) continue;
-
         meta.yearsRequired = num;
         break;
     }
@@ -512,7 +498,6 @@ function nameToResourceId(name) {
         .replace(/[^a-z0-9-]/g, '');
 }
 
-// Fallback only — used when inference suggestion is null or missing
 function getGapSuggestion(name, resumeLevel, requiredLevel) {
     if (!resumeLevel || resumeLevel <= 1) {
         return `Your resume lists ${name} but shows no context. ` +
@@ -542,7 +527,7 @@ function formatDuration(months) {
 }
 
 function evidenceSummary(skill) {
-    const isListedOnly = skill.source != null && (skill.source === 'Technical Skills' || skill.source === 'Summary');
+    const isListedOnly = skill.source === 'Technical Skills' || skill.source === 'Summary';
     if (isListedOnly) return 'listed only';
     const parts = [];
     const dur = formatDuration(skill.durationMonths);
@@ -554,7 +539,6 @@ function evidenceSummary(skill) {
 }
 
 function ConfidenceDot({ confidence }) {
-    if (!confidence) return null;
     const color = confidence === 'high' ? '#22c55e' : confidence === 'medium' ? '#f59e0b' : '#94a3b8';
     return <span style={{ color, fontSize: '10px', marginLeft: '2px', lineHeight: 1 }}>●</span>;
 }
@@ -563,23 +547,22 @@ function ConfidenceDot({ confidence }) {
 // SHARED UI PRIMITIVES
 // ============================================================
 
-function SectionHeader({ label, count, color = 'text-slate-500', subtitle }) {
+function SectionHeader({ label, count, color = 'text-slate-500' }) {
     return (
-        <div className="mb-1.5">
-            <div className={`text-xs font-semibold uppercase tracking-wide ${color}`}>
-                {label}{count !== undefined ? ` — ${count}` : ''}
-            </div>
-            {subtitle && (
-                <div className="text-xs text-amber-600 mt-0.5 font-normal normal-case tracking-normal">{subtitle}</div>
-            )}
+        <div className={`text-xs font-semibold uppercase tracking-wide mb-1.5 ${color}`}>
+            {label}{count !== undefined ? ` — ${count}` : ''}
         </div>
     );
 }
 
-function SkillLine({ name, meta, color = 'text-slate-700', bg = 'bg-slate-50', metaColor, level, confidence }) {
+function SkillLine({ name, meta, color = 'text-slate-700', bg = 'bg-slate-50', metaColor, evidenceText, level, confidence }) {
+    const hasEvidence = evidenceText != null || level != null;
     return (
         <div className={`flex items-center gap-2 py-1 px-2.5 rounded-lg ${bg} text-sm mb-1`}>
             <span className={`font-medium ${color} shrink-0`}>{name}</span>
+            {hasEvidence && (
+                <span className="text-xs text-gray-400 flex-1 min-w-0 truncate">{evidenceText}</span>
+            )}
             <div className="flex items-center gap-2 ml-auto shrink-0">
                 {level != null && (
                     <span className="text-xs text-slate-500 flex items-center">
@@ -769,25 +752,8 @@ const DEGREE_LEVEL_LABELS = { 1: "Associate's", 2: "Bachelor's", 3: "Master's", 
 export function computeDegreeFlag(resumeDegree, jdDegree) {
     if (!jdDegree?.requiredDegreeLevel) return { status: 'not_stated' }
 
-    const required           = jdDegree.requiredDegreeLevel
-    const found              = resumeDegree?.degreeLevel ?? null
-    const graduationStatus   = resumeDegree?.graduationStatus ?? null
-    const graduationYear     = resumeDegree?.graduationYear ?? null
-    const startYear          = resumeDegree?.startYear ?? null
-
-    // In-progress degree: show a neutral status regardless of level match
-    if (graduationStatus === 'in_progress') {
-        const fieldSuffix = resumeDegree.field ? ` in ${resumeDegree.field}` : ''
-        const levelLabel  = found !== null ? (DEGREE_LEVEL_LABELS[found] ?? `Level ${found}`) : 'Degree'
-        return {
-            status:          'in_progress',
-            required:        DEGREE_LEVEL_LABELS[required] ?? 'Degree',
-            found:           levelLabel + fieldSuffix,
-            startYear:       startYear,
-            graduationYear:  graduationYear,
-            note:            null,
-        }
-    }
+    const required = jdDegree.requiredDegreeLevel
+    const found    = resumeDegree?.degreeLevel ?? null
 
     if (found === null) {
         return {
@@ -819,58 +785,29 @@ export function computeDegreeFlag(resumeDegree, jdDegree) {
 
 function DegreeFlagCard({ degreeFlag }) {
     if (!degreeFlag || degreeFlag.status === 'not_stated') return null
-
-    const isMatch      = degreeFlag.status === 'match'
-    const isInProgress = degreeFlag.status === 'in_progress'
-
-    let borderColor, bgColor, iconColor, labelColor
-    if (isMatch) {
-        borderColor = '#bbf7d0'; bgColor = '#f0fdf4'; iconColor = '#166534'; labelColor = '#166534'
-    } else if (isInProgress) {
-        borderColor = '#bae6fd'; bgColor = '#f0f9ff'; iconColor = '#0369a1'; labelColor = '#0369a1'
-    } else {
-        borderColor = '#fde68a'; bgColor = '#fffbeb'; iconColor = '#92400e'; labelColor = '#92400e'
-    }
-
-    const icon = isMatch ? '✓' : isInProgress ? '⏳' : '!'
-
-    const inProgressSuffix = isInProgress
-        ? (degreeFlag.graduationYear
-            ? (degreeFlag.startYear
-                ? ` · ${degreeFlag.startYear} – Expected ${degreeFlag.graduationYear}`
-                : ` · Expected ${degreeFlag.graduationYear}`)
-            : '')
-        : null
-
+    const isMatch = degreeFlag.status === 'match'
     return (
         <div style={{
             padding: '10px 14px',
             borderRadius: '8px',
-            border: `1px solid ${borderColor}`,
-            backgroundColor: bgColor,
+            border: `1px solid ${isMatch ? '#bbf7d0' : '#fde68a'}`,
+            backgroundColor: isMatch ? '#f0fdf4' : '#fffbeb',
             fontSize: '13px',
             display: 'flex',
             alignItems: 'flex-start',
             gap: '10px',
             marginBottom: '4px',
         }}>
-            <span style={{ fontSize: '15px', flexShrink: 0, lineHeight: '1.6' }}>{icon}</span>
+            <span style={{ fontSize: '15px', flexShrink: 0, lineHeight: '1.6' }}>{isMatch ? '✓' : '!'}</span>
             <div>
-                <div style={{ fontWeight: '600', color: labelColor }}>
+                <div style={{ fontWeight: '600', color: isMatch ? '#166534' : '#92400e' }}>
                     Degree required: {degreeFlag.required}
-                    {isMatch && (
-                        <span style={{ marginLeft: '8px', color: '#059669', fontWeight: '400' }}>— {degreeFlag.found} · Matches</span>
-                    )}
-                    {isInProgress && (
-                        <span style={{ marginLeft: '8px', color: '#0284c7', fontWeight: '400' }}>
-                            — In Progress — {degreeFlag.found}{inProgressSuffix}
-                        </span>
-                    )}
-                    {!isMatch && !isInProgress && (
-                        degreeFlag.found
+                    {isMatch
+                        ? <span style={{ marginLeft: '8px', color: '#059669', fontWeight: '400' }}>— {degreeFlag.found} · Matches</span>
+                        : degreeFlag.found
                             ? <span style={{ marginLeft: '8px', color: '#d97706', fontWeight: '400' }}>— {degreeFlag.found} found · Gap</span>
                             : <span style={{ marginLeft: '8px', color: '#d97706', fontWeight: '400' }}>— Not detected · Gap</span>
-                    )}
+                    }
                 </div>
                 {degreeFlag.note && (
                     <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '2px' }}>→ {degreeFlag.note}</div>
@@ -905,13 +842,6 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
 
             {/* Degree requirement flag */}
             <DegreeFlagCard degreeFlag={degreeFlag} />
-
-            {/* Both-sides empty: user has not pasted/parsed yet, or nothing was detected */}
-            {critical.length === 0 && levelGaps.length === 0 && matched.length === 0 && bonus.length === 0 && (
-                <p className="text-sm text-slate-500 text-center py-8">
-                    Paste a job description and resume above, then parse both to see your gap analysis.
-                </p>
-            )}
 
             {/* Zero match warning */}
             {critical.length === 0 && levelGaps.length === 0 && matched.length === 0 && bonus.length > 0 && (
@@ -978,7 +908,6 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                     <div>
                         <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Level Gaps</div>
                         <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#d97706' }}>{levelGaps.length}</div>
-                        <div style={{ fontSize: '10px', color: '#92400e', marginTop: '2px', lineHeight: '1.3' }}>fastest wins</div>
                     </div>
                     <div>
                         <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Bonus</div>
@@ -1026,26 +955,6 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                             ? 'Certified'
                             : (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`);
                         const jdLabel = LEVEL_NAMES[skill.level] ?? `L${skill.level}`;
-
-                        // CHANGE 2: When both resume and JD are L1/Mentioned, use a
-                        // weaker neutral treatment instead of the standard green match.
-                        const isBothMentioned = skill.resumeLevel === 1 && skill.level === 1;
-
-                        if (isBothMentioned) {
-                            return (
-                                <div key={skill.name}
-                                     className="flex items-start justify-between gap-2 py-1.5 px-2.5 rounded-lg bg-slate-50 border border-slate-200 mb-1">
-                                    <div className="min-w-0">
-                                        <div className="font-medium text-slate-600 text-sm">{skill.name}</div>
-                                        <div className="text-xs text-slate-400">Add evidence to strengthen this signal</div>
-                                    </div>
-                                    <span className="text-xs text-slate-400 shrink-0 flex items-center mt-0.5">
-                                        Both sides: Mentioned
-                                    </span>
-                                </div>
-                            );
-                        }
-
                         return (
                             <div key={skill.name}
                                  className="flex items-start justify-between gap-2 py-1.5 px-2.5 rounded-lg bg-emerald-50 mb-1">
@@ -1098,14 +1007,14 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                         </div>
 
                         {topGaps.map((skill, index) => {
-                            const resources = getAffiliateResources(nameToResourceId(skill.name), skill.resumeLevel ?? 1, 'tech');
+                            const resources = RESOURCE_MAP[nameToResourceId(skill.name)] ?? [];
                             const freeResources = resources.filter(r => !r.affiliate).slice(0, 2);
                             const affiliateResource = resources.find(r => r.affiliate);
                             const resumeLabel = skill.resumeLevel
                                 ? (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`)
                                 : 'Not evidenced';
                             const jdLabel = LEVEL_NAMES[skill.level] ?? `L${skill.level}`;
-                            const suggestion = skill.suggestion || getGapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level);
+                            const suggestion = getGapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level);
 
                             return (
                                 <div key={skill.name}
@@ -1114,8 +1023,8 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                                     {/* Skill header */}
                                     <div className="flex items-start justify-between gap-2 mb-2">
                                         <div className="min-w-0">
-                                            <div className="font-semibold text-slate-800 text-sm truncate">{skill.name}</div>
-                                            <div className="text-xs text-gray-400 mt-0.5 truncate">{evidenceSummary(skill)}</div>
+                                            <div className="font-semibold text-slate-800 text-sm">{skill.name}</div>
+                                            <div className="text-xs text-gray-400 mt-0.5">{evidenceSummary(skill)}</div>
                                         </div>
                                         <div className="flex items-center gap-2 shrink-0">
                                             <span className="text-xs text-amber-600 font-medium flex items-center">
@@ -1123,9 +1032,6 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                                             </span>
                                             <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full border border-amber-200">
                                                 {IMPORTANCE_NAMES[skill.importance] ?? 'Required'}
-                                            </span>
-                                            <span className="text-xs px-2 py-0.5 bg-teal-50 text-teal-700 rounded-full border border-teal-200 font-medium">
-                                                Fast fix
                                             </span>
                                         </div>
                                     </div>
@@ -1174,11 +1080,6 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                                                     </span>
                                                 </a>
                                             )}
-                                            {affiliateResource && (
-                                                <p className="text-xs text-slate-400 mt-1">
-                                                    Some resources above are affiliate links. We earn a small commission if you enroll — at no extra cost to you.
-                                                </p>
-                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -1207,9 +1108,6 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                                                     ? (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`)
                                                     : '—'}<ConfidenceDot confidence={skill.confidence} /> → {LEVEL_NAMES[skill.level] ?? `L${skill.level}`}
                                             </span>
-                                            <span className="text-xs px-1.5 py-0.5 bg-teal-50 text-teal-700 rounded border border-teal-200 font-medium shrink-0">
-                                                Fast fix
-                                            </span>
                                         </div>
                                     ))}
                                 </div>
@@ -1221,7 +1119,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
 
             {/* Bonus skills — collapsed */}
             {bonus.length > 0 && (
-                <CollapsibleSection label="Also Mentioned — no evidence found" count={bonus.length} color="text-violet-600">
+                <CollapsibleSection label="Bonus Skills" count={bonus.length} color="text-violet-600">
                     <div className="flex flex-wrap gap-1">
                         {bonus.map(skill => (
                             <span key={skill.name}
@@ -1233,21 +1131,18 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                 </CollapsibleSection>
             )}
 
-            {requiresFTCDisclosure(
-                [...critical, ...levelGaps].flatMap(skill =>
-                    getAffiliateResources(nameToResourceId(skill.name), skill.resumeLevel ?? 1)
-                )
-            ) && (
-                <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '8px' }}>
-                    Some links are affiliate links. We may earn a small commission if you enroll — at no extra cost to you.
-                </p>
-            )}
+            {/* Zone 2 — Boost skills for this specific role */}
+            <BoostSection
+                skills={getMatchBoostSkills({ critical, levelGaps })}
+                zone="match"
+                jobTitle={jobRole ?? null}
+            />
 
         </div>
     );
 }
 
-function ResumeResultsView({ results, behavioralSignals, degree, allDegrees }) {
+function ResumeResultsView({ results, behavioralSignals, degree }) {
     const SOURCE_COLORS = {
         'Technical Skills': '#0369a1',
         'Education':        '#7c3aed',
@@ -1312,68 +1207,25 @@ function ResumeResultsView({ results, behavioralSignals, degree, allDegrees }) {
             </div>
 
             {/* Education / Degrees */}
-            <div className="mb-4">
+            <div className="pl-3 border-l-2 border-slate-200 mb-4">
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1.5">
                     Education &amp; Degrees
                 </div>
-                {(allDegrees && allDegrees.length > 0) ? (
-                    <div className="flex flex-col gap-1">
-                        {allDegrees.map((deg, idx) => {
-                            const isInProgress = deg.graduationStatus === 'in_progress'
-                            // Build the date portion according to the spec:
-                            // Completed:              "· 2023"
-                            // In-progress with range: "· 2026 – Expected 2028"
-                            // In-progress single:     "· Expected 2028"
-                            // No year at all:         omit date part
-                            let yearLabel = null
-                            if (deg.graduationYear) {
-                                if (isInProgress && deg.startYear) {
-                                    yearLabel = `${deg.startYear} – Expected ${deg.graduationYear}`
-                                } else if (isInProgress) {
-                                    yearLabel = `Expected ${deg.graduationYear}`
-                                } else {
-                                    yearLabel = String(deg.graduationYear)
-                                }
-                            } else if (isInProgress) {
-                                yearLabel = 'In Progress'
-                            }
-                            return (
-                                <div key={idx} className="text-xs text-slate-600">
-                                    <span className="font-medium">{DEGREE_LEVEL_LABELS[deg.degreeLevel]}</span>
-                                    {deg.field && <span className="text-slate-500"> in {deg.field}</span>}
-                                    {deg.institution && <span className="text-slate-400"> · {deg.institution}</span>}
-                                    {yearLabel && (
-                                        <span className="text-slate-400">
-                                            {' '}· {yearLabel}
-                                        </span>
-                                    )}
-                                </div>
-                            )
-                        })}
+                {degree?.degreeLevel ? (
+                    <div className="text-xs text-slate-600">
+                        <span className="font-medium">{DEGREE_LEVEL_LABELS[degree.degreeLevel]}</span>
+                        {degree.field && <span className="text-slate-500"> in {degree.field}</span>}
+                        {degree.institution && <span className="text-slate-400"> · {degree.institution}</span>}
+                        {degree.graduationYear && <span className="text-slate-400"> ({degree.graduationYear})</span>}
                     </div>
                 ) : (
-                    <span className="text-xs text-slate-400">None detected</span>
+                    <span className="text-xs text-slate-400">No degree detected in Education section</span>
                 )}
             </div>
 
-            {/* Coaching banner — low-evidence warning */}
-            {(() => {
-                const l1Count = skillResults.filter(s => s.level === 1).length;
-                if (skillResults.length > 0 && l1Count / skillResults.length > 0.5) {
-                    return (
-                        <div style={{ backgroundColor: '#eff6ff', border: '1px solid #93c5fd', borderRadius: '8px', padding: '12px 16px', fontSize: '13px', color: '#1e40af', marginBottom: '4px' }}>
-                            Most of your skills are listed without evidence. Skills without a job or project behind them score at L1 regardless of your actual ability. The gap cards in the Match tab show exactly what to add.
-                        </div>
-                    );
-                }
-                return null;
-            })()}
-
-            {/* Skills grouped by evidence band (strong, supported, mentioned) */}
-            {EVIDENCE_BANDS.filter(band => band.key !== 'limited').map(band => {
-                const bandSkills = band.key === 'mentioned'
-                    ? skillResults.filter(s => band.levels.includes(s.level) && s.limitingFactor !== 'no_context')
-                    : skillResults.filter(s => band.levels.includes(s.level));
+            {/* Skills grouped by evidence band */}
+            {EVIDENCE_BANDS.map(band => {
+                const bandSkills = skillResults.filter(s => band.levels.includes(s.level));
                 if (bandSkills.length === 0) return null;
 
                 if (band.key === 'mentioned') {
@@ -1382,6 +1234,7 @@ function ResumeResultsView({ results, behavioralSignals, degree, allDegrees }) {
                             {bandSkills.map(skill => (
                                 <SkillLine key={skill.name} name={skill.name}
                                            meta={skill.source} color="text-slate-400"
+                                           evidenceText={evidenceSummary(skill)}
                                            level={skill.level} confidence={skill.confidence} />
                             ))}
                         </CollapsibleSection>
@@ -1395,62 +1248,16 @@ function ResumeResultsView({ results, behavioralSignals, degree, allDegrees }) {
                             <SkillLine key={skill.name} name={skill.name}
                                        meta={skill.source}
                                        metaColor={SOURCE_COLORS[skill.source]}
+                                       evidenceText={evidenceSummary(skill)}
                                        level={skill.level} confidence={skill.confidence} />
                         ))}
                     </div>
                 );
             })}
 
-            {/* Grouped coaching sections — Limited Evidence (L1+L2) skills by limitingFactor */}
-            {(() => {
-                const noContextSkills = skillResults.filter(s => s.limitingFactor === 'no_context');
-                const limitedSkills = skillResults.filter(s => s.level === 2 && s.limitingFactor !== 'no_context');
-                if (noContextSkills.length === 0 && limitedSkills.length === 0) return null;
+            {/* Zone 1 — Boost weak-evidence resume skills */}
+            <BoostSection skills={getResumeBoostSkills(results)} zone="resume" />
 
-                const GROUP_ORDER = ['no_context', 'no_duration', 'weak_verb', 'single_context'];
-                const GROUP_CONFIG = {
-                    no_context: {
-                        header: 'ADD CONTEXT',
-                        subtext: 'Listed but no job or project behind them. Move these into a role or project description.',
-                    },
-                    no_duration: {
-                        header: 'ADD DURATION',
-                        subtext: 'Add how long you used each one — months or years is enough.',
-                    },
-                    weak_verb: {
-                        header: 'STRENGTHEN YOUR VERBS',
-                        subtext: 'Describe what you built or led, not just that you used it.',
-                    },
-                    single_context: {
-                        header: 'APPEARS ONCE',
-                        subtext: 'Referencing a skill in more than one place raises its score.',
-                    },
-                };
-
-                return GROUP_ORDER.map(factor => {
-                    const sourcePool = factor === 'no_context' ? noContextSkills : limitedSkills;
-                    const group = sourcePool.filter(s => s.limitingFactor === factor);
-                    if (group.length === 0) return null;
-                    const cfg = GROUP_CONFIG[factor];
-                    return (
-                        <div key={factor} className="mb-3">
-                            <SectionHeader
-                                label={`${cfg.header} — ${group.length} skill${group.length !== 1 ? 's' : ''}`}
-                                color="text-amber-700"
-                                subtitle={cfg.subtext}
-                            />
-                            <div className="flex flex-wrap gap-1 mt-1">
-                                {group.map(skill => (
-                                    <span key={skill.name}
-                                          className="text-xs px-2.5 py-0.5 bg-amber-50 text-amber-800 border border-amber-200 rounded-full font-medium">
-                                        {skill.name}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    );
-                });
-            })()}
         </div>
     );
 }
@@ -1480,9 +1287,6 @@ function ResultsView({ results, companyName, jobRole, jobMeta, behavioralSignals
 // GAP ANALYSIS
 // ============================================================
 
-// runGapAnalysis() — owns: levelGaps, matched, critical, bonus arrays
-// matchScore and isEntryLevel come from decision.js (getDecision()).
-// Keep gap array logic here; keep score logic in decision.js.
 export function runGapAnalysis(jdSkills, resumeSkills) {
     if (!jdSkills || !resumeSkills) return null;
 
@@ -1507,29 +1311,23 @@ export function runGapAnalysis(jdSkills, resumeSkills) {
             // Have it but below required level
             levelGaps.push({
                 ...jdSkill,
-                resumeLevel:    resumeSkill.level,
-                gap:            jdSkill.level - resumeSkill.level,
-                confidence:     resumeSkill.confidence     ?? null,
-                source:         resumeSkill.source         ?? null,
+                resumeLevel:   resumeSkill.level,
+                gap:           jdSkill.level - resumeSkill.level,
+                confidence:    resumeSkill.confidence    ?? null,
+                source:        resumeSkill.source        ?? null,
                 durationMonths: resumeSkill.durationMonths ?? null,
-                contextCount:   resumeSkill.contextCount   ?? null,
-                primarySignal:  resumeSkill.primarySignal  ?? null,
-                suggestion:     resumeSkill.suggestion     ?? null,
-                limitingFactor: resumeSkill.limitingFactor ?? null,
+                contextCount:  resumeSkill.contextCount  ?? null,
             });
         } else {
             // Have it at or above required level (includes 'certified' — credential counts as met)
             matched.push({
                 ...jdSkill,
-                resumeLevel:    resumeSkill.level,
-                gap:            0,
-                confidence:     resumeSkill.confidence     ?? null,
-                source:         resumeSkill.source         ?? null,
+                resumeLevel:   resumeSkill.level,
+                gap:           0,
+                confidence:    resumeSkill.confidence    ?? null,
+                source:        resumeSkill.source        ?? null,
                 durationMonths: resumeSkill.durationMonths ?? null,
-                contextCount:   resumeSkill.contextCount   ?? null,
-                primarySignal:  resumeSkill.primarySignal  ?? null,
-                suggestion:     resumeSkill.suggestion     ?? null,
-                limitingFactor: resumeSkill.limitingFactor ?? null,
+                contextCount:  resumeSkill.contextCount  ?? null,
             });
         }
     }
@@ -1925,7 +1723,6 @@ export default function App() {
                                         results={resumeResults.technicalSignals}
                                         behavioralSignals={resumeResults.behavioralSignals}
                                         degree={resumeResults.degree}
-                                        allDegrees={resumeResults.allDegrees}
                                     />
                                 </>
                             )

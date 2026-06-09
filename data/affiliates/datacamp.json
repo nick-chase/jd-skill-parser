@@ -1,213 +1,159 @@
 {
   "program": "DataCamp",
-  "network": "Impact Radius",
-  "version": "2026.1",
-  "updated": "2026-06-09",
-  "note": "Affiliate URLs generated via Impact dashboard. skill_id values match data/skills.json ids. Set enabled: false for any entry whose URL has not been verified.",
   "entries": [
     {
       "skill_id": "python",
-      "title": "Python Data Fundamentals",
-      "url": "https://datacamp.pxf.io/B5O0E0",
+      "title": "Python Fundamentals Track",
+      "url": "https://datacamp.pxf.io/xJrk9x",
       "platform": "DataCamp",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 4,
-      "industry_tags": ["tech"]
+      "industry_tags": ["tech", "skill"]
     },
     {
       "skill_id": "sql",
-      "title": "SQL Fundamentals Track",
+      "title": "Introduction to SQL",
       "url": "https://datacamp.pxf.io/9VngW4",
       "platform": "DataCamp",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 4,
-      "industry_tags": ["tech"]
+      "industry_tags": ["tech", "skill"]
     },
     {
       "skill_id": "r",
-      "title": "R Programming Fundamentals",
+      "title": "R Programming Track",
       "url": "https://datacamp.pxf.io/3kyeer",
       "platform": "DataCamp",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 4,
-      "industry_tags": ["tech"]
+      "industry_tags": ["tech", "skill"]
     },
     {
-      "skill_id": "machine_learning",
-      "title": "Associate AI Engineer for Developers",
-      "url": "https://datacamp.pxf.io/VOAmm6",
-      "platform": "DataCamp",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 2,
-      "level_max": 5,
-      "industry_tags": ["tech"]
-    },
-    {
-      "skill_id": "deep_learning",
-      "title": "Deep Learning in Python",
-      "url": "https://datacamp.pxf.io/L0OXK0",
-      "platform": "DataCamp",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 3,
-      "level_max": 5,
-      "industry_tags": ["tech"]
-    },
-    {
-      "skill_id": "data_engineering",
-      "title": "Data Engineer in Python",
-      "url": "https://datacamp.pxf.io/B5O00B",
-      "platform": "DataCamp",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 2,
-      "level_max": 5,
-      "industry_tags": ["tech"]
-    },
-    {
-      "skill_id": "power_bi",
-      "title": "Power BI Fundamentals",
-      "url": "https://datacamp.pxf.io/WOAqqJ",
-      "platform": "DataCamp",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 4,
-      "industry_tags": ["tech"]
-    },
-    {
-      "skill_id": "cloud_computing",
+      "skill_id": "cloud-computing",
       "title": "Understanding Cloud Computing",
       "url": "https://datacamp.pxf.io/E0OKKW",
       "platform": "DataCamp",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 3,
-      "industry_tags": ["tech"]
+      "industry_tags": ["tech", "skill"]
+    },
+    {
+      "skill_id": "power-bi",
+      "title": "Power BI Fundamentals",
+      "url": "https://datacamp.pxf.io/WOAqqJ",
+      "platform": "DataCamp",
+      "industry_tags": ["data", "skill"]
+    },
+    {
+      "skill_id": "python",
+      "title": "Data Engineer in Python",
+      "url": "https://datacamp.pxf.io/B5O00B",
+      "platform": "DataCamp",
+      "industry_tags": ["tech", "career"]
+    },
+    {
+      "skill_id": "ai-engineer",
+      "title": "Associate AI Engineer for Developers",
+      "url": "https://datacamp.pxf.io/VOAmm6",
+      "platform": "DataCamp",
+      "industry_tags": ["tech", "career"]
     },
     {
       "skill_id": "aws",
       "title": "AWS Cloud Practitioner (CLF-C02)",
       "url": "https://datacamp.pxf.io/7Xn55Y",
       "platform": "DataCamp",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 4,
-      "industry_tags": ["tech"]
+      "industry_tags": ["tech", "career"]
     },
     {
       "skill_id": "azure",
       "title": "Microsoft Azure Fundamentals (AZ-900)",
       "url": "https://datacamp.pxf.io/xJrkkx",
       "platform": "DataCamp",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 4,
-      "industry_tags": ["tech"]
+      "industry_tags": ["tech", "career"]
+    },
+    {
+      "skill_id": "deep-learning",
+      "title": "Deep Learning in Python",
+      "url": "https://datacamp.pxf.io/L0OXK0",
+      "platform": "DataCamp",
+      "industry_tags": ["tech", "skill"]
     },
     {
       "skill_id": "llm",
       "title": "Developing Large Language Models",
       "url": "https://datacamp.pxf.io/5kyg51",
       "platform": "DataCamp",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 2,
-      "level_max": 5,
-      "industry_tags": ["tech"]
+      "industry_tags": ["tech", "skill"]
+    },
+    {
+      "skill_id": "google-cloud",
+      "title": "Google Cloud Generative AI Leader",
+      "url": "https://datacamp.pxf.io/oN5q4W",
+      "platform": "DataCamp",
+      "industry_tags": ["tech", "career"]
     },
     {
       "skill_id": "openai",
       "title": "OpenAI Fundamentals",
       "url": "https://datacamp.pxf.io/E0OKED",
       "platform": "DataCamp",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 4,
-      "industry_tags": ["tech"]
+      "industry_tags": ["tech", "skill"]
     },
     {
-      "skill_id": "github",
-      "title": "GitHub Foundations",
-      "url": "https://datacamp.pxf.io/2Ry1RA",
+      "skill_id": "chatgpt",
+      "title": "ChatGPT Fundamentals",
+      "url": "https://datacamp.pxf.io/R0Z5Gv",
       "platform": "DataCamp",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 3,
-      "industry_tags": ["tech"]
+      "industry_tags": ["tech", "skill"]
     },
     {
-      "skill_id": "data_literacy",
-      "title": "Data Literacy Professional",
-      "url": "https://datacamp.pxf.io/KBOjxe",
+      "skill_id": "google-cloud",
+      "title": "Google Cloud Digital Leader",
+      "url": "https://datacamp.pxf.io/dykaO2",
       "platform": "DataCamp",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 3,
-      "industry_tags": ["tech"]
-    },
-    {
-      "skill_id": "data_science",
-      "title": "Associate Data Scientist in Python",
-      "url": "https://datacamp.pxf.io/9VngeE",
-      "platform": "DataCamp",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 4,
-      "industry_tags": ["tech"]
+      "industry_tags": ["tech", "career"]
     },
     {
       "skill_id": "snowflake",
       "title": "Essentials for Snowflake SnowPro Core Certification",
       "url": "https://datacamp.pxf.io/zzPNzG",
       "platform": "DataCamp",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 2,
-      "level_max": 5,
-      "industry_tags": ["tech"]
+      "industry_tags": ["tech", "career"]
     },
     {
-      "skill_id": "google_cloud",
-      "title": "Google Cloud Digital Leader",
-      "url": "https://datacamp.pxf.io/dykaO2",
+      "skill_id": "alteryx",
+      "title": "Alteryx Fundamentals",
+      "url": "https://datacamp.pxf.io/6knekm",
       "platform": "DataCamp",
-      "type": "paid",
-      "affiliate": true,
-      "enabled": true,
-      "level_min": 1,
-      "level_max": 4,
-      "industry_tags": ["tech"]
+      "industry_tags": ["tech", "skill"]
+    },
+    {
+      "skill_id": "github",
+      "title": "GitHub Foundations",
+      "url": "https://datacamp.pxf.io/2Ry1RA",
+      "platform": "DataCamp",
+      "industry_tags": ["tech", "skill"]
+    },
+    {
+      "skill_id": "data-literacy",
+      "title": "Data Literacy Professional",
+      "url": "https://datacamp.pxf.io/KBOjxe",
+      "platform": "DataCamp",
+      "industry_tags": ["tech", "career"]
+    },
+    {
+      "skill_id": "data-scientist",
+      "title": "Associate Data Scientist in Python",
+      "url": "https://datacamp.pxf.io/9VngeE",
+      "platform": "DataCamp",
+      "industry_tags": ["tech", "career"]
+    },
+    {
+      "skill_id": "data-analyst",
+      "title": "Data Analyst in Power BI",
+      "url": "https://datacamp.pxf.io/PzRyaR",
+      "platform": "DataCamp",
+      "industry_tags": ["tech", "career"]
+    },
+    {
+      "skill_id": "ai-engineer",
+      "title": "Associate AI Engineer for Data Scientists",
+      "url": "https://datacamp.pxf.io/eneKRQ",
+      "platform": "DataCamp",
+      "industry_tags": ["tech", "career"]
     }
   ]
 }
