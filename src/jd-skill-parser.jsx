@@ -18,7 +18,7 @@ import AdSlot from './components/AdSlot.jsx';
 import AppFooter from './components/AppFooter.jsx';
 import HowToTour from './components/HowToTour.jsx'
 import FeedbackForm from './components/FeedbackForm.jsx';
-import resourceData from '@data/resources.json';
+import { getAffiliateResources } from '@utils/affiliateLoader.js';
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
 const betaFeedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
@@ -486,8 +486,6 @@ const EVIDENCE_BANDS = [
     { key: 'limited',   label: 'Limited Evidence',  levels: [2],    color: 'text-amber-700'  },
     { key: 'mentioned', label: 'Mentioned',         levels: [1],    color: 'text-slate-400'  },
 ];
-
-const RESOURCE_MAP = resourceData.resources;
 
 function nameToResourceId(name) {
     return (name || '')
@@ -1007,9 +1005,8 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                         </div>
 
                         {topGaps.map((skill, index) => {
-                            const resources = RESOURCE_MAP[nameToResourceId(skill.name)] ?? [];
-                            const freeResources = resources.filter(r => !r.affiliate).slice(0, 2);
-                            const affiliateResource = resources.find(r => r.affiliate);
+                            const freeResources = [];
+                            const affiliateResource = getAffiliateResources(nameToResourceId(skill.name), skill.resumeLevel ?? 1)[0] ?? null;
                             const resumeLabel = skill.resumeLevel
                                 ? (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`)
                                 : 'Not evidenced';
