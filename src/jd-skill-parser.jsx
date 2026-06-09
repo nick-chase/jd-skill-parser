@@ -194,9 +194,48 @@ export function parseJobMeta(text) {
     }
     if (locationMatch) meta.location = locationMatch[1].trim();
 
-    // Years of Experience — just match number + years
-    const yearsMatch = text.match(/(\d+)\s*\+?\s*years\b/i);
-    if (yearsMatch) meta.yearsRequired = parseInt(yearsMatch[1]);
+    // Years of Experience — extract number + years with context guards to
+    // avoid false positives from age-requirement boilerplate (e.g. "18 years of age").
+    const yearsPattern = /(\d+)\s*\+?\s*years?\b/gi;
+    let yearsMatch;
+    while ((yearsMatch = yearsPattern.exec(text)) !== null) {
+        const num = parseInt(yearsMatch[1]);
+
+        // Guard: no real job requires more than 15 years of experience
+        if (num > 15) continue;
+
+        // Use line-bounded context to avoid bleeding into adjacent lines.
+        // Find the newline before and after the match position.
+        const matchIdx  = yearsMatch.index;
+        const lineStart = text.lastIndexOf('\n', matchIdx - 1) + 1;
+        const lineEndRaw = text.indexOf('\n', matchIdx + yearsMatch[0].length);
+        const lineEnd   = lineEndRaw === -1 ? text.length : lineEndRaw;
+
+        // Within the line, allow ±80 chars around the match for inline context
+        const ctxStart = Math.max(lineStart, matchIdx - 80);
+        const ctxEnd   = Math.min(lineEnd,   matchIdx + yearsMatch[0].length + 80);
+        const ctx      = text.substring(ctxStart, ctxEnd).toLowerCase();
+
+        // Skip legal/age boilerplate:
+        //   "years of age", "years old", "at least N years" near "age", "must be N years"
+        if (ctx.includes('of age'))                          continue;
+        if (ctx.includes('years old'))                       continue;
+        if (ctx.includes('at least') && ctx.includes('age')) continue;
+        if (ctx.includes('must be')  && ctx.includes('age')) continue;
+
+        // Accept only if context confirms this is an experience requirement
+        const isExperience =
+            ctx.includes('experience') ||
+            ctx.includes('working')    ||
+            ctx.includes('minimum')    ||
+            ctx.includes('at least')   ||
+            yearsMatch[0].includes('+');
+
+        if (!isExperience) continue;
+
+        meta.yearsRequired = num;
+        break;
+    }
 
     return meta;
 }

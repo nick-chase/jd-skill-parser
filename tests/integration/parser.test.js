@@ -596,3 +596,53 @@ describe('parseJobMeta() -- metadata extraction from sample JD', () => {
     expect(minimal.yearsRequired).toBeNull();
   });
 });
+
+// ---------------------------------------------------------------------------
+// parseJobMeta() -- yearsRequired age-clause guards
+// ---------------------------------------------------------------------------
+
+describe('parseJobMeta() -- yearsRequired age-clause guards', () => {
+  test('age boilerplate "Is at least 18 years of age" returns null', () => {
+    // Regression guard: EEO legal boilerplate must never surface as job experience.
+    const result = parseJobMeta('Is at least 18 years of age and authorized to work in the US.');
+    expect(result.yearsRequired).toBeNull();
+  });
+
+  test('age boilerplate "Must be 21 years of age or older" returns null', () => {
+    const result = parseJobMeta('Must be 21 years of age or older to apply.');
+    expect(result.yearsRequired).toBeNull();
+  });
+
+  test('"3+ years of experience required" returns 3', () => {
+    const result = parseJobMeta('3+ years of experience required in software development.');
+    expect(result.yearsRequired).toBe(3);
+  });
+
+  test('"Minimum 5 years experience in software development" returns 5', () => {
+    const result = parseJobMeta('Minimum 5 years experience in software development required.');
+    expect(result.yearsRequired).toBe(5);
+  });
+
+  test('"10 years of experience preferred" returns 10', () => {
+    const result = parseJobMeta('10 years of experience preferred with enterprise systems.');
+    expect(result.yearsRequired).toBe(10);
+  });
+
+  test('"20 years of experience" returns null — N > 15 guard', () => {
+    // No legitimate job posting requires more than 15 years.
+    // This catches inflated numbers from non-experience prose.
+    const result = parseJobMeta('Over 20 years of experience in the industry is a plus.');
+    expect(result.yearsRequired).toBeNull();
+  });
+
+  test('age clause before experience clause extracts experience, not age', () => {
+    // When a JD contains both an age clause and a real experience requirement,
+    // the age clause must be skipped and the experience clause must win.
+    const jd = [
+      'Applicants must be at least 18 years of age.',
+      'We require 4+ years of experience in data engineering.',
+    ].join('\n');
+    const result = parseJobMeta(jd);
+    expect(result.yearsRequired).toBe(4);
+  });
+});
