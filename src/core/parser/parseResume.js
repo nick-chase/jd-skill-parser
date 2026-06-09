@@ -476,9 +476,17 @@ function stripFieldPrefix(raw) {
 }
 
 function extractDegreeField(line) {
+    // "Master of Science — Artificial Intelligence" / "Bachelor of Science — Software Development"
+    // Must check this FIRST — the generic "master of" pattern below would otherwise grab "Science"
+    let m = line.match(/\b(?:Master|Bachelor|Doctor|Associate)'?s?\s+of\s+\w+(?:\s+\w+)?\s*(?:–|—)\s*([A-Za-z][A-Za-z\s,&\/]+?)(?=\s*(?:\||\(|\bfrom\b|\bat\b|\d{4})|\s*$)/i)
+    if (m) {
+        const candidate = m[1].trim().replace(/\s+/g, ' ')
+        if (candidate.length <= 60) return stripFieldPrefix(candidate)
+    }
+
     // "degree in X", "Bachelor's in X", "Bachelor of X", "B.S. in X"
     // "Master of Science in X" — captures everything after the final "in"
-    let m = line.match(/\b(?:degree\s+(?:in|of)|bachelor'?s?\s+(?:in|of)|master'?s?\s+(?:in|of)|b\.?s\.?\s+in|m\.?s\.?\s+in)\s+([A-Za-z][A-Za-z\s,&\/]+?)(?=\s*(?:–|—|-{1,2}|,\s|\(|\bfrom\b|\bat\b|\d{4})|\s*$)/i)
+    m = line.match(/\b(?:degree\s+(?:in|of)|bachelor'?s?\s+(?:in|of)|master'?s?\s+(?:in|of)|b\.?s\.?\s+in|m\.?s\.?\s+in)\s+([A-Za-z][A-Za-z\s,&\/]+?)(?=\s*(?:–|—|-{1,2}|,\s|\(|\bfrom\b|\bat\b|\d{4})|\s*$)/i)
     if (m) return stripFieldPrefix(m[1].trim().replace(/\s+/g, ' '))
 
     // "Master of Science in X" and similar long-form patterns not caught above
@@ -535,6 +543,7 @@ function extractInstitutionFromLine(line) {
 function extractGraduationYearFromBlock(lines, startIdx, maxLook = 4) {
     let year = null
     let startYear = null
+    let firstYearSeen = null
     let inProgress = false
     for (let offset = 0; offset <= maxLook; offset++) {
         const idx = startIdx + offset
@@ -566,7 +575,9 @@ function extractGraduationYearFromBlock(lines, startIdx, maxLook = 4) {
         // All 4-digit years in this line; keep updating to get the LAST one
         const yearMatches = [...trimmed.matchAll(/\b(20\d{2}|19[89]\d)\b/g)]
         for (const ym of yearMatches) {
-            year = parseInt(ym[1])
+            const y = parseInt(ym[1])
+            if (firstYearSeen === null) firstYearSeen = y
+            year = y
         }
         // Detect a date range: two years separated by dash/en-dash/em-dash.
         // The FIRST year in the range becomes startYear; the second becomes graduationYear (year above).
@@ -576,6 +587,11 @@ function extractGraduationYearFromBlock(lines, startIdx, maxLook = 4) {
             startYear = parseInt(rangeMatch[1])
             // year is already set to the last year in the line above, which is rangeMatch[2]
         }
+    }
+    // Multi-line date range: if in-progress and no same-line range found, infer startYear from
+    // the first year seen across all scanned lines (e.g. "NJJan 2026 –\nMay 2028 (Expected)")
+    if (inProgress && startYear === null && firstYearSeen !== null && firstYearSeen !== year) {
+        startYear = firstYearSeen
     }
     return { year, startYear, inProgress }
 }
@@ -609,13 +625,20 @@ export function extractAllDegrees(educationText) {
 
         const field = extractDegreeField(trimmed)
 
-        // Look for institution in the following 1-2 lines
+        // Look for institution — first try the degree line itself (after | separator),
+        // then fall through to the following 1-2 lines.
         let institution = null
-        for (let offset = 1; offset <= 2; offset++) {
-            const idx = i + offset
-            if (idx >= lines.length) break
-            const candidate = extractInstitutionFromLine(lines[idx])
-            if (candidate) { institution = candidate; break }
+        if (lines[i].includes('|')) {
+            const afterPipe = lines[i].split('|').slice(1).join('|')
+            institution = extractInstitutionFromLine(afterPipe)
+        }
+        if (!institution) {
+            for (let offset = 1; offset <= 2; offset++) {
+                const idx = i + offset
+                if (idx >= lines.length) break
+                const candidate = extractInstitutionFromLine(lines[idx])
+                if (candidate) { institution = candidate; break }
+            }
         }
 
         // Extract graduation year, start year (for date ranges), and in-progress status

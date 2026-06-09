@@ -152,6 +152,39 @@ describe('extractAllDegrees()', () => {
     expect(result[0].startYear).toBeNull()
     expect(result[0].graduationYear).toBe(2023)
   })
+
+  test('captures startYear from multi-line range "NJJan 2026 –\\nMay 2028 (Expected)"', () => {
+    const resume = 'Master of Science   —   Artificial Intelligence   | New Jersey Institute of Technology   —   Newark, NJJan 2026   –\nMay 2028 (Expected)\n• GPA: 3.75'
+    const result = extractAllDegrees(resume)
+    expect(result).toHaveLength(1)
+    expect(result[0].startYear).toBe(2026)
+    expect(result[0].graduationYear).toBe(2028)
+    expect(result[0].graduationStatus).toBe('in_progress')
+  })
+
+  test('extracts field from em-dash separator "Master of Science — Artificial Intelligence"', () => {
+    const result = extractAllDegrees('Master of Science — Artificial Intelligence\nNJIT\n2028')
+    expect(result[0].field).toMatch(/Artificial Intelligence/i)
+  })
+
+  test('extracts field from em-dash separator "Bachelor of Science — Software Development"', () => {
+    const result = extractAllDegrees('Bachelor of Science — Software Development\nChamplain College Online\n2023')
+    expect(result[0].field).toMatch(/Software Development/i)
+  })
+
+  test('extracts institution from pipe on same line as degree', () => {
+    const resume = 'Bachelor of Science   —   Software Development   | Champlain College Online   —   South Burlington, VT   Apr\n2020   –   Dec 2023'
+    const result = extractAllDegrees(resume)
+    expect(result).toHaveLength(1)
+    expect(result[0].institution).toMatch(/Champlain College/i)
+  })
+
+  test('extracts institution from pipe on same line — Master with NJIT', () => {
+    const resume = 'Master of Science   —   Artificial Intelligence   | New Jersey Institute of Technology   —   Newark, NJJan 2026   –\nMay 2028 (Expected)'
+    const result = extractAllDegrees(resume)
+    expect(result).toHaveLength(1)
+    expect(result[0].institution).toMatch(/New Jersey Institute/i)
+  })
 })
 
 describe('extractDegree() ranking: completed beats in-progress of higher level', () => {
