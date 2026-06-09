@@ -1,0 +1,10 @@
+{
+  "program": "Grammarly",
+  "enabled": false,
+  "priority": 1,
+  "ftc_disclosure": true,
+  "cookie_days": 90,
+  "commission_note": "$0.20 per free signup, $20 per premium",
+  "trigger": "low_bloom_verb",
+  "resources": []
+}
