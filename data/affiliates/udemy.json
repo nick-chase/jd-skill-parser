@@ -1,142 +1,82 @@
 {
   "program": "Udemy",
-  "enabled": false,
-  "priority": 2,
-  "ftc_disclosure": true,
-  "cookie_days": 7,
-  "commission_note": "15% per sale",
-  "resources": [
+  "entries": [
     {
       "skill_id": "python",
       "title": "Complete Python Bootcamp",
       "url": "https://trk.udemy.com/vDQNVO",
-      "level_min": 1,
-      "level_max": 3,
-      "type": "paid",
-      "industry_tags": [
-        "tech",
-        "skill"
-      ]
+      "platform": "Udemy",
+      "industry_tags": ["tech", "skill"]
     },
     {
       "skill_id": "sql",
       "title": "The Complete SQL Bootcamp",
       "url": "https://trk.udemy.com/n4PL2o",
-      "level_min": 1,
-      "level_max": 2,
-      "type": "paid",
-      "industry_tags": [
-        "tech",
-        "skill"
-      ]
+      "platform": "Udemy",
+      "industry_tags": ["tech", "skill"]
     },
     {
       "skill_id": "javascript",
       "title": "The Complete JavaScript Course",
       "url": "https://trk.udemy.com/2Ry1Wg",
-      "level_min": 1,
-      "level_max": 3,
-      "type": "paid",
-      "industry_tags": [
-        "tech",
-        "skill"
-      ]
+      "platform": "Udemy",
+      "industry_tags": ["tech", "skill"]
     },
     {
       "skill_id": "react",
-      "title": "React - The Complete Guide",
+      "title": "React — The Complete Guide",
       "url": "https://trk.udemy.com/YVb9Nm",
-      "level_min": 1,
-      "level_max": 3,
-      "type": "paid",
-      "industry_tags": [
-        "tech",
-        "skill"
-      ]
+      "platform": "Udemy",
+      "industry_tags": ["tech", "skill"]
     },
     {
       "skill_id": "aws",
       "title": "AWS Certified Solutions Architect",
       "url": "https://trk.udemy.com/NGRk6v",
-      "level_min": 1,
-      "level_max": 3,
-      "type": "paid",
-      "industry_tags": [
-        "tech",
-        "career"
-      ]
+      "platform": "Udemy",
+      "industry_tags": ["tech", "career"]
     },
     {
       "skill_id": "docker",
-      "title": "Docker and Kubernetes..",
+      "title": "Docker and Kubernetes: The Practical Guide",
       "url": "https://trk.udemy.com/9VngE0",
-      "level_min": 1,
-      "level_max": 3,
-      "type": "paid",
-      "industry_tags": [
-        "tech",
-        "skill"
-      ]
+      "platform": "Udemy",
+      "industry_tags": ["tech", "skill"]
     },
     {
       "skill_id": "git",
       "title": "Git and GitHub Bootcamp",
       "url": "https://trk.udemy.com/DWOKko",
-      "level_min": 1,
-      "level_max": 2,
-      "type": "paid",
-      "industry_tags": [
-        "tech",
-        "skill"
-      ]
+      "platform": "Udemy",
+      "industry_tags": ["tech", "skill"]
     },
     {
       "skill_id": "typescript",
       "title": "Understanding TypeScript",
       "url": "https://trk.udemy.com/k490on",
-      "level_min": 1,
-      "level_max": 3,
-      "type": "paid",
-      "industry_tags": [
-        "code",
-        "skill"
-      ]
+      "platform": "Udemy",
+      "industry_tags": ["tech", "skill"]
     },
     {
       "skill_id": "java",
       "title": "Java Programming Masterclass",
       "url": "https://trk.udemy.com/VOAmNa",
-      "level_min": 1,
-      "level_max": 3,
-      "type": "paid",
-      "industry_tags": [
-        "code",
-        "skill"
-      ]
+      "platform": "Udemy",
+      "industry_tags": ["tech", "skill"]
     },
     {
       "skill_id": "excel",
-      "title": "Microsoft Excel - Excel..",
+      "title": "Microsoft Excel — Beginner to Advanced",
       "url": "https://trk.udemy.com/X4GYN4",
-      "level_min": 1,
-      "level_max": 3,
-      "type": "paid",
-      "industry_tags": [
-        "data",
-        "skill"
-      ]
+      "platform": "Udemy",
+      "industry_tags": ["data", "skill"]
     },
     {
-      "skill_id": "power bi",
-      "title": "Microsoft Certified: Power BI Data Analyst..",
+      "skill_id": "power-bi",
+      "title": "Microsoft Power BI Desktop",
       "url": "https://trk.udemy.com/6kneEV",
-      "level_min": 1,
-      "level_max": 3,
-      "type": "paid",
-      "industry_tags": [
-        "data",
-        "skill"
-      ]
+      "platform": "Udemy",
+      "industry_tags": ["data", "skill"]
     }
   ]
 }

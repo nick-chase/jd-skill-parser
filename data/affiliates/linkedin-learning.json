@@ -1,9 +1,4 @@
 {
   "program": "LinkedIn Learning",
-  "enabled": false,
-  "priority": 3,
-  "ftc_disclosure": true,
-  "cookie_days": 30,
-  "commission_note": "35% per subscription",
-  "resources": []
+  "entries": []
 }

@@ -1,9 +1,4 @@
 {
   "program": "Coursera",
-  "enabled": false,
-  "priority": 3,
-  "ftc_disclosure": true,
-  "cookie_days": 30,
-  "commission_note": "45% first month, 15% recurring",
-  "resources": []
+  "entries": []
 }

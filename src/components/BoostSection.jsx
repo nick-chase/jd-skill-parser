@@ -11,7 +11,7 @@
  *   jobTitle  string | null — used in match zone header only
  */
 
-import { getAffiliateResources, requiresFTCDisclosure } from '@utils/affiliateLoader.js'
+import { getAffiliateResources } from '@utils/affiliateLoader.js'
 
 const LEVEL_NAMES = [
   '—',
@@ -78,7 +78,7 @@ export default function BoostSection({ skills, zone, jobTitle }) {
 
   // Collect all resources across all skills for FTC check
   const allResources = enriched.flatMap(({ resources }) => resources)
-  const showFTC = requiresFTCDisclosure(allResources)
+  const showFTC = allResources.length > 0
 
   if (zone === 'resume') {
     return (

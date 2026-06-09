@@ -9,7 +9,7 @@
  */
 
 import ResourceLink from './ResourceLink.jsx'
-import { getAffiliateResources, requiresFTCDisclosure } from '@utils/affiliateLoader.js'
+import { getAffiliateResources } from '@utils/affiliateLoader.js'
 import { getResources } from '@utils/resources.js'
 
 function nameToResourceId(name) {
@@ -95,16 +95,15 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
   const showResources = isMissing || (isGap && (skill.resumeLevel ?? 0) <= 2)
 
   // Prefer affiliate resources from the plugin system; fall back to legacy getResources().
-  const rawAffiliate   = showResources ? getAffiliateResources(nameToResourceId(skill.name), skillLevel) : []
-  const hasFTCDisclosure = requiresFTCDisclosure(rawAffiliate)
+  const rawAffiliate = showResources ? getAffiliateResources(nameToResourceId(skill.name), skillLevel) : []
 
   // Map affiliate resources to the shape ResourceLink expects
   const affiliateMapped = rawAffiliate.map(r => ({
     title:         r.title,
     url:           r.url,
-    platform:      r.program,
+    platform:      r.platform ?? r.program,
     type:          r.type,
-    affiliate:     hasFTCDisclosure,
+    affiliate:     rawAffiliate.length > 0,
     level_min:     r.level_min,
     level_max:     r.level_max,
     industry_tags: r.industry_tags,
