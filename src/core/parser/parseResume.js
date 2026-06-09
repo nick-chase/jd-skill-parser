@@ -593,6 +593,8 @@ function extractGraduationYearFromBlock(lines, startIdx, maxLook = 4) {
     if (inProgress && startYear === null && firstYearSeen !== null && firstYearSeen !== year) {
         startYear = firstYearSeen
     }
+    // Completed degrees do not expose startYear — only in-progress degrees show a start year
+    if (!inProgress) startYear = null
     return { year, startYear, inProgress }
 }
 

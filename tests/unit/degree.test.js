@@ -137,11 +137,11 @@ describe('extractAllDegrees()', () => {
     expect(extractAllDegrees(null)).toHaveLength(0)
   })
 
-  test('captures startYear from date range "2026 – 2028"', () => {
+  test('completed date range "2026 – 2028" — startYear null, graduationYear is end year', () => {
     const resume = 'M.S. Artificial Intelligence\nState University\n2026 – 2028'
     const result = extractAllDegrees(resume)
     expect(result).toHaveLength(1)
-    expect(result[0].startYear).toBe(2026)
+    expect(result[0].startYear).toBeNull()
     expect(result[0].graduationYear).toBe(2028)
   })
 
@@ -311,7 +311,46 @@ describe('extractAllDegrees() — Ernest resume date format', () => {
   test('completed date range → startYear null, graduationYear is end year', () => {
     const result = extractAllDegrees('B.S. Computer Science\nState Univ\nApr 2020 – Dec 2023')
     expect(result[0].graduationStatus).toBeUndefined()
-    expect(result[0].startYear).toBe(2020)
+    expect(result[0].startYear).toBeNull()
     expect(result[0].graduationYear).toBe(2023)
+  })
+})
+
+describe('extractAllDegrees() — year extraction: last year = graduationYear', () => {
+  test('A: two years in_progress — Jan 2026 – May 2028 (Expected)', () => {
+    const result = extractAllDegrees('M.S. AI\nState Univ\nJan 2026 – May 2028 (Expected)')
+    expect(result[0].startYear).toBe(2026)
+    expect(result[0].graduationYear).toBe(2028)
+    expect(result[0].graduationStatus).toBe('in_progress')
+  })
+
+  test('B: fused state abbreviation — Newark, NJJan 2026 – May 2028 (Expected)', () => {
+    const result = extractAllDegrees(
+      'Master of Science — AI | NJIT — Newark, NJJan 2026 – May 2028 (Expected)'
+    )
+    expect(result[0].startYear).toBe(2026)
+    expect(result[0].graduationYear).toBe(2028)
+    expect(result[0].graduationStatus).toBe('in_progress')
+  })
+
+  test('C: two years completed — Apr 2020 – Dec 2023', () => {
+    const result = extractAllDegrees('B.S. CS\nState Univ\nApr 2020 – Dec 2023')
+    expect(result[0].startYear).toBeNull()
+    expect(result[0].graduationYear).toBe(2023)
+    expect(result[0].graduationStatus).toBeUndefined()
+  })
+
+  test('D: single year completed — 2021', () => {
+    const result = extractAllDegrees('B.A. English\nState College\n2021')
+    expect(result[0].startYear).toBeNull()
+    expect(result[0].graduationYear).toBe(2021)
+    expect(result[0].graduationStatus).toBeUndefined()
+  })
+
+  test('E: single year in_progress — Expected 2028', () => {
+    const result = extractAllDegrees('M.S. Data Science\nState University\nExpected 2028')
+    expect(result[0].startYear).toBeNull()
+    expect(result[0].graduationYear).toBe(2028)
+    expect(result[0].graduationStatus).toBe('in_progress')
   })
 })
