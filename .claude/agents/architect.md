@@ -1,7 +1,7 @@
 ---
 name: architect
 description: "Design decisions, ADRs, complex refactors. Use ONLY when explicitly invoked — never for routine work. Examples: 'Should I move parsing server-side?', 'Design the multi-tenant data model.'"
-model: claude-opus-4-7
+model: opus 
 tools: Read, Write
 ---
 

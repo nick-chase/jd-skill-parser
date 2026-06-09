@@ -171,18 +171,30 @@ function extractDateFromTitleLine(titleLine) {
         const months = parseDateRange(part.trim())
         if (months !== null) return months
     }
-    // Try date range at end of line (project format: "Name — Stack  May 2026 to Present")
-    // Looks for: (month? year) (–|—|-|to) (month? year | Present) at end of string
-    const endDateMatch = titleLine.match(/((?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+)?\d{4})\s*(?:–|—|-|to)\s*((?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+)?\d{4}|Present|Current|Now)\s*$/i)
-    if (endDateMatch) {
-        const months = parseDateRange(endDateMatch[0].trim())
+    // Strip the title prefix and delegate to parseDateRange — single source of truth.
+    // Find the start of the date portion: a month name or 4-digit year that begins
+    // a date range or stands alone near the end of the line.
+    // Pattern: optional "MonthName " then 4-digit year, then (sep + end-date)? at EOL.
+    const MONTH_PREFIX = '(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\\.?\\s+)?'
+    const YEAR = '\\d{4}'
+    const SEP = '\\s*(?:—|–|-|\\bto\\b)\\s*'
+    const END_DATE = '(?:' + MONTH_PREFIX + YEAR + '|Present|Current|Now)'
+    const dateSubstrRE = new RegExp(
+        '(' + MONTH_PREFIX + YEAR + '(?:' + SEP + END_DATE + ')?)\\s*$',
+        'i'
+    )
+    const dateMatch = titleLine.match(dateSubstrRE)
+    if (dateMatch) {
+        const months = parseDateRange(dateMatch[1].trim())
         if (months !== null) return months
     }
     return null
 }
 
-// Split projects text into per-project blocks.
-// A new block starts on any non-bullet, non-continuation, non-URL line.
+// A project title line ends with a date: "Project Name  Jan 2025 – Present" or "Project Name  2023"
+// Everything from one title line to the next belongs to the same block.
+const PROJECT_TITLE_DATE_RE = /(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+)?\d{4}(?:\s*(?:–|—|-|to)\s*(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+)?(?:\d{4}|Present|Current|Now))?\s*$/i
+
 function splitProjectBlocks(text) {
     if (!text) return []
     const lines = text.split('\n')
@@ -193,8 +205,8 @@ function splitProjectBlocks(text) {
         if (!trimmed) continue
         const isBullet = /^[•\-\*‣◦→]/.test(trimmed)
         const isUrl = /^(?:github|http|www)/i.test(trimmed)
-        const isContinuation = /^[a-z]/.test(trimmed)
-        if (!isBullet && !isUrl && !isContinuation && current.length > 0) {
+        const isTitle = !isBullet && !isUrl && PROJECT_TITLE_DATE_RE.test(trimmed)
+        if (isTitle && current.length > 0) {
             blocks.push(current.join('\n'))
             current = []
         }

@@ -1,257 +1,254 @@
-# CLAUDE.md — ResumeMatch
+# CLAUDE.md — Nat20 (jd-skill-parser)
+
+> Read this file in full at the start of every session.
+> This file contains STABLE rules and architecture only.
+> Anything that changes session-to-session lives in a live document.
+> If a live document contradicts this file, the live document wins.
+
+---
+
+## Session Defaults
+
+- Default effort: medium (`/effort medium`)
+- Default model: sonnet
+- Override to `opus` only for `@architect` invocations
+- Override to `low` for `@explorer` read-only passes
+
+---
+
+## Live Documents — Read These at Session Start
+
+| Document | Path | Contains |
+|----------|------|----------|
+| Open tasks + current phase | `../nat20-core/OPEN_TASKS.md` | Active task IDs, DoDs, what's in flight |
+| Master plan | `../nat20-core/docs/master-plan-v4.md` | Phase definitions, completed history, architecture decisions |
+| Scoring spec | `../nat20-core/docs/scoring-model.md` | Full E×C×D×R tables, weight values, score→level map |
+| Known bugs | `../nat20-core/KNOWN_BUGS.md` | Open bugs, priority, status — single source of truth |
+| Affiliate plan | `../nat20-core/docs/affiliate_masterplan.md` | Affiliate program strategy and implementation |
+
+Do not rely on anything in this file for current task state, bug status,
+or test counts. Read the live documents directly.
+
+---
 
 ## Two-Repo Workflow
 
-**Claude Code: read this section in full at the start of every session.**
+| Repo | Location | Claude Code can... |
+|------|----------|--------------------|
+| **jd-skill-parser** (public) | `C:\Users\nikec\Desktop\jd-skill-parser` | Read + write freely |
+| **nat20-core** (private) | `C:\Users\nikec\Desktop\nat20-core` | Read only — never write |
 
-This project uses two repos with a deliberate asymmetry:
+### Deployment copy pattern
 
-- **Public (this repo):** `C:\Users\nikec\Desktop\jd-skill-parser\`
-  Code, tests, public docs, sample data, **and the active parser logic**.
-  This is where Claude Code runs and where all edits happen.
+Vercel cannot access nat20-core. Core files are copied into this repo:
+- `nat20-core/src/` → `src/core/`
+- `nat20-core/data/` → `data/`
 
-- **Private (read-only from Claude's perspective):** `C:\Users\nikec\Desktop\nat20-core\`
-  Master plan (`docs/master-plan-v4.md`), research notes, strategy docs.
-  Claude **reads** from here for context. Claude **never writes** here.
-  You update this repo manually after task completion.
+When editing core files (`inference.js`, `parseResume.js`, `skills.json`),
+edit the copy in this repo. Nicholas copies changes back to nat20-core manually.
 
-### Path conventions for Claude Code
+### Hard rules — no exceptions
 
-When Claude Code runs from `jd-skill-parser/`, the private repo is at the
-relative path `../nat20-core/`. All hooks and agents use this relative path.
+- NEVER commit. NEVER push. Nicholas commits manually via GitHub Desktop.
+- NEVER write to `../nat20-core/`.
+- NEVER edit `OPEN_TASKS.md`, `master-plan-v4.md`, or `KNOWN_BUGS.md` —
+  Nicholas updates those.
+- NEVER bypass the pre-commit hook with `--no-verify`.
+- NEVER add new dependencies without explicit approval.
+- NEVER add hardcoded skill or role data to source files — belongs in `/data`.
+- All work on feature branches. Never edit master directly.
 
-### Rules
+---
 
-- Never add private filenames to this repo. The pre-commit hook enforces this.
-- Pricing, monetization strategy, and launch plans live in `nat20-core` only.
-- `data/skills.json` and `data/soft-skills.json` are public and contain the
-  launch-ready dataset and are the source of truth for vocabulary.
-- `docs/scoring-model.md` lives in `nat20-core/docs/`. Do not recreate it here.
-- **Architecture note:** An earlier plan called for the core parser to live in
-  `nat20-core`. That plan has been deferred — the parser is currently in this
-  public repo under `src/`. A future architecture discussion will resolve
-  whether to keep it here or move it. Until that decision is made, treat
-  `src/` in this repo as authoritative for parser logic.
+## Branch Discipline
 
-### Hook installation (required on each fresh clone)
+```
+main (production — never touch directly)
+  └── feature/e11-description    ← one branch per task
+        └── commit freely here
+              └── merge to main when done, delete branch
+```
 
-The pre-commit hook lives in `.git/hooks/pre-commit` which is NOT tracked
-by git. After cloning this repo, the hook will be missing and commits will
-be unprotected.
+Branch naming:
+- `feature/e11-date-parser` — new work, maps to a task ID
+- `fix/pdf-yearLocked-flag` — bug fix
+- `chore/update-docs` — docs or config only
 
-To install: copy `.git/hooks/pre-commit` from a working clone, or recreate
-it from `docs/pre-commit-template.md` (a reference copy kept in this repo
-for that purpose).
+**Create a branch before touching any file. No exceptions.**
 
-After installing (Git Bash only — not needed in PowerShell):
-
-    chmod +x .git/hooks/pre-commit
-
-Verify with:
-
-    bash -n .git/hooks/pre-commit    # syntax check
-    bash scripts/verify-gitignore.sh # full validation
-
-### Adding a new private file
-
-1. Create it in `../nat20-core/`
-2. Add its pattern to `.gitignore` in this repo
-3. Add the same pattern to `.git/hooks/pre-commit` BANNED_PATTERNS
-4. Run `bash scripts/verify-gitignore.sh` to confirm
-
-### Moving a file from private to public
-
-Sometimes a doc starts private and is later cleared for public release
-(e.g., the README, a public architecture doc).
-
-To move private → public:
-1. Copy (don't move) the file from `../nat20-core/` to this repo
-2. Verify it contains no pricing, strategy, or operational content
-3. Verify the pre-commit hook does NOT match its filename pattern
-4. Commit to the public repo
-5. After confirming the public commit, delete from the private repo
-   and commit the deletion there
-
-Never move a file between repos in a single step. Always: copy →
-verify → commit public → then delete private.
 ---
 
 ## Product Goal
 
-This app helps students and entry-level job seekers quickly assess how well
-their resume matches a specific job description — and decide what to do next.
+**By August 31, 2026, Nat20 produces recurring revenue from paying subscribers.**
 
 The one question the app answers:
-**"Based on how my resume reads today, how well does it match this JD?"**
+> "Based on how my resume reads today, how well does it match this JD?"
 
-The user decides what to do. The app shows them the signal clearly.
-The app does NOT make the decision for them.
+The user decides what to do. The app shows the signal. The app does not
+make the decision for them.
+
+**Two audiences, one parser:**
+- **Early-career** (students, new grads, bootcamp grads): gap is claims
+  without evidence — skills listed but not demonstrated.
+- **Mid-career / career-changers**: gap is evidence with weak framing —
+  senior work described with passive verbs ("helped," "worked on").
 
 ---
 
-## What Changed in v3 (read before touching any parser logic)
+## Parser Philosophy
 
-The app no longer uses role templates for inference.
-The app no longer assigns a "role type" to a job description.
-The app no longer outputs Apply Now / Build Skill / Consider Adjacent Role.
+The parser is a **document reader**. Read the document, don't judge the person.
 
-**Why:** Job descriptions are unique documents. Mapping them to a hardcoded role
-template adds noise. The parser's job is to read what the JD says and report it.
-The user provides all context about themselves and the company.
+One-sentence test before adding any filter or conditional:
+> *"Am I reading the document, or am I deciding who the user is?"*
 
-**What replaced it:** Three signal types extracted from both documents.
-See "Three Signal Types" below.
+If it's the second one, it does not belong in the parser.
+
+---
+
+## What NOT to Build
+
+Permanent decisions — not phase-specific deferrals:
+
+- Role type inference from JD content
+- "Apply Now / Build Skill / Consider Adjacent Role" output —
+  deleted in v3, do not recreate under any framing
+- L1–L5 scoring for behavioral signals — present/absent only, always
+- A single 0–100 overall match score displayed to users — explicitly banned
+- Role template matching in any parser or scoring function
+- Salary data, company ratings, or external enrichment
 
 ---
 
 ## Stack
 
-- Frontend: React + Vite + Tailwind CSS (deployed on Vercel)
-- Data: JSON files in /data — single source for both parsers
-- No backend; all logic runs client-side
-- Test runner: Vitest (122 tests passing as of 2026-05-26)
+- **Frontend:** React 19 + Vite 8 + Tailwind CSS v4
+- **Auth:** Supabase (Google OAuth)
+- **Database:** Supabase Postgres (resume profiles, user accounts)
+- **Payments:** Stripe Checkout + webhooks via Supabase Edge Functions
+- **PDF parsing:** pdfjs-dist (client-side)
+- **Email:** EmailJS (`@emailjs/browser`)
+- **Analytics:** Plausible
+- **Hosting:** Vercel (auto-deploy from master)
+- **Test runner:** Vitest (`npm test` = `vitest run`, single pass, exits)
 
 ---
 
 ## Three Signal Types
 
-Every signal extracted from a JD or resume belongs to one of three buckets.
-Both parsers use the same vocabulary source. The extraction method differs.
-
-### 1. Technical Signals
-**What:** Skills, tools, technologies, methodologies
-**Examples:** Python, SQL, Git, React, Docker, Agile, TDD, REST APIs
-**Source file:** data/skills.json
-**Matched:** Yes — scored L1–L5 on resume side; requirement tier on JD side
-**This is the primary matching surface.**
-
-### 2. Behavioral Signals
-**What:** Soft skills, work traits, interpersonal behaviors
-**Examples:** communication, teamwork, attention to detail, problem-solving, leadership
-**Source file:** data/soft-skills.json
-**Matched:** Present / Absent only — no L1–L5 scoring
-**Show as a simple checklist panel, not a scored gap.**
-
-### 3. Job Duties
-**What:** What the role actually does day-to-day
-**Examples:** "develop backend microservices", "write technical documentation",
-             "participate in code reviews", "manage inventory systems"
-**Source file:** None — extracted as free text from JD only
-**Matched:** NOT matched against resume. Displayed as-is for the user to read.
-**The user interprets duties. The app does not score them.**
+| Signal | Source | Scoring |
+|--------|--------|---------|
+| **Technical** | `data/skills.json` | L1–L5 via E×C×D×R formula |
+| **Behavioral** | `data/soft-skills.json` | Present / Absent only — never L1–L5 |
+| **Job Duties** | JD free text | Not scored — displayed as-is |
 
 ---
 
-## Output Format (what the user sees)
+## Scoring Formula
+
+Formula structure is stable. Full weight tables live in the scoring spec:
+`../nat20-core/docs/scoring-model.md`
 
 ```
-TECHNICAL MATCH
-  ✓ Python     — resume: L3 (internship + 2 projects)
-  ✓ SQL        — resume: L2 (coursework only) | JD asks for: Required
-  ✗ Docker     — not on resume | JD asks for: Required
-  ✗ React      — not on resume | JD asks for: Preferred
-
-BEHAVIORAL SIGNALS
-  ✓ Teamwork        — found on resume
-  ✓ Communication   — found on resume
-  — Attention to detail — not found on resume
-
-WHAT THIS ROLE DOES  (read and decide)
-  • Design and develop backend microservices
-  • Participate in Agile sprint planning and code reviews
-  • Write technical documentation
-  • Collaborate with frontend and data teams
+Skill Score = SUM(E × C × D) × R + B
 ```
 
-The user reads this and decides: apply now, rewrite resume, or build a skill.
+| Factor | What | Derived from |
+|--------|------|--------------|
+| E | Evidence type weight | Where skill appears in resume |
+| C | Bloom complexity multiplier | Action verb level in bullet text |
+| D | Duration multiplier | Date range in that context |
+| R | Recurrence multiplier | Count of distinct contexts |
+| B | Bounded phrase boost | Self-claim language (capped, Dunning-Kruger guard) |
+
+Score maps to L1 (Awareness) → L5 (Expert).
+Full tables: `../nat20-core/docs/scoring-model.md`
 
 ---
 
-## Technical Signal Scoring (unchanged from v2 — see docs/scoring-model.md)
+## Date Parsing — Single Source of Truth
 
-Proficiency is scored by weighted evidence on the resume, not keyword presence.
+`parseDateRange()` is the only date parser. All date extraction routes
+through it. `extractDateFromTitleLine()` delegates to `parseDateRange()`
+and does not maintain its own regex.
 
-  Skill Score = SUM(W_type × M_duration) × M_recurrence
+Recognized patterns (stable as of June 9, 2026 — update this list when
+new patterns are added):
 
-W_type:
-  Full-time job history  → 1.0
-  Contract / internship  → 0.7
-  Personal project       → 0.5
-  Academic / coursework  → 0.4
-  Skills section only    → 0.1
+| Pattern | Example | Behavior |
+|---------|---------|----------|
+| Closed range | `Jan 2020 – Mar 2022` | start + end + duration |
+| Open range | `Jan 2023 – Present` | start + duration to today |
+| Season + year | `Summer 2023` | 3mo / Fall=4mo / Spring=5mo / Winter=3mo |
+| Duration only | `6 months` | duration, no dates |
+| Bare year | `2022` | null duration, known point-in-time |
+| Expected prefix | `Expected May 2026` | null until status shape-change (see KNOWN_BUGS.md #7) |
 
-M_duration:
-  4+ years → 1.5 | 2–4 years → 1.3 | 1–2 years → 1.0
-  6–12 mo  → 0.8 | < 6 mo    → 0.6 | unknown   → 0.5
-
-M_recurrence:
-  1 context → 1.0 | 2 contexts → 1.2 | 3+ contexts → 1.4
-
-Score → Level:
-  0.00–0.30 = L1 Awareness
-  0.30–0.60 = L2 Novice
-  0.60–1.10 = L3 Intermediate
-  1.10–1.80 = L4 Advanced
-  1.80+     = L5 Expert
-
-Full spec: docs/scoring-model.md
-Behavioral signals use this scoring: NEVER. Present/absent only.
+Degree scoring rules (always enforced):
+- `in_progress` or `expected` status → no completed credential weight
+- In-progress graduation year → never used as duration anchor for jobs
 
 ---
 
-## JD Requirement Tiers (extracted from section context)
+## Test Suite
 
-Only assign a tier if the JD explicitly signals it:
-  "required", "must have", "essential"     → Required
-  "preferred", "nice to have", "a plus"    → Preferred
-  "familiarity", "exposure to"             → Nice-to-Have
-  No signal found                          → Stated (no tier assigned)
+`npm test` must pass fully before staging any change.
+Do not track a total count — the count grows. Track groups.
 
-Do NOT default all skills to "Required" when no section headers exist.
-Do NOT infer a role type from the job title or skill set.
+| Group | File | Protects |
+|-------|------|----------|
+| Unit: inference | `tests/unit/inference.test.js` | E×C×D×R scoring, Bloom, confidence |
+| Unit: registry | `tests/unit/registry.test.js` | skills.json + soft-skills.json access |
+| Unit: decision | `tests/unit/decision.test.js` | matchScore, isEntryLevel |
+| Unit: resources | `tests/unit/resources.test.js` | Affiliate lookup, level filtering |
+| Unit: degree | `tests/unit/degree.test.js` | Degree parsing, in_progress gate |
+| Unit: projects | `tests/unit/projects.test.js` | Project evidence, outcome flag |
+| Unit: certifications | `tests/unit/certifications.test.js` | Cert detection and scoring |
+| Unit: supabase | `tests/unit/supabase.test.js` | Supabase client init |
+| Integration: parser | `tests/integration/parser.test.js` | End-to-end resume parsing |
+| Integration: JD bank | `tests/integration/jd-test-bank.test.js` | 10 real JD fixtures |
+| Integration: alt JDs | `tests/integration/alt-jd-fixtures.test.js` | Edge case JDs |
+| Diagnostic | `tests/diagnostic-output/` | Fixture snapshots — informational only |
+| Smoke | `tests/smoke.test.js` | App loads without crashing |
+
+Rules:
+- All groups must be green before staging
+- Skipped tests must have a documented reason in the test file
+- Diagnostic group failures flag output changes, not broken logic
 
 ---
 
-## Architecture (updated)
+## Architecture Layers
 
-  1. Ingest Layer    → text cleanup, section detection (JD + resume)
-  2. Taxonomy Layer  → extract Technical Signals (skills.json)
-                       extract Behavioral Signals (soft-skills.json)
-                       extract Job Duties (free text, JD only)
-  3. Inference Layer → weighted evidence scoring for Technical Signals (resume only)
-                       present/absent detection for Behavioral Signals
-  4. Gap Layer       → compare JD signals vs resume signals per bucket
-  5. Display Layer   → render three-panel output (Technical / Behavioral / Duties)
+```
+1. Ingest      → text cleanup, section detection (JD + resume)
+2. Taxonomy    → extract Technical / Behavioral / Duty signals
+3. Inference   → E×C×D×R scoring (Technical); present/absent (Behavioral)
+4. Gap         → compare JD signals vs resume signals per bucket
+5. Display     → three-panel output (Technical / Behavioral / Duties)
+```
 
-No role readiness score. No guidance layer. No decision output.
-The gap map IS the output.
-
----
-
-## Data Files
-
-| File | Purpose | Status |
-|---|---|---|
-| data/skills.json | Technical Signal vocabulary — skills, tools, technologies, methodologies | 122 entries — expand to 300–500 |
-| data/soft-skills.json | Behavioral Signal vocabulary — soft skills, work traits | 49 entries |
-| data/roles.json | Role reference only — not used in inference | Keep, demote to reference panel |
-
-**roles.json is no longer used by any parser.**
-It may be displayed as an optional "what skills are typical for X role" reference panel.
-It must not influence skill extraction, gap scoring, or any output.
+- Scope each task to ONE layer at a time
+- Never mix inference logic with display logic
+- Never mix display logic with gap computation
 
 ---
 
 ## Key Files
 
-- data/skills.json           ← Technical Signal source (expand)
-- data/soft-skills.json      ← Behavioral Signal source (49 terms, wired into registry)
-- data/roles.json            ← reference only (do not wire to parsers)
-- src/lib/registry.js        ← single data access point (serves skills + soft-skills)
-- src/jd-skill-parser.jsx    ← main parser (extracts 3 signal types from JD + resume)
-- tests/jd_test_bank/        ← 10 real JDs
-- tests/coverage-gaps.md     ← auto-generated gap report
-- docs/scoring-model.md      ← weighted evidence scoring spec (unchanged)
+| File | Purpose |
+|------|---------|
+| `src/core/parser/parseResume.js` | Resume parser — sections, blocks, date extraction |
+| `src/core/parser/inference.js` | E×C×D×R scoring, Bloom detection, confidence |
+| `src/core/parser/decision.js` | matchScore + isEntryLevel only |
+| `src/lib/registry.js` | Single data access point (skills + soft-skills) |
+| `src/jd-skill-parser.jsx` | Main UI + inline JD extraction (1842 lines) |
+| `src/components/SkillRow.jsx` | Gap row — level, primarySignal, confidence, suggestion |
+| `data/skills.json` | Technical signal vocabulary |
+| `data/soft-skills.json` | Behavioral signal vocabulary |
+| `data/resources.json` | Resource links for gap skills |
+| `data/affiliates/` | Per-program affiliate JSON (plugin architecture) |
 
 ---
 
@@ -261,103 +258,72 @@ It must not influence skill extraction, gap scoring, or any output.
 - Propose a plan with affected files before making changes.
 - Scope each task to ONE layer at a time.
 - Write or update tests before changing parser logic.
-- Run `npm test` after every change. All 122 tests must still pass.
+- Run `npm test` after every change. All groups must pass.
 - Do not add new dependencies without asking.
 - Do not mix inference logic with display logic.
 - Prefer clarity over cleverness.
-- Flag any hardcoded skill or role data — it belongs in /data.
+- Flag any hardcoded skill or role data — it belongs in `/data`.
 - Never score Behavioral Signals with L1–L5. Present/absent only.
-- Never apply role templates to JD parsing. roles.json is reference only.
+- Never apply role templates. `roles.json` is reference only.
 - Never raise a Technical Signal level through phrase signals alone
-  without structural evidence (job history or project) to support it.
-
----
-
-## Definition of Done (per task)
-
-- Change scoped to one layer
-- Behavior unchanged unless explicitly requested
-- Tests written for changed logic
-- `npm test` passes (all 122 + any new tests)
-- CLAUDE.md updated if architecture changed
-- No new hardcoded skill or role data added to source files
+  without structural evidence to support it.
 
 ---
 
 ## Task Completion Protocol
 
-When a Phase task (e.g., B8, B9) reaches Definition of Done, the
-session must perform these steps in order before declaring complete:
+1. Run `npm test` — confirm all groups pass
+2. Stage changes (`git add`) — do NOT commit
+3. Report to Nicholas: what changed, which files, test group summary
+4. Nicholas reviews staged changes
+5. Nicholas commits via GitHub Desktop
+6. Nicholas updates `OPEN_TASKS.md` and `master-plan-v4.md` in nat20-core
+7. If a new bug was found, Nicholas adds it to `KNOWN_BUGS.md`
 
-1. Run `npm test` — all tests pass
-2. Commit code changes in public repo with `feat(TASK_ID): description`
-3. Push public repo
-4. cd ../nat20-private/
-5. Open docs/master-plan-v3.md
-6. Mark the task ✅ with today's date and any notes
-7. Commit private repo with `docs(plan): mark TASK_ID complete`
-8. Push private repo  
-9. cd back to public repo
-10. State to the user: "Task TASK_ID complete and recorded in both repos."
-
-Do NOT skip steps 4–8. The plan is the source of truth and falls 
-out of date silently if not updated immediately.
+**Do not commit. Do not push. Do not write to nat20-core.**
 
 ---
 
-## Phase Roadmap (Current: Phase 1)
+## Agent Routing
 
-Phase 1 — Foundation (May–June 2026)
-  ✅ 1. Registry refactor (SKILL_DICTIONARY → JSON)
-  ✅ 2. JD test bank — 10 real JDs
-  ✅ 3. Vitest suite — 122 tests passing
-  ✅ 4. Create data/soft-skills.json — behavioral signal vocabulary (49 terms)
-  ✅ 5. Wire soft-skills.json into registry.js
-  ✅ 6. Update JD parser — extract 3 signal types (Technical / Behavioral / Duties)
-  ✅ 7. Update resume parser — extract Technical (scored) + Behavioral (present/absent)
-  ✅ 8. Update gap output — 3-panel display
-  ⬜ 9. Expand skills.json to 300–500 entries (fix JD2 + JD7 zero-skills bug)
-  ⬜ 10. Resume test bank — 10 real resumes
-  ⬜ 11. Implement weighted evidence scoring (docs/scoring-model.md)
-  ⬜ 12. End-to-end: real JD + real resume → 3-panel gap output
+| Task type | Agent | Model |
+|-----------|-------|-------|
+| Read-only investigation | `@explorer` | haiku |
+| Make a code change | `@ship-feature` | sonnet |
+| Write tests | `@test-writer` | sonnet |
+| Fix a bug | `@debugger` | sonnet |
+| Review a diff | `@code-reviewer` | sonnet |
+| Architecture decision | `@architect` | opus (rare) |
 
-Phase 2 — Output Quality (June–July 2026)
-  Per-skill suggestion text | Evidence transparency | Resume rewrite hints
-  Export gap as PDF/CSV | Shareable result links
-
-Phase 3 — Scale (July–August 2026)
-  Skill database 500+ | Non-tech domain expansion | Usage analytics | Freemium tier
+Full agent specs: `.claude/agents/`
 
 ---
 
-## What NOT to build (explicit out-of-scope)
+## Architecture Decisions
 
-- Role type inference from JD content
-- "Apply Now / Build Skill / Consider Adjacent Role" decision output
-- Role template matching in any parser or scoring function
-- L1–L5 scoring for soft skills / behavioral signals
-- Salary data, company ratings, or external enrichment
+Append-only. Full history in `master-plan-v4.md`.
+Only the decisions most relevant to daily parser work are listed here.
+
+| Decision | Date |
+|----------|------|
+| Parser stays client-side through launch | June 1, 2026 |
+| Two-repo split — parser logic private, UI public | June 1, 2026 |
+| isTechRole() removed — judged person not document | June 2, 2026 |
+| roles.json is reference-only — never used in inference | June 2, 2026 |
+| Four-decision label system retired — DecisionCard deleted | June 8, 2026 |
+| Single 0–100 match score banned from display | June 8, 2026 |
+| Affiliate plugin architecture — per-program JSON in data/affiliates/ | June 8, 2026 |
+| Bloom multipliers applied per-bullet, not per-block | June 8, 2026 |
+| JD parser extraction from React file deferred to Phase F | June 8, 2026 |
+| parseDateRange() is single source of truth for all date extraction | June 9, 2026 |
+| Season date recognition live — Summer/Fall/Spring/Winter YYYY | June 9, 2026 |
 
 ---
 
-## When Stuck — Run This Check
+## When Stuck
 
-1. Run `npm test` — are all tests still passing?
-2. Check Phase Roadmap — what is the next ⬜ task?
-3. Open tests/coverage-gaps.md — what is the top unmatched JD term? Add it to skills.json.
-4. Check known bugs below — is the zero-skills bug (JD2, JD7) fixed yet?
-
-If none are clear, stop and plan before coding.
-
----
-
-## Known Bugs
-
-| # | Bug | Priority |
-|---|---|---|
-| 1 | JD2 + JD7 return 0 skills — vocabulary gaps in skills.json | High |
-| 2 | jobType detection fails for internship/contract JDs | ✅ Fixed (commit 395be96) |
-| 3 | Java suppressed when JavaScript present — expected behavior, document it | Low |
-| 4 | JD10 jobType returns null — no explicit "Full-time" text | Low |
-| 5 | Role template match fires during JD parse — remove this logic | ✅ Fixed — removed compareSkillsToRole(), template panel, and matchRole() canonicalization |
-| B-FIX-01 | Match score discrepancy — same parse returns 8% in one place and 15% in another | ✅ Fixed — GapAnalysisView now uses decisionResult.matchScore as single source of truth |
+1. Run `npm test` — are all groups still passing?
+2. Read `../nat20-core/docs/OPEN_TASKS.md` — what is the active task?
+3. Re-read the task's Definition of Done in `master-plan-v4.md`
+4. Check `../nat20-core/docs/KNOWN_BUGS.md` — is this a known issue?
+5. If genuinely blocked, stop and report — do not improvise

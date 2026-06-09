@@ -1,5 +1,6 @@
 ---
 name: test-writer
+model: sonnet
 description: Writes unit and integration tests for the JD Skill Parser. Specializes in Vitest, knows the parser structure and registry API. Delegates test execution to the orchestrator.
 tools: Read, Grep, Glob, Edit, Bash
 ---

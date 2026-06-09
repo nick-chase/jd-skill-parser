@@ -101,6 +101,56 @@ describe('parseDateRange()', () => {
     expect(result).toBeLessThan(120)
   })
 
+  // Season recognition
+  test('parses "Summer 2023" → 3 months (Jun–Aug)', () => {
+    expect(parseDateRange('Summer 2023')).toBe(3)
+  })
+
+  test('parses "Fall 2023" → 4 months (Sep–Dec)', () => {
+    expect(parseDateRange('Fall 2023')).toBe(4)
+  })
+
+  test('parses "Spring 2023" → 5 months (Jan–May)', () => {
+    expect(parseDateRange('Spring 2023')).toBe(5)
+  })
+
+  test('parses "Winter 2023" → 3 months (Dec–Feb cross-year)', () => {
+    expect(parseDateRange('Winter 2023')).toBe(3)
+  })
+
+  test('season recognition is case-insensitive: "summer 2024" → 3', () => {
+    expect(parseDateRange('summer 2024')).toBe(3)
+  })
+
+  test('season recognition is case-insensitive: "FALL 2022" → 4', () => {
+    expect(parseDateRange('FALL 2022')).toBe(4)
+  })
+
+  // Expected / Anticipated prefix
+  test('strips "Expected" prefix and parses remaining date range', () => {
+    // "Expected May 2026" is a single point, not a range → null (no duration computable)
+    expect(parseDateRange('Expected May 2026')).toBeNull()
+  })
+
+  test('strips "Anticipated" prefix and parses remaining date range', () => {
+    expect(parseDateRange('Anticipated May 2026')).toBeNull()
+  })
+
+  test('"Expected Jan 2023 – Present" strips prefix and computes months from Jan 2023', () => {
+    const result = parseDateRange('Expected Jan 2023 – Present')
+    expect(result).toBeGreaterThanOrEqual(12)
+    expect(result).toBeLessThan(120)
+  })
+
+  // Bare 4-digit year
+  test('returns null for bare year "2022" (no range, duration indeterminate)', () => {
+    expect(parseDateRange('2022')).toBeNull()
+  })
+
+  test('returns null for bare year "2019" (no range, duration indeterminate)', () => {
+    expect(parseDateRange('2019')).toBeNull()
+  })
+
   // Unparseable
   test('returns null for empty string', () => {
     expect(parseDateRange('')).toBeNull()

@@ -1,7 +1,7 @@
 ---
 name: explorer
 description: "Read-only investigation of the Nat20 codebase. Use for finding where functions are called, tracing data flow, locating files. Cannot edit. Use BEFORE making changes to understand impact."
-model: claude-haiku-4-5-20251001
+model: haiku
 tools: Read, Grep, Glob
 ---
 

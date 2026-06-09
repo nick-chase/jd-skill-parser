@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "report": "vitest run --config vitest.report.config.js",
     "test:coverage-gaps": "vitest run --config vitest.coverage-gaps.config.js"
