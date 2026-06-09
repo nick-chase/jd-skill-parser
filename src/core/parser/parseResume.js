@@ -165,12 +165,43 @@ function matchSkillsInText(text) {
 }
 
 function extractDateFromTitleLine(titleLine) {
+    // Try | separated parts first (experience format: "Role | Company | Date")
     const parts = titleLine.split('|')
     for (const part of parts.slice(1)) {
         const months = parseDateRange(part.trim())
         if (months !== null) return months
     }
+    // Try date range at end of line (project format: "Name — Stack  May 2026 to Present")
+    // Looks for: (month? year) (–|—|-|to) (month? year | Present) at end of string
+    const endDateMatch = titleLine.match(/((?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+)?\d{4})\s*(?:–|—|-|to)\s*((?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+)?\d{4}|Present|Current|Now)\s*$/i)
+    if (endDateMatch) {
+        const months = parseDateRange(endDateMatch[0].trim())
+        if (months !== null) return months
+    }
     return null
+}
+
+// Split projects text into per-project blocks.
+// A new block starts on any non-bullet, non-continuation, non-URL line.
+function splitProjectBlocks(text) {
+    if (!text) return []
+    const lines = text.split('\n')
+    const blocks = []
+    let current = []
+    for (const line of lines) {
+        const trimmed = line.trim()
+        if (!trimmed) continue
+        const isBullet = /^[•\-\*‣◦→]/.test(trimmed)
+        const isUrl = /^(?:github|http|www)/i.test(trimmed)
+        const isContinuation = /^[a-z]/.test(trimmed)
+        if (!isBullet && !isUrl && !isContinuation && current.length > 0) {
+            blocks.push(current.join('\n'))
+            current = []
+        }
+        current.push(line)
+    }
+    if (current.length > 0) blocks.push(current.join('\n'))
+    return blocks.filter(b => b.trim())
 }
 
 // ---------------------------------------------------------------------------
@@ -240,16 +271,26 @@ function averageBloomForSkill(skillName, bulletLines) {
 }
 
 function extractSkillsFromProjects(text) {
-    const wType = classifyEvidenceType('projects', '', text)
-    const bulletLines = splitIntoBulletLines(text)
-    return matchSkillsInText(text).map(({ canonical, category }) => ({
-        canonical, category,
-        wType,
-        durationMonths: null,
-        sectionName: 'projects',
-        bulletText: text,
-        bloomC: averageBloomForSkill(canonical, bulletLines),
-    }))
+    const instances = []
+    if (!text) return instances
+    const blocks = splitProjectBlocks(text)
+    // Fall back to whole-section treatment if no blocks detected
+    const targets = blocks.length > 0 ? blocks : [text]
+    for (const block of targets) {
+        const titleLine = block.split('\n')[0]
+        const durationMonths = extractDateFromTitleLine(titleLine)
+        const wType = classifyEvidenceType('projects', '', block)
+        const bulletLines = splitIntoBulletLines(block)
+        for (const { canonical, category } of matchSkillsInText(block)) {
+            instances.push({
+                canonical, category, wType, durationMonths,
+                sectionName: 'projects',
+                bulletText: block,
+                bloomC: averageBloomForSkill(canonical, bulletLines),
+            })
+        }
+    }
+    return instances
 }
 
 // Matches the last uppercase acronym in parentheses immediately before a comma or year.
