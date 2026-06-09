@@ -17,7 +17,7 @@ import AppFooter from './components/AppFooter.jsx';
 import HowToTour from './components/HowToTour.jsx'
 import FeedbackForm from './components/FeedbackForm.jsx';
 import resourceData from '@data/resources.json';
-import { getAffiliateResources } from './utils/affiliateLoader.js';
+import { getAffiliateResources, requiresFTCDisclosure } from './utils/affiliateLoader.js';
 import { LEVEL_NAMES, IMPORTANCE_NAMES } from '@utils/constants.js';
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
@@ -1231,6 +1231,16 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                         ))}
                     </div>
                 </CollapsibleSection>
+            )}
+
+            {requiresFTCDisclosure(
+                [...critical, ...levelGaps].flatMap(skill =>
+                    getAffiliateResources(nameToResourceId(skill.name), skill.resumeLevel ?? 1)
+                )
+            ) && (
+                <p style={{ fontSize: '11px', color: '#94a3b8', marginTop: '8px' }}>
+                    Some links are affiliate links. We may earn a small commission if you enroll — at no extra cost to you.
+                </p>
             )}
 
         </div>
