@@ -28,6 +28,41 @@ const PRIORITY_LABELS = {
   3: 'PRIORITY 3 — Deepen strong evidence',
 }
 
+/**
+ * Returns link className and badge element based on resource.industry_tags.
+ * industry_tags may be an array or a string; handles both safely.
+ * Defaults to indigo if undefined/null or no recognized tag.
+ */
+function getResourceDisplay(resource) {
+  const tags = resource.industry_tags
+  const tagList = Array.isArray(tags)
+    ? tags
+    : typeof tags === 'string'
+      ? [tags]
+      : []
+
+  if (tagList.includes('career')) {
+    return {
+      linkClass: 'text-sm text-emerald-600 hover:text-emerald-700 hover:underline',
+      badge: (
+        <span className="text-xs text-emerald-600 font-medium ml-1">CERT</span>
+      ),
+    }
+  }
+  if (tagList.includes('skill')) {
+    return {
+      linkClass: 'text-sm text-indigo-600 hover:text-indigo-700 hover:underline',
+      badge: (
+        <span className="text-xs text-indigo-500 font-medium ml-1">COURSE</span>
+      ),
+    }
+  }
+  return {
+    linkClass: 'text-sm text-indigo-600 hover:underline',
+    badge: null,
+  }
+}
+
 export default function BoostSection({ skills, zone, jobTitle }) {
   if (!skills || skills.length === 0) return null
 
@@ -68,19 +103,23 @@ export default function BoostSection({ skills, zone, jobTitle }) {
                   <span className="text-xs text-slate-400">{levelLabel}</span>
                 )}
               </div>
-              {resources.map(r => (
-                <div key={r.url} className="flex items-center gap-1 mb-0.5">
-                  <a
-                    href={r.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-indigo-600 hover:underline"
-                  >
-                    {r.title}
-                  </a>
-                  <span className="text-xs text-slate-400 ml-2">· {r.program}</span>
-                </div>
-              ))}
+              {resources.map(r => {
+                const { linkClass, badge } = getResourceDisplay(r)
+                return (
+                  <div key={r.url} className="flex items-center gap-1 mb-0.5">
+                    <a
+                      href={r.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={linkClass}
+                    >
+                      {r.title}
+                    </a>
+                    {badge}
+                    <span className="text-xs text-slate-400 ml-2">· {r.program}</span>
+                  </div>
+                )
+              })}
             </div>
           )
         })}
@@ -123,19 +162,23 @@ export default function BoostSection({ skills, zone, jobTitle }) {
           {byPriority[p].map(({ skill, resources }) => (
             <div key={skill.name} className="mb-3">
               <div className="text-sm font-medium text-slate-800 mb-1">{skill.name}</div>
-              {resources.map(r => (
-                <div key={r.url} className="flex items-center gap-1 mb-0.5">
-                  <a
-                    href={r.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm text-indigo-600 hover:underline"
-                  >
-                    {r.title}
-                  </a>
-                  <span className="text-xs text-slate-400 ml-2">· {r.program}</span>
-                </div>
-              ))}
+              {resources.map(r => {
+                const { linkClass, badge } = getResourceDisplay(r)
+                return (
+                  <div key={r.url} className="flex items-center gap-1 mb-0.5">
+                    <a
+                      href={r.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={linkClass}
+                    >
+                      {r.title}
+                    </a>
+                    {badge}
+                    <span className="text-xs text-slate-400 ml-2">· {r.program}</span>
+                  </div>
+                )
+              })}
             </div>
           ))}
         </div>
