@@ -545,6 +545,7 @@ function extractGraduationYearFromBlock(lines, startIdx, maxLook = 4) {
     let startYear = null
     let firstYearSeen = null
     let inProgress = false
+    let yearLocked = false  // prevents course-bullet lines from overwriting graduation year
     for (let offset = 0; offset <= maxLook; offset++) {
         const idx = startIdx + offset
         if (idx >= lines.length) break
@@ -558,34 +559,30 @@ function extractGraduationYearFromBlock(lines, startIdx, maxLook = 4) {
             }
             if (isNewDegree) break
         }
-        // "Expected" anywhere on the line (before or after year — handles "May 2028 (Expected)")
-        if (/\bExpected\b/i.test(trimmed)) {
-            inProgress = true
-            // fall through — year extracted below by generic year scan
-        }
-        // "– Present" / "- Present" / "to Present" — currently enrolled
-        if (/(?:–|-|to)\s*Present\b/i.test(trimmed)) {
-            inProgress = true
-            // still fall through to pick up any year on the same line
-        }
-        // "In Progress", "currently", "pursuing", "enrolled" — explicit in-progress phrases
-        if (/\bin\s+progress\b|\bcurrently\b|\bpursuing\b|\benrolled\b/i.test(trimmed)) {
-            inProgress = true
-        }
-        // All 4-digit years in this line; keep updating to get the LAST one
-        const yearMatches = [...trimmed.matchAll(/\b(20\d{2}|19[89]\d)\b/g)]
-        for (const ym of yearMatches) {
-            const y = parseInt(ym[1])
-            if (firstYearSeen === null) firstYearSeen = y
-            year = y
-        }
-        // Detect a date range: two years separated by dash/en-dash/em-dash.
-        // The FIRST year in the range becomes startYear; the second becomes graduationYear (year above).
-        // Only capture startYear from this line if it actually contains a range pattern.
-        const rangeMatch = trimmed.match(/\b(20\d{2}|19[89]\d)\b\s*(?:–|—|-{1,2})\s*(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+)?(20\d{2}|19[89]\d)\b/i)
-        if (rangeMatch) {
-            startYear = parseInt(rangeMatch[1])
-            // year is already set to the last year in the line above, which is rangeMatch[2]
+        // Always check in-progress markers regardless of yearLocked —
+        // "Expected" / "Present" / "currently" etc. can appear on any line
+        if (/\bExpected\b/i.test(trimmed)) inProgress = true
+        if (/(?:–|-|to)\s*Present\b/i.test(trimmed)) inProgress = true
+        if (/\bin\s+progress\b|\bcurrently\b|\bpursuing\b|\benrolled\b/i.test(trimmed)) inProgress = true
+
+        // Once inProgress is confirmed and a year is known, stop scanning for years.
+        // This prevents lines like "• Fall 2026: DS 675 Machine Learning" from overwriting
+        // the graduation year already established from the Expected/date line.
+        if (!yearLocked) {
+            // All 4-digit years in this line; keep updating to get the LAST one
+            const yearMatches = [...trimmed.matchAll(/\b(20\d{2}|19[89]\d)\b/g)]
+            for (const ym of yearMatches) {
+                const y = parseInt(ym[1])
+                if (firstYearSeen === null) firstYearSeen = y
+                year = y
+            }
+            // Detect a date range: two years separated by dash/en-dash/em-dash.
+            const rangeMatch = trimmed.match(/\b(20\d{2}|19[89]\d)\b\s*(?:–|—|-{1,2})\s*(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+)?(20\d{2}|19[89]\d)\b/i)
+            if (rangeMatch) {
+                startYear = parseInt(rangeMatch[1])
+            }
+            // Lock once graduation year is established and in-progress status confirmed
+            if (inProgress && year !== null) yearLocked = true
         }
     }
     // Multi-line date range: if in-progress and no same-line range found, infer startYear from

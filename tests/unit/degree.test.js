@@ -162,6 +162,22 @@ describe('extractAllDegrees()', () => {
     expect(result[0].graduationStatus).toBe('in_progress')
   })
 
+  test('course-bullet year does not overwrite graduation year (Ernest PDF pattern)', () => {
+    // Real PDF produces bullet lines like "• Fall 2026: DS 675 Machine Learning" AFTER
+    // the Expected line. Without yearLocked, "Fall 2026" overwrites graduationYear 2028 → 2026.
+    const resume = [
+      'Master of Science — AI | NJIT — Newark, NJ Jan 2026 –',
+      'May 2028 (Expected)',
+      '• Ying Wu College of Computing | GPA: 3.75',
+      '• Completed: DS 637 Python (B+)',
+      '• Fall 2026: DS 675 Machine Learning',
+    ].join('\n')
+    const result = extractAllDegrees(resume)
+    expect(result[0].graduationYear).toBe(2028)
+    expect(result[0].startYear).toBe(2026)
+    expect(result[0].graduationStatus).toBe('in_progress')
+  })
+
   test('extracts field from em-dash separator "Master of Science — Artificial Intelligence"', () => {
     const result = extractAllDegrees('Master of Science — Artificial Intelligence\nNJIT\n2028')
     expect(result[0].field).toMatch(/Artificial Intelligence/i)
