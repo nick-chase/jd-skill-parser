@@ -1,5 +1,6 @@
 ---
 name: debugger
+model: sonnet
 description: Reproduces and fixes bugs in the parser logic. Use when a defect is reported or behavior is wrong. Makes minimal, targeted fixes.
 tools: Read, Grep, Glob, Edit, Bash
 ---

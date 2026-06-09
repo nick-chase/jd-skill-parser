@@ -1,7 +1,7 @@
 ---
 name: ship-feature
 description: "Complete a code change end-to-end: edit, test, stage. Use for atomic Nat20 changes — adding a skill, fixing a bug, updating vocabulary. Replaces the back-and-forth of edit→ask→test→ask→stage."
-model: claude-sonnet-4-6
+model: sonnet
 tools: Read, Edit, Write, Bash, Grep, Glob
 ---
 
