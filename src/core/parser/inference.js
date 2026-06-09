@@ -89,9 +89,9 @@ export function parseDateRange(text) {
   const months = t.match(/^(\d+)\s+months?$/i)
   if (months) return parseInt(months[1], 10)
 
-  // --- Date ranges (separator: –, -, to) ---
-  // Split on en-dash, hyphen surrounded by spaces, or " to "
-  const SEP = /\s*(?:–|-(?=\s|[A-Za-z])|\bto\b|-(?=\d{4}))\s*/i
+  // --- Date ranges (separator: —, –, -, to) ---
+  // Split on em-dash, en-dash, hyphen surrounded by spaces, or " to "
+  const SEP = /\s*(?:—|–|-(?=\s|[A-Za-z])|\bto\b|-(?=\d{4}))\s*/i
   const parts = t.split(SEP)
 
   if (parts.length === 2) {

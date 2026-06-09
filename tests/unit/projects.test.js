@@ -57,4 +57,30 @@ describe('extractSkillsFromProjects() — date extraction from title line', () =
     const js = result.technicalSignals.find(s => s.name === 'JavaScript')
     expect(js?.durationMonths).toBeGreaterThan(0)
   })
+
+  test('em-dash as date range separator in title line yields non-null durationMonths', () => {
+    // parseDateRange now handles em-dash (—) as a separator; route confirmed via extractDateFromTitleLine
+    const resume = [
+      'PROJECTS',
+      'My App — React / Node.js  Jan 2024 — Present',
+      '• Built an app using React and Node.js.',
+    ].join('\n')
+    const result = parseResume(resume)
+    const react = result.technicalSignals.find(s => s.name === 'React')
+    expect(react).toBeDefined()
+    expect(react.durationMonths).toBeGreaterThan(0)
+  })
+
+  test('Enterprise Java Application with single year gets null durationMonths', () => {
+    const resume = [
+      'PROJECTS',
+      'Enterprise Java Application   2021',
+      '• Built an enterprise app using Java.',
+    ].join('\n')
+    const result = parseResume(resume)
+    const java = result.technicalSignals.find(s => s.name === 'Java')
+    if (java) {
+      expect(java.durationMonths).toBeNull()
+    }
+  })
 })

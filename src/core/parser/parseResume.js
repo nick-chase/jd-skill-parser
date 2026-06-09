@@ -171,11 +171,21 @@ function extractDateFromTitleLine(titleLine) {
         const months = parseDateRange(part.trim())
         if (months !== null) return months
     }
-    // Try date range at end of line (project format: "Name — Stack  May 2026 to Present")
-    // Looks for: (month? year) (–|—|-|to) (month? year | Present) at end of string
-    const endDateMatch = titleLine.match(/((?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+)?\d{4})\s*(?:–|—|-|to)\s*((?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+)?\d{4}|Present|Current|Now)\s*$/i)
-    if (endDateMatch) {
-        const months = parseDateRange(endDateMatch[0].trim())
+    // Strip the title prefix and delegate to parseDateRange — single source of truth.
+    // Find the start of the date portion: a month name or 4-digit year that begins
+    // a date range or stands alone near the end of the line.
+    // Pattern: optional "MonthName " then 4-digit year, then (sep + end-date)? at EOL.
+    const MONTH_PREFIX = '(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\\.?\\s+)?'
+    const YEAR = '\\d{4}'
+    const SEP = '\\s*(?:—|–|-|\\bto\\b)\\s*'
+    const END_DATE = '(?:' + MONTH_PREFIX + YEAR + '|Present|Current|Now)'
+    const dateSubstrRE = new RegExp(
+        '(' + MONTH_PREFIX + YEAR + '(?:' + SEP + END_DATE + ')?)\\s*$',
+        'i'
+    )
+    const dateMatch = titleLine.match(dateSubstrRE)
+    if (dateMatch) {
+        const months = parseDateRange(dateMatch[1].trim())
         if (months !== null) return months
     }
     return null
