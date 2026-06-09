@@ -19,7 +19,8 @@
       "Bash(node -e ' *)",
       "Bash(node --experimental-vm-modules -e ' *)",
       "Bash(npx vitest *)",
-      "Bash(node *)"
+      "Bash(node *)",
+      "Bash(git add *)"
     ]
   },
   "hooks": {

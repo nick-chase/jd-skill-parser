@@ -4,7 +4,9 @@ import * as registry from '@core/registry.js';
 import { extractTextFromPdf } from './lib/pdfExtract.js';
 import { parseResume, extractBehavioralSignals } from './core/parser/parseResume.js';
 import { getDecision } from '@core/parser/decision.js';
-import SkillRow from './components/SkillRow.jsx';
+import SkillRow from './components/SkillRow.jsx'
+import BoostSection from './components/BoostSection.jsx'
+import { getResumeBoostSkills, getMatchBoostSkills } from './utils/boostSkills.js';
 import { getOrCreateUser, onAuthStateChange } from './lib/auth.js'
 import { analytics } from './lib/analytics.js';
 import { saveResumeProfile, loadResumeProfile, getUserPlanStatus } from './lib/supabase.js';
@@ -1107,6 +1109,13 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                 </CollapsibleSection>
             )}
 
+            {/* Zone 2 — Boost skills for this specific role */}
+            <BoostSection
+                skills={getMatchBoostSkills({ critical, levelGaps })}
+                zone="match"
+                jobTitle={jobRole ?? null}
+            />
+
         </div>
     );
 }
@@ -1223,6 +1232,10 @@ function ResumeResultsView({ results, behavioralSignals, degree }) {
                     </div>
                 );
             })}
+
+            {/* Zone 1 — Boost weak-evidence resume skills */}
+            <BoostSection skills={getResumeBoostSkills(results)} zone="resume" />
+
         </div>
     );
 }
