@@ -1,0 +1,38 @@
+Alex Rivera
+alex.rivera@email.com | github.com/alexrivera | linkedin.com/in/alexrivera
+
+SUMMARY
+Recent Computer Science graduate with hands-on experience through internships and personal projects.
+Strong communicator and collaborative team player with attention to detail.
+
+TECHNICAL SKILLS
+Python, JavaScript, React, SQL, Git, HTML, CSS
+
+EDUCATION
+B.S. Computer Science
+State University
+May 2025
+
+PROFESSIONAL EXPERIENCE
+Software Engineering Intern | TechCorp | Jun 2024 – Aug 2024
+- Built RESTful APIs using Python and Flask
+- Developed React components for internal dashboard
+- Used Git for version control and collaborated in Agile sprints
+- Wrote SQL queries to extract and analyze usage data
+
+Data Science Intern | Analytics Co | Summer 2023
+- Analyzed datasets using Python and pandas
+- Created data visualizations using matplotlib
+- Presented findings to stakeholders using clear communication skills
+
+PROJECTS
+Personal Portfolio Site  Jan 2024 – Present
+- Built and deployed a portfolio using React and CSS
+- Integrated GitHub API to display recent repositories
+
+Inventory Management App  Sep 2023 – Dec 2023
+- Developed a full-stack app using JavaScript and SQL
+- Implemented user authentication and role management
+
+ADDITIONAL INFORMATION
+Relevant Coursework: Data Structures, Algorithms, Database Systems, Machine Learning

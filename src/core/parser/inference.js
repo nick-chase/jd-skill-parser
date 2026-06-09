@@ -67,11 +67,44 @@ const PRESENT_RE = /\b(present|current|now)\b/i
 /**
  * Parses a date range or duration phrase and returns the number of months.
  * Returns null if the text cannot be interpreted.
+ *
+ * NOTE: A future refactor should change the return shape to an object
+ * { months, status, year? } so that callers can distinguish:
+ *   - status: 'expected' (prefixed with Expected/Anticipated — not yet completed)
+ *   - status: 'completed' (bare year with no range — year is known but duration is not)
+ * That shape change requires updating all three call sites in parseResume.js:
+ *   line 171 (extractDateFromTitleLine, pipe-part loop)
+ *   line 188 (extractDateFromTitleLine, dateSubstrRE match)
+ *   line 483 (extractSkillsFromExperience, separate date line)
+ * Until that refactor lands, status is stripped/ignored and months (integer|null) is returned.
  */
 export function parseDateRange(text) {
   if (!text || !text.trim()) return null
 
   const t = text.trim()
+
+  // --- Season recognition (checked first — must precede generic patterns) ---
+  // "Summer YYYY" → Jun–Aug = 3 months
+  // "Fall YYYY"   → Sep–Dec = 4 months
+  // "Spring YYYY" → Jan–May = 5 months
+  // "Winter YYYY" → Dec–Feb = 3 months (cross-year)
+  const seasonMatch = t.match(/^(Summer|Fall|Spring|Winter)\s+(\d{4})$/i)
+  if (seasonMatch) {
+    const season = seasonMatch[1].toLowerCase()
+    if (season === 'summer') return 3   // Jun(6) – Aug(8): 3 months
+    if (season === 'fall')   return 4   // Sep(9) – Dec(12): 4 months
+    if (season === 'spring') return 5   // Jan(1) – May(5): 5 months
+    if (season === 'winter') return 3   // Dec(12) – Feb(2): 3 months (cross-year)
+  }
+
+  // --- Expected / Anticipated prefix ---
+  // Strip the prefix and parse the remaining date normally.
+  // Status ('expected') is intentionally not returned here — the return shape is an integer.
+  // See the refactor note in the JSDoc above for how to add status in a future pass.
+  const expectedMatch = t.match(/^(?:Expected|Anticipated)\s+(.+)$/i)
+  if (expectedMatch) {
+    return parseDateRange(expectedMatch[1])
+  }
 
   // --- Explicit duration phrases ---
 
@@ -117,6 +150,13 @@ export function parseDateRange(text) {
     const diff = monthsBetween(from, to)
     return diff < 0 ? null : diff
   }
+
+  // --- Bare 4-digit year (e.g. "2022") ---
+  // The year is known but no range is available; duration is indeterminate.
+  // Returns null (no duration info). Status enrichment ('completed') requires a
+  // shape change — see the refactor note in the JSDoc above.
+  const bareYear = t.match(/^(\d{4})$/)
+  if (bareYear) return null
 
   return null
 }

@@ -1,72 +1,118 @@
-# Runs when Claude Code starts/resumes a session
-# Output gets injected as context for Claude
+# .claude/hooks/session-start.ps1
+# Runs when Claude Code starts or resumes a session.
+# Output is injected as context before the first user message.
 
-Write-Output "=== Nat20 / ResumeMatch Session Context ==="
+Write-Output "=== Nat20 Session Context ==="
 Write-Output ""
 
+# ─── Git state ───────────────────────────────────────────
 $branch = git branch --show-current 2>$null
-Write-Output "Current branch: $branch"
+Write-Output "Branch: $branch"
 Write-Output ""
 
 Write-Output "Last 5 commits:"
 git log -5 --oneline 2>$null
 Write-Output ""
 
-Write-Output "Modified files (uncommitted):"
-git status --short 2>$null | Select-Object -First 10
+$modified = git status --short 2>$null | Select-Object -First 10
+if ($modified) {
+    Write-Output "Modified (uncommitted):"
+    $modified | ForEach-Object { Write-Output "  $_" }
+} else {
+    Write-Output "Working tree: clean"
+}
 Write-Output ""
 
-# Master plan lives in nat20-core (read-only from Claude's perspective)
+# ─── Master plan phase headers ───────────────────────────
 $masterPlan = "..\nat20-core\docs\master-plan-v4.md"
 if (Test-Path $masterPlan) {
-    Write-Output "=== Master Plan Status (from nat20-core) ==="
-    Select-String -Path $masterPlan -Pattern "^## Phase|^### Phase" `
-    | Select-Object -First 10 `
-    | ForEach-Object { $_.Line }
+    Write-Output "=== Phase Status (master-plan-v4.md) ==="
+    Select-String -Path $masterPlan -Pattern "^## Phase|^### Phase" |
+        Select-Object -First 10 |
+        ForEach-Object { Write-Output "  $($_.Line)" }
     Write-Output ""
-    $openTasks = "..\nat20-core\docs\OPEN_TASKS.md"
-    if (Test-Path $openTasks) {
-        Write-Output ""
-        Write-Output "=== Open Tasks (from OPEN_TASKS.md) ==="
-        Select-String -Path $openTasks -Pattern "^- \[ \]" |
+} else {
+    Write-Output "WARNING: master-plan-v4.md not found at $masterPlan"
+    Write-Output ""
+}
+
+# ─── Open tasks ──────────────────────────────────────────
+$openTasks = "..\nat20-core\docs\OPEN_TASKS.md"
+if (Test-Path $openTasks) {
+    Write-Output "=== Open Tasks (OPEN_TASKS.md) ==="
+
+    # Current phase header
+    $phaseHeader = Select-String -Path $openTasks -Pattern "^## Current Phase" |
+        Select-Object -First 1
+    if ($phaseHeader) {
+        Write-Output "  $($phaseHeader.Line)"
+    }
+
+    # Unchecked task lines
+    Select-String -Path $openTasks -Pattern "^- \[ \]" |
         Select-Object -First 10 |
         ForEach-Object {
-            # Strip the "- [ ] " prefix for compact display
             $line = $_.Line -replace "^- \[ \]\s*", "  "
-            # Truncate long lines for terminal readability
-            if ($line.Length -gt 90) {
-                $line = $line.Substring(0, 87) + "..."
-            }
+            if ($line.Length -gt 90) { $line = $line.Substring(0, 87) + "..." }
             Write-Output $line
         }
-        Write-Output ""
-        Write-Output "  Full task details + plan refs: ..\nat20-core\docs\OPEN_TASKS.md"
-        Write-Output "  Strategy context: ..\nat20-core\docs\master-plan-v4.md"
+
+    Write-Output ""
+    Write-Output "  Full details: ..\nat20-core\docs\OPEN_TASKS.md"
+    Write-Output ""
+} else {
+    Write-Output "WARNING: OPEN_TASKS.md not found at $openTasks"
+    Write-Output ""
+}
+
+# ─── Known bugs ──────────────────────────────────────────
+$knownBugs = "..\nat20-core\docs\KNOWN_BUGS.md"
+if (Test-Path $knownBugs) {
+    Write-Output "=== Open Bugs (KNOWN_BUGS.md) ==="
+
+    # Extract rows from the Open table only
+    # Reads lines between "## Open" and the next "## " heading
+    $bugContent = Get-Content $knownBugs
+    $inOpenSection = $false
+    $bugCount = 0
+
+    foreach ($line in $bugContent) {
+        if ($line -match "^## Open") {
+            $inOpenSection = $true
+            continue
+        }
+        if ($inOpenSection -and $line -match "^## ") {
+            break
+        }
+        if ($inOpenSection -and $line -match "^\|\s*\d+\s*\|") {
+            # Table row — trim to 90 chars
+            $trimmed = $line.Trim()
+            if ($trimmed.Length -gt 90) { $trimmed = $trimmed.Substring(0, 87) + "..." }
+            Write-Output "  $trimmed"
+            $bugCount++
+        }
     }
-    else {
-        Write-Output ""
-        Write-Output "  WARNING: OPEN_TASKS.md not found at $openTasks"
-        Write-Output "           Falling back to master plan only."
+
+    if ($bugCount -eq 0) {
+        Write-Output "  No open bugs."
     }
 
+    Write-Output ""
+    Write-Output "  Full details: ..\nat20-core\docs\KNOWN_BUGS.md"
+    Write-Output ""
+} else {
+    Write-Output "WARNING: KNOWN_BUGS.md not found at $knownBugs"
+    Write-Output "         Create it at: ..\nat20-core\docs\KNOWN_BUGS.md"
+    Write-Output ""
 }
-else {
-    Write-Output "WARNING: Master plan not found at $masterPlan"
-    Write-Output "         Expected: C:\Users\nikec\Desktop\nat20-core\docs\master-plan-v4.md"
-}
-Write-Output ""
 
-Write-Output "=== Known Bugs (from CLAUDE.md) ==="
-if (Test-Path "CLAUDE.md") {
-    Select-String -Path "CLAUDE.md" -Pattern "^\| \d+ \|" `
-    | Where-Object { $_.Line -notmatch "Fixed" } `
-    | Select-Object -First 3 `
-    | ForEach-Object { $_.Line }
-}
+# ─── Workflow reminders ───────────────────────────────────
+Write-Output "=== Reminders ==="
+Write-Output "  1. All work on a feature branch -- never edit master directly"
+Write-Output "  2. npm test must pass before staging any change"
+Write-Output "  3. Stage only -- Nicholas commits via GitHub Desktop"
+Write-Output "  4. Never write to ..\nat20-core\ -- read only"
+Write-Output "  5. Effort: medium by default -- opus for @architect only"
 Write-Output ""
-
-Write-Output "=== Workflow Reminders ==="
-Write-Output "1. Run 'npm test' before any commit (all tests must pass)"
-Write-Output "2. Branch from main, never edit main directly"
-Write-Output "3. Update nat20-core\docs\master-plan-v4.md manually when tasks complete"
-Write-Output "4. Pre-commit hook must be installed (see CLAUDE.md)"
+Write-Output "Full rules: CLAUDE.md"
+Write-Output "============================================"
