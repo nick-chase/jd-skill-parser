@@ -18,6 +18,7 @@ function Analytics() {
 }
 
 export default function App() {
+  console.log('PAYMENTS_ENABLED:', import.meta.env.VITE_PAYMENTS_ENABLED)
   return (
     <BrowserRouter>
       <Analytics />
