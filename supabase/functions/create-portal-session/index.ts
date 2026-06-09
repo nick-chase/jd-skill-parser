@@ -12,6 +12,11 @@ const supabase = createClient(
   Deno.env.get('SERVICE_ROLE_KEY') ?? ''
 )
 
+const CORS = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
@@ -32,9 +37,14 @@ serve(async (req) => {
       .single()
 
     if (userError || !user?.stripe_customer_id) {
+      console.error('[create-portal-session] No customer found:', {
+        userId,
+        supabaseError: userError?.message ?? 'missing stripe_customer_id',
+        ts: new Date().toISOString()
+      })
       return new Response(
         JSON.stringify({ error: 'No Stripe customer found' }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
+        { status: 400, headers: CORS }
       )
     }
 
@@ -45,23 +55,18 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ url: portalSession.url }),
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        }
-      }
+      { headers: CORS }
     )
   } catch (err) {
+    console.error('[create-portal-session] Error:', {
+      message: err instanceof Error ? err.message : String(err),
+      userId,
+      ts: new Date().toISOString()
+    })
+    const message = err instanceof Error ? err.message : 'Unknown error'
     return new Response(
-      JSON.stringify({ error: err.message }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        }
-      }
+      JSON.stringify({ error: message }),
+      { status: 500, headers: CORS }
     )
   }
 })

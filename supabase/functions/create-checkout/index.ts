@@ -6,6 +6,11 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {
   httpClient: Stripe.createFetchHttpClient(),
 })
 
+const CORS = {
+  'Content-Type': 'application/json',
+  'Access-Control-Allow-Origin': '*',
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
@@ -19,6 +24,13 @@ serve(async (req) => {
   try {
     const { userId, userEmail, priceId } = await req.json()
 
+    if (!userId || !userEmail || !priceId) {
+      return new Response(
+        JSON.stringify({ error: 'Missing required fields: userId, userEmail, priceId' }),
+        { status: 400, headers: CORS }
+      )
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
@@ -31,23 +43,19 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ url: session.url }),
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        }
-      }
+      { headers: CORS }
     )
   } catch (err) {
+    console.error('[create-checkout] Stripe error:', {
+      message: err instanceof Error ? err.message : String(err),
+      userId,
+      priceId,
+      ts: new Date().toISOString()
+    })
+    const message = err instanceof Error ? err.message : 'Unknown error'
     return new Response(
-      JSON.stringify({ error: err.message }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        }
-      }
+      JSON.stringify({ error: message }),
+      { status: 500, headers: CORS }
     )
   }
 })
