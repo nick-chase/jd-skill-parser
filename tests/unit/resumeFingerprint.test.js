@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { buildFingerprint } from '../../src/utils/resumeFingerprint.js'
 import { getFastFixSections } from '../../src/utils/freeGate.js'
+import * as fp from '../../src/utils/resumeFingerprint.js'
 
 describe('buildFingerprint', () => {
   it('is stable across bullet edits (skill count change)', () => {
@@ -77,5 +78,16 @@ describe('getFastFixSections', () => {
     expect(result.visible).toHaveLength(1)
     expect(result.blurred).toHaveLength(0)
     expect(result.remainingCount).toBe(0)
+  })
+
+  it('same-resume hash still returns slice(0,1) visible for free user', () => {
+    // isSameResume returns true when stored fingerprint matches — gate shape is unchanged
+    vi.spyOn(fp, 'isSameResume').mockReturnValue(true)
+    const sections = ['a', 'b', 'c']
+    const result = getFastFixSections(sections, false, 'matching-hash')
+    expect(result.visible).toHaveLength(1)
+    expect(result.blurred).toHaveLength(2)
+    expect(result.remainingCount).toBe(2)
+    vi.restoreAllMocks()
   })
 })

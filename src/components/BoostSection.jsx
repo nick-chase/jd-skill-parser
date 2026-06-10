@@ -12,6 +12,8 @@
  */
 
 import { getAffiliateResources } from '@utils/affiliateLoader.js'
+import { getFastFixSections } from '../utils/freeGate.js'
+import { getStoredFingerprint } from '../utils/resumeFingerprint.js'
 
 const LEVEL_NAMES = [
   '—',
@@ -77,8 +79,7 @@ export default function BoostSection({ skills, zone, jobTitle, isPaidUser = fals
   if (enriched.length === 0) return null
 
   // Gate: free users see only the first enriched skill
-  const visibleEnriched = isPaidUser ? enriched : enriched.slice(0, 1)
-  const blurredEnriched = isPaidUser ? [] : enriched.slice(1)
+  const { visible: visibleEnriched, blurred: blurredEnriched } = getFastFixSections(enriched, isPaidUser, getStoredFingerprint())
 
   // Collect all resources across visible skills for FTC check
   const allResources = visibleEnriched.flatMap(({ resources }) => resources)
