@@ -49,6 +49,12 @@ edit the copy in this repo. Nicholas copies changes back to nat20-core manually.
 
 ### Hard rules — no exceptions
 
+## Hard Rules — File System
+- NEVER write to ~/.claude/ or the global Claude config directory
+- Hook scripts belong in .claude/hooks/ (project level) only
+- settings.local.json belongs in .claude/ (project level) only
+- Global Claude config (~/.claude/) is managed by Nicholas manually
+
 - NEVER commit. NEVER push. Nicholas commits manually via GitHub Desktop.
 - NEVER write to `../nat20-core/`.
 - NEVER edit `OPEN_TASKS.md`, `master-plan-v4.md`, or `KNOWN_BUGS.md` —
@@ -57,6 +63,7 @@ edit the copy in this repo. Nicholas copies changes back to nat20-core manually.
 - NEVER add new dependencies without explicit approval.
 - NEVER add hardcoded skill or role data to source files — belongs in `/data`.
 - All work on feature branches. Never edit master directly.
+
 
 ---
 
