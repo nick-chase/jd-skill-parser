@@ -20,7 +20,6 @@ import HowToTour from './components/HowToTour.jsx'
 import FeedbackForm from './components/FeedbackForm.jsx';
 import { getAffiliateResources } from '@utils/affiliateLoader.js';
 import { buildFingerprint, saveFingerprint } from './utils/resumeFingerprint.js';
-import { getFastFixSections } from './utils/freeGate.js';
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
 const betaFeedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
@@ -1131,45 +1130,12 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
             )}
 
             {/* Zone 2 — Boost skills for this specific role (Priority 2/3 gated for free users) */}
-            {(() => {
-                const allMatchSkills = getMatchBoostSkills({ critical, levelGaps });
-                const p1Skills = allMatchSkills.filter(s => (s.priority ?? 1) === 1);
-                const gatedSkills = isPaidProp ? allMatchSkills : p1Skills;
-                const hiddenCount = isPaidProp ? 0 : allMatchSkills.filter(s => (s.priority ?? 1) > 1).length;
-                return (
-                    <>
-                        <BoostSection
-                            skills={gatedSkills}
-                            zone="match"
-                            jobTitle={jobRole ?? null}
-                        />
-                        {hiddenCount > 0 && (
-                            <div className="relative mt-4">
-                                <div className="blur-sm pointer-events-none select-none">
-                                    <BoostSection
-                                        skills={allMatchSkills.filter(s => (s.priority ?? 1) > 1)}
-                                        zone="match"
-                                        jobTitle={jobRole ?? null}
-                                    />
-                                </div>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 rounded-lg z-10">
-                                    <span className="text-sm font-semibold text-slate-700">
-                                        {hiddenCount} more improvement{hiddenCount > 1 ? 's' : ''} found
-                                    </span>
-                                    <span className="text-xs text-slate-500 mt-1 text-center px-4">
-                                        Upgrade to see all fixes and your full evidence breakdown
-                                    </span>
-                                    <button
-                                        onClick={() => { window.location.href = '/pricing'; }}
-                                        className="mt-3 text-xs px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium">
-                                        Upgrade
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </>
-                );
-            })()}
+            <BoostSection
+                skills={getMatchBoostSkills({ critical, levelGaps })}
+                zone="match"
+                jobTitle={jobRole ?? null}
+                isPaidUser={isPaidProp}
+            />
 
         </div>
     );
@@ -1289,35 +1255,11 @@ function ResumeResultsView({ results, behavioralSignals, degree, isPaid: isPaidP
             })}
 
             {/* Zone 1 — Boost weak-evidence resume skills (gated for free users) */}
-            {(() => {
-                const boostEl = <BoostSection skills={getResumeBoostSkills(results)} zone="resume" />;
-                const { visible, blurred, remainingCount } = getFastFixSections([boostEl], isPaidProp);
-                return (
-                    <>
-                        {visible.map((el, i) => <div key={i}>{el}</div>)}
-                        {blurred.length > 0 && (
-                            <div className="relative mt-4">
-                                <div className="blur-sm pointer-events-none select-none">
-                                    {blurred.map((el, i) => <div key={i}>{el}</div>)}
-                                </div>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 rounded-lg z-10">
-                                    <span className="text-sm font-semibold text-slate-700">
-                                        {remainingCount} more improvement{remainingCount > 1 ? 's' : ''} found
-                                    </span>
-                                    <span className="text-xs text-slate-500 mt-1 text-center px-4">
-                                        Upgrade to see all fixes and your full evidence breakdown
-                                    </span>
-                                    <button
-                                        onClick={() => { window.location.href = '/pricing'; }}
-                                        className="mt-3 text-xs px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium">
-                                        Upgrade
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-                    </>
-                );
-            })()}
+            <BoostSection
+                skills={getResumeBoostSkills(results)}
+                zone="resume"
+                isPaidUser={isPaidProp}
+            />
 
         </div>
     );

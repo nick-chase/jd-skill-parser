@@ -63,7 +63,7 @@ function getResourceDisplay(resource) {
   }
 }
 
-export default function BoostSection({ skills, zone, jobTitle }) {
+export default function BoostSection({ skills, zone, jobTitle, isPaidUser = false }) {
   if (!skills || skills.length === 0) return null
 
   // Resolve resources for each skill, skip skills with no resources
@@ -76,8 +76,12 @@ export default function BoostSection({ skills, zone, jobTitle }) {
 
   if (enriched.length === 0) return null
 
-  // Collect all resources across all skills for FTC check
-  const allResources = enriched.flatMap(({ resources }) => resources)
+  // Gate: free users see only the first enriched skill
+  const visibleEnriched = isPaidUser ? enriched : enriched.slice(0, 1)
+  const blurredEnriched = isPaidUser ? [] : enriched.slice(1)
+
+  // Collect all resources across visible skills for FTC check
+  const allResources = visibleEnriched.flatMap(({ resources }) => resources)
   const showFTC = allResources.length > 0
 
   if (zone === 'resume') {
@@ -90,7 +94,7 @@ export default function BoostSection({ skills, zone, jobTitle }) {
           These skills have weak or no evidence. A project or course raises your score.
         </div>
 
-        {enriched.map(({ skill, resources }) => {
+        {visibleEnriched.map(({ skill, resources }) => {
           const levelLabel = typeof skill.resumeLevel === 'number'
             ? `L${skill.resumeLevel} · ${LEVEL_NAMES[skill.resumeLevel] ?? ''}`
             : ''
@@ -124,6 +128,41 @@ export default function BoostSection({ skills, zone, jobTitle }) {
           )
         })}
 
+        {blurredEnriched.length > 0 && (
+          <div className="relative mt-2">
+            <div className="blur-sm pointer-events-none select-none">
+              {blurredEnriched.map(({ skill, resources }) => (
+                <div key={skill.name} className="mb-3">
+                  <div className="text-sm font-medium text-slate-800 mb-1">{skill.name}</div>
+                  {resources.map(r => {
+                    const { linkClass, badge } = getResourceDisplay(r)
+                    return (
+                      <div key={r.url} className="flex items-center gap-1 mb-0.5">
+                        <a href={r.url} className={linkClass}>{r.title}</a>
+                        {badge}
+                        <span className="text-xs text-slate-400 ml-2">· {r.platform}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              ))}
+            </div>
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 rounded-lg z-10">
+              <span className="text-sm font-semibold text-slate-700">
+                {'🔒'} {blurredEnriched.length} more improvement{blurredEnriched.length > 1 ? 's' : ''} found
+              </span>
+              <span className="text-xs text-slate-500 mt-1 text-center px-4">
+                Upgrade to see all fixes and your full evidence breakdown
+              </span>
+              <button
+                onClick={() => { window.location.href = '/pricing' }}
+                className="mt-3 text-xs px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium">
+                Upgrade &rarr;
+              </button>
+            </div>
+          </div>
+        )}
+
         {showFTC && (
           <p className="text-xs text-slate-400 italic mt-2">
             Some links are affiliate links. We may earn a small commission if you enroll — at no extra cost to you.
@@ -134,9 +173,9 @@ export default function BoostSection({ skills, zone, jobTitle }) {
   }
 
   // zone === 'match'
-  // Group by priority
+  // Group visible by priority
   const byPriority = {}
-  for (const item of enriched) {
+  for (const item of visibleEnriched) {
     const p = item.skill.priority ?? 1
     if (!byPriority[p]) byPriority[p] = []
     byPriority[p].push(item)
@@ -183,6 +222,41 @@ export default function BoostSection({ skills, zone, jobTitle }) {
           ))}
         </div>
       ))}
+
+      {blurredEnriched.length > 0 && (
+        <div className="relative mt-2">
+          <div className="blur-sm pointer-events-none select-none">
+            {blurredEnriched.map(({ skill, resources }) => (
+              <div key={skill.name} className="mb-3">
+                <div className="text-sm font-medium text-slate-800 mb-1">{skill.name}</div>
+                {resources.map(r => {
+                  const { linkClass, badge } = getResourceDisplay(r)
+                  return (
+                    <div key={r.url} className="flex items-center gap-1 mb-0.5">
+                      <a href={r.url} className={linkClass}>{r.title}</a>
+                      {badge}
+                      <span className="text-xs text-slate-400 ml-2">· {r.platform}</span>
+                    </div>
+                  )
+                })}
+              </div>
+            ))}
+          </div>
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 rounded-lg z-10">
+            <span className="text-sm font-semibold text-slate-700">
+              {'🔒'} {blurredEnriched.length} more improvement{blurredEnriched.length > 1 ? 's' : ''} found
+            </span>
+            <span className="text-xs text-slate-500 mt-1 text-center px-4">
+              Upgrade to see all fixes and your full evidence breakdown
+            </span>
+            <button
+              onClick={() => { window.location.href = '/pricing' }}
+              className="mt-3 text-xs px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition font-medium">
+              Upgrade &rarr;
+            </button>
+          </div>
+        </div>
+      )}
 
       {showFTC && (
         <p className="text-xs text-slate-400 italic mt-2">
