@@ -70,7 +70,7 @@ export default function BoostSection({ skills, zone, jobTitle }) {
   const enriched = skills
     .map(skill => ({
       skill,
-      resources: getAffiliateResources(skill.skillId, skill.resumeLevel ?? 1),
+      resources: getAffiliateResources(skill.skillId, skill.resumeLevel ?? 1, 'tech', skill.name),
     }))
     .filter(({ resources }) => resources.length > 0)
 

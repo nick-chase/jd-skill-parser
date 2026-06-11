@@ -1006,7 +1006,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
 
                         {topGaps.map((skill, index) => {
                             const freeResources = [];
-                            const affiliateResource = getAffiliateResources(nameToResourceId(skill.name), skill.resumeLevel ?? 1)[0] ?? null;
+                            const affiliateResource = getAffiliateResources(nameToResourceId(skill.name), skill.resumeLevel ?? 1, 'tech', skill.name)[0] ?? null;
                             const resumeLabel = skill.resumeLevel
                                 ? (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`)
                                 : 'Not evidenced';
