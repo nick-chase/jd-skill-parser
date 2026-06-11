@@ -19,6 +19,7 @@ import AppFooter from './components/AppFooter.jsx';
 import HowToTour from './components/HowToTour.jsx'
 import FeedbackForm from './components/FeedbackForm.jsx';
 import { getAffiliateResources } from '@utils/affiliateLoader.js';
+import { buildFingerprint, saveFingerprint } from './utils/resumeFingerprint.js';
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
 const betaFeedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
@@ -815,7 +816,7 @@ function DegreeFlagCard({ degreeFlag }) {
     )
 }
 
-function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, jobMeta, decisionResult, degreeFlag }) {
+function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, jobMeta, decisionResult, degreeFlag, isPaid: isPaidProp }) {
     if (!gap) return null;
 
     const { critical, levelGaps, matched, bonus } = gap;
@@ -1128,18 +1129,19 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                 </CollapsibleSection>
             )}
 
-            {/* Zone 2 — Boost skills for this specific role */}
+            {/* Zone 2 — Boost skills for this specific role (Priority 2/3 gated for free users) */}
             <BoostSection
                 skills={getMatchBoostSkills({ critical, levelGaps })}
                 zone="match"
                 jobTitle={jobRole ?? null}
+                isPaidUser={isPaidProp}
             />
 
         </div>
     );
 }
 
-function ResumeResultsView({ results, behavioralSignals, degree }) {
+function ResumeResultsView({ results, behavioralSignals, degree, isPaid: isPaidProp }) {
     const SOURCE_COLORS = {
         'Technical Skills': '#0369a1',
         'Education':        '#7c3aed',
@@ -1252,8 +1254,12 @@ function ResumeResultsView({ results, behavioralSignals, degree }) {
                 );
             })}
 
-            {/* Zone 1 — Boost weak-evidence resume skills */}
-            <BoostSection skills={getResumeBoostSkills(results)} zone="resume" />
+            {/* Zone 1 — Boost weak-evidence resume skills (gated for free users) */}
+            <BoostSection
+                skills={getResumeBoostSkills(results)}
+                zone="resume"
+                isPaidUser={isPaidProp}
+            />
 
         </div>
     );
@@ -1447,6 +1453,8 @@ export default function App() {
         setResumeInputError(false);
         const parsed = parseResumeInput(resumeInput, 'text');
         setResumeResults(parsed);
+        // Fire-and-forget fingerprint — stable identity signal for gate
+        saveFingerprint(buildFingerprint(parsed));
         sessionStorage.setItem('beta_resume_results', JSON.stringify(parsed));
         sessionStorage.setItem('beta_resume_count', parsed.technicalSignals.length);
         analytics.parseComplete('resume');
@@ -1720,6 +1728,7 @@ export default function App() {
                                         results={resumeResults.technicalSignals}
                                         behavioralSignals={resumeResults.behavioralSignals}
                                         degree={resumeResults.degree}
+                                        isPaid={isPaidStatus}
                                     />
                                 </>
                             )
@@ -1758,6 +1767,7 @@ export default function App() {
                                     jobMeta={jobMeta}
                                     decisionResult={getDecision(results, resumeResults)}
                                     degreeFlag={computeDegreeFlag(resumeResults.degree, results.degree)}
+                                    isPaid={isPaidStatus}
                                 />
                                 <AdSlot isPaid={isPaidStatus} />
                             </>
