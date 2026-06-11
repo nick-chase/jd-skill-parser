@@ -72,21 +72,21 @@
       "industry_tags": ["tech", "skill"]
     },
     {
-      "skill_id": "llm",
+      "skill_id": "large-language-models",
       "title": "Developing Large Language Models",
       "url": "https://datacamp.pxf.io/5kyg51",
       "platform": "DataCamp",
       "industry_tags": ["tech", "skill"]
     },
     {
-      "skill_id": "google-cloud",
+      "skill_id": "gcp",
       "title": "Google Cloud Generative AI Leader",
       "url": "https://datacamp.pxf.io/oN5q4W",
       "platform": "DataCamp",
       "industry_tags": ["tech", "career"]
     },
     {
-      "skill_id": "openai",
+      "skill_id": "openai-api",
       "title": "OpenAI Fundamentals",
       "url": "https://datacamp.pxf.io/E0OKED",
       "platform": "DataCamp",
@@ -100,7 +100,7 @@
       "industry_tags": ["tech", "skill"]
     },
     {
-      "skill_id": "google-cloud",
+      "skill_id": "gcp",
       "title": "Google Cloud Digital Leader",
       "url": "https://datacamp.pxf.io/dykaO2",
       "platform": "DataCamp",
@@ -121,7 +121,7 @@
       "industry_tags": ["tech", "skill"]
     },
     {
-      "skill_id": "github",
+      "skill_id": "git",
       "title": "GitHub Foundations",
       "url": "https://datacamp.pxf.io/2Ry1RA",
       "platform": "DataCamp",
