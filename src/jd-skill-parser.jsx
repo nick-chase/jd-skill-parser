@@ -1005,7 +1005,6 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                         </div>
 
                         {topGaps.map((skill, index) => {
-                            const freeResources = [];
                             const affiliateResource = getAffiliateResources(nameToResourceId(skill.name), skill.resumeLevel ?? 1, 'tech', skill.name)[0] ?? null;
                             const resumeLabel = skill.resumeLevel
                                 ? (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`)
@@ -1055,28 +1054,17 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                                     </div>
 
                                     {/* Resources */}
-                                    {(freeResources.length > 0 || affiliateResource) && (
+                                    {affiliateResource && (
                                         <div className="space-y-1">
-                                            {freeResources.map(r => (
-                                                <a key={r.url} href={r.url}
-                                                   target="_blank" rel="noopener noreferrer"
-                                                   className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 transition">
-                                                    <span className="text-slate-300">→</span>
-                                                    {r.title}
-                                                    <span className="text-slate-300 ml-auto">Free</span>
-                                                </a>
-                                            ))}
-                                            {affiliateResource && (
-                                                <a href={affiliateResource.url}
-                                                   target="_blank" rel="noopener noreferrer"
-                                                   className="flex items-center gap-2 text-xs mt-2 px-3 py-2 bg-white border border-indigo-200 text-indigo-700 rounded-lg hover:bg-indigo-50 transition">
-                                                    <span>📚</span>
-                                                    <span className="font-medium">{affiliateResource.title}</span>
-                                                    <span className="text-[10px] text-indigo-400 ml-auto">
-                                                        {affiliateResource.platform} · affiliate
-                                                    </span>
-                                                </a>
-                                            )}
+                                            <a href={affiliateResource.url}
+                                               target="_blank" rel="noopener noreferrer"
+                                               className="flex items-center gap-2 text-xs mt-2 px-3 py-2 bg-white border border-indigo-200 text-indigo-700 rounded-lg hover:bg-indigo-50 transition">
+                                                <span>📚</span>
+                                                <span className="font-medium">{affiliateResource.title}</span>
+                                                <span className="text-[10px] text-indigo-400 ml-auto">
+                                                    {affiliateResource.platform} · affiliate
+                                                </span>
+                                            </a>
                                         </div>
                                     )}
                                 </div>

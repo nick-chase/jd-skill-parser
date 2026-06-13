@@ -116,7 +116,6 @@ export default function BoostSection({ skills, zone, jobTitle }) {
                       {r.title}
                     </a>
                     {badge}
-                    <span className="text-xs text-slate-400 ml-2">· {r.program}</span>
                   </div>
                 )
               })}
@@ -175,7 +174,6 @@ export default function BoostSection({ skills, zone, jobTitle }) {
                       {r.title}
                     </a>
                     {badge}
-                    <span className="text-xs text-slate-400 ml-2">· {r.program}</span>
                   </div>
                 )
               })}
