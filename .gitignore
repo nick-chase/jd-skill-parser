@@ -58,3 +58,4 @@ tests/diagnostic-output/
 package-lock.json.backup
 yarn-error.log
 .claude/settings.local.json
+tests/fixtures/nick_text.txt
