@@ -396,6 +396,13 @@
 
     { "id": "ocajp", "canonical": "OCAJP", "category": "Certification", "aliases": ["ocajp", "oracle certified associate java programmer"], "patterns": ["\\bOCAJP\\b", "\\boracle certified associate java programmer\\b"], "guardWords": [] },
     { "id": "mcsd", "canonical": "MCSD", "category": "Certification", "aliases": ["mcsd", "microsoft certified solutions developer"], "patterns": ["\\bMCSD\\b", "\\bMicrosoft Certified Solutions Developer\\b"], "guardWords": [] },
-    { "id": "microsoft-certified", "canonical": "Microsoft Certified", "category": "Certification", "aliases": ["microsoft certified"], "patterns": ["\\bMicrosoft Certified\\b"], "guardWords": [] }
+    { "id": "microsoft-certified", "canonical": "Microsoft Certified", "category": "Certification", "aliases": ["microsoft certified"], "patterns": ["\\bMicrosoft Certified\\b"], "guardWords": [] },
+
+    { "id": "cloud-computing", "canonical": "Cloud Computing", "category": "Cloud / Infra", "aliases": ["cloud", "cloud platforms", "cloud infrastructure"], "patterns": ["\\bcloud computing\\b", "\\bcloud platforms\\b", "\\bcloud infrastructure\\b"], "guardWords": [] },
+    { "id": "ai-engineer", "canonical": "AI Engineer", "category": "ML / AI", "aliases": ["AI engineer", "artificial intelligence engineer", "ML engineer"], "patterns": ["\\bAI engineer\\b", "\\bartificial intelligence engineer\\b", "\\bML engineer\\b"], "guardWords": [] },
+    { "id": "data-scientist", "canonical": "Data Scientist", "category": "Data Tool", "aliases": ["data science", "data scientist"], "patterns": ["\\bdata scientist\\b", "\\bdata science\\b"], "guardWords": [] },
+    { "id": "data-analyst", "canonical": "Data Analyst", "category": "Data Tool", "aliases": ["data analysis", "data analyst", "analytics"], "patterns": ["\\bdata analyst\\b", "\\bdata analysis\\b", "\\banalytics\\b"], "guardWords": [] },
+    { "id": "alteryx", "canonical": "Alteryx", "category": "Data Tool", "aliases": ["Alteryx Designer", "Alteryx Analytics"], "patterns": ["\\balteryx\\b"], "guardWords": [] },
+    { "id": "data-literacy", "canonical": "Data Literacy", "category": "Data Tool", "aliases": ["data literacy", "data fluency", "data-driven"], "patterns": ["\\bdata literacy\\b", "\\bdata fluency\\b", "\\bdata[- ]driven\\b"], "guardWords": [] }
   ]
 }

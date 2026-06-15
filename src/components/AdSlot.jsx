@@ -35,13 +35,5 @@ export default function AdSlot({ isPaid, skillId = null, resources = [] }) {
     )
   }
 
-  return (
-    <div className="mt-4">
-      <div
-        className="border border-dashed border-slate-200 rounded-lg p-3 bg-slate-50 text-center text-xs text-slate-300"
-      >
-        In development
-      </div>
-    </div>
-  )
+  return null
 }

@@ -16,6 +16,8 @@ import grammarly       from '@data/affiliates/grammarly.json'
 import linkedinLearning from '@data/affiliates/linkedin-learning.json'
 import huntr           from '@data/affiliates/huntr.json'
 
+import { resolveToCanonical } from './resolveToCanonical.js'
+
 const PROGRAMS = [udemy, datacamp, coursera, grammarly, linkedinLearning, huntr]
 
 /**
@@ -37,16 +39,23 @@ export function loadAffiliates() {
  * Filters by industryTag if provided (default: 'tech').
  * Returns [] when no match — never throws.
  *
- * @param {string} skillId
- * @param {number} level        - unused for filtering, reserved for future use
- * @param {string} industryTag  - default 'tech'
+ * When rawName is provided, resolveToCanonical() is tried first so that
+ * alias names (e.g. "LLMs") resolve to the correct skill_id in the affiliate
+ * data (e.g. "large-language-models") even when the pre-slugified skillId
+ * would not match.
+ *
+ * @param {string} skillId    - Pre-slugified skill ID (nameToResourceId output)
+ * @param {number} level      - unused for filtering, reserved for future use
+ * @param {string} industryTag - default 'tech'
+ * @param {string|null} rawName - Optional original display name; used for alias resolution
  */
-export function getAffiliateResources(skillId, level = 1, industryTag = 'tech') {
-  if (!skillId) return []
+export function getAffiliateResources(skillId, level = 1, industryTag = 'tech', rawName = null) {
+  if (!skillId && !rawName) return []
   try {
+    const resolvedId = (rawName && resolveToCanonical(rawName)) ?? skillId
     return loadAffiliates()
       .filter(r => {
-        const skillOk = r.skill_id === skillId
+        const skillOk = r.skill_id === resolvedId
         const tagOk   = !r.industry_tags || r.industry_tags.includes(industryTag)
         return skillOk && tagOk
       })

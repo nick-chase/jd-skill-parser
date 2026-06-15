@@ -72,7 +72,7 @@ export default function BoostSection({ skills, zone, jobTitle, isPaidUser = fals
   const enriched = skills
     .map(skill => ({
       skill,
-      resources: getAffiliateResources(skill.skillId, skill.resumeLevel ?? 1),
+      resources: getAffiliateResources(skill.skillId, skill.resumeLevel ?? 1, 'tech', skill.name),
     }))
     .filter(({ resources }) => resources.length > 0)
 
@@ -121,7 +121,6 @@ export default function BoostSection({ skills, zone, jobTitle, isPaidUser = fals
                       {r.title}
                     </a>
                     {badge}
-                    <span className="text-xs text-slate-400 ml-2">· {r.program}</span>
                   </div>
                 )
               })}
@@ -215,7 +214,6 @@ export default function BoostSection({ skills, zone, jobTitle, isPaidUser = fals
                       {r.title}
                     </a>
                     {badge}
-                    <span className="text-xs text-slate-400 ml-2">· {r.program}</span>
                   </div>
                 )
               })}
