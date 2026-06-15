@@ -1,0 +1,86 @@
+======================================================================
+OBSERVATION 1 — Section boundaries
+======================================================================
+
+--- SUMMARY ---
+  Length: 374 chars
+  FIRST 100: "Graduate student in Artificial Intelligence at NJIT (GPA 3.75) with a B.S. in Software Development. "
+  LAST  100: " 6+ months using agentic AI development with Claude Code. Seeking ML/AI or Data Science internships."
+
+--- EDUCATION ---
+  Length: 607 chars
+  FIRST 100: "M.S. Artificial Intelligence (In Progress) Jan 2026 – May 2028\r\nNew Jersey Institute of Technology ·"
+  LAST  100: "'s List — Summer 2023\r\n•\r\nCertifications: Cybersecurity Fundamentals (2023), Java Programming (2021)"
+
+--- TECHNICALSKILLS ---
+  Length: 527 chars
+  FIRST 100: "Skills listed only where backed by a project or coursework above.\r\nLanguages: JavaScript (React/Vite"
+  LAST  100: ": Stable Diffusion (SD.Next, ComfyUI), Prompt Engineering, Claude Code (agentic dev)\r\nConcepts: SDLC"
+
+--- PROJECTS ---
+  Length: 1916 chars
+  FIRST 100: "Nat20 — Resume & JD Skill Parser May 2026 – Present\r\nPersonal Project · React, Vite, Tailwind CSS, S"
+  LAST  100: "ject with a 3-person team, coordinating via Slack and Git across design, build, and delivery phases."
+
+--- EXPERIENCE ---
+  Length: 1328 chars
+  FIRST 100: "Ramp Service Employee Oct 2025 – Present\r\nUnited Airlines · Newark, NJ\r\n•\r\nPerform aircraft ground h"
+  LAST  100: "DDITIONAL\r\n•\r\nAuthorized to work in the US for any employer\r\n•\r\nAvailable for internships until 2028"
+
+--- CERTIFICATIONS ---
+  (not detected)
+
+======================================================================
+OBSERVATION 2 — AI / Artificial Intelligence matches
+======================================================================
+
+From technicalSignals: 1 AI-related skill(s) detected
+  name="Artificial Intelligence" source="Projects" level=2 confidence=medium contextCount=3
+
+Raw text occurrences (AI / artificial intelligence):
+  [1] matched="Artificial Intelligence" section="unknown" ctx: ...NICHOLAS CHASE↵M.S. Artificial Intelligence Candidate · Data Science · NJIT↵Edgewa...
+  [2] matched="Artificial Intelligence" section="summary" ctx: ...OFESSIONAL SUMMARY↵Graduate student in Artificial Intelligence at NJIT (GPA 3.75) with a B.S. in Softw...
+  [3] matched="AI" section="summary" ctx: ...om scratch over 6+ months using agentic AI development with Claude Code. Seeking M...
+  [4] matched="AI" section="summary" ctx: ...evelopment with Claude Code. Seeking ML/AI or Data Science internships.↵PROJECTS...
+  [5] matched="AI" section="projects" ctx: ...evelopment lifecycle solo using agentic AI (Claude Code) — adapted architecture an...
+  [6] matched="Artificial Intelligence" section="education" ctx: ..., and delivery phases.↵EDUCATION↵M.S. Artificial Intelligence (In Progress) Jan 2026 – May 2028↵New ...
+  [7] matched="AI" section="technicalSkills" ctx: ...DS 637 / DS 644 coursework)↵Generative AI: Stable Diffusion (SD.Next, ComfyUI), P...
+
+======================================================================
+OBSERVATION 3 — Degree year extraction (B.S. Software Development)
+======================================================================
+
+Raw education section text:
+M.S. Artificial Intelligence (In Progress) Jan 2026 – May 2028
+New Jersey Institute of Technology · Ying Wu College of Computing · Newark, NJ
+•
+GPA: 3.75 · Department of Data Science
+•
+Completed: DS 637 Python and Mathematics (B+) — Python, NumPy, Pandas, Jupyter Notebooks; DS 644 Introduction to Big Data (A)
+•
+Fall 2026: DS 675 Machine Learning, MATH 662 Probability Distributions
+B.S. Software Development Apr 2020 – Dec 2023
+Champlain College Online · South Burlington, VT
+•
+GPA: 3.44 · Dean's List — Summer 2023
+•
+Certifications: Cybersecurity Fundamentals (2023), Java Programming (2021)
+
+extractAllDegrees() returned 2 degree(s):
+  {"degreeLevel":2,"field":"Software Development Apr","institution":"Champlain College Online · South Burlington, VT","startYear":null,"graduationYear":2023}
+  {"degreeLevel":3,"field":null,"institution":"New Jersey Institute of Technology · Ying Wu College of Computing · Newark, NJ","startYear":2026,"graduationYear":2028,"graduationStatus":"in_progress"}
+
+B.S. block starts at education line index 8: "B.S. Software Development Apr 2020 – Dec 2023"
+Lines passed to extractGraduationYearFromBlock (up to maxLook=4 ahead):
+  [0] "B.S. Software Development Apr 2020 – Dec 2023"
+  [1] "Champlain College Online · South Burlington, VT"
+  [2] "•"
+  [3] "GPA: 3.44 · Dean's List — Summer 2023"
+  [4] "•"
+
+Year tokens (20xx / 19[89]x) in each line, in order:
+  [0] "B.S. Software Development Apr 2020 – Dec 2023" → years: [2020, 2023]
+  [1] "Champlain College Online · South Burlington, VT" → years: []
+  [2] "•" → years: []
+  [3] "GPA: 3.44 · Dean's List — Summer 2023" → years: [2023]
+  [4] "•" → years: []

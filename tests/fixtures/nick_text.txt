@@ -1,0 +1,77 @@
+NICHOLAS CHASE
+M.S. Artificial Intelligence Candidate · Data Science · NJIT
+Edgewater, NJ · nikechase@gmail.com · 269-350-0535 · LinkedIn · GitHub
+PROFESSIONAL SUMMARY
+Graduate student in Artificial Intelligence at NJIT (GPA 3.75) with a B.S. in Software Development. Built and deployed a production web application — a resume and job description skill parser — using React, Vite, Tailwind CSS, Supabase, and Stripe, shipped from scratch over 6+ months using agentic AI development with Claude Code. Seeking ML/AI or Data Science internships.
+PROJECTS
+Nat20 — Resume & JD Skill Parser May 2026 – Present
+Personal Project · React, Vite, Tailwind CSS, Supabase, Stripe, Vercel
+•
+Built a full-stack SaaS web application that parses job descriptions and resumes to produce an actionable role readiness decision — independently designed the product logic, scoring model, and UX from scratch, applying problem-solving and decision-making at every layer of the system.
+•
+Researched occupational standards (OPM MOSAIC, Bloom's Revised Taxonomy, Lightcast skill taxonomy) to ground the scoring model in industry frameworks; designed and implemented a rule-based extraction engine with a 400+ skill dictionary and weighted evidence scoring.
+•
+Designed and built a 4-tab UI (React + Tailwind CSS) covering the full user flow from JD input to gap analysis output; configured Supabase (auth + database) and Stripe Checkout for a freemium subscription backend deployed on Vercel.
+•
+Managed full development lifecycle solo using agentic AI (Claude Code) — adapted architecture and tooling iteratively across 6+ months, making data-driven technical decisions from test results and real user feedback.
+nat20 - project
+Inventrack v1 — Inventory Management System 3 months
+Champlain College: SDEV 435 · C#, Unity3D, SQLite, Git
+•
+Built a full inventory management application in a team software development course — designed the UI layout and user flow, implemented in Unity3D with SQLite for embedded data persistence.
+•
+Collaborated across a 3-person team using Git and Agile sprints, communicating requirements and coordinating deliverables to ship a functional product on schedule.
+github.com/nick-chase/Inventrack_v1
+Enterprise Java Application 3 months
+Champlain College: SDEV 450 · Java, JavaFX, J2EE, Git
+•
+Completed a full software development lifecycle project with a 3-person team, coordinating via Slack and Git across design, build, and delivery phases.
+EDUCATION
+M.S. Artificial Intelligence (In Progress) Jan 2026 – May 2028
+New Jersey Institute of Technology · Ying Wu College of Computing · Newark, NJ
+•
+GPA: 3.75 · Department of Data Science
+•
+Completed: DS 637 Python and Mathematics (B+) — Python, NumPy, Pandas, Jupyter Notebooks; DS 644 Introduction to Big Data (A)
+•
+Fall 2026: DS 675 Machine Learning, MATH 662 Probability Distributions
+B.S. Software Development Apr 2020 – Dec 2023
+Champlain College Online · South Burlington, VT
+•
+GPA: 3.44 · Dean's List — Summer 2023
+•
+Certifications: Cybersecurity Fundamentals (2023), Java Programming (2021)
+TECHNICAL SKILLS
+Skills listed only where backed by a project or coursework above.
+Languages: JavaScript (React/Vite — Nat20, 6+ months), Python (DS 637 coursework), Java (SDEV 450, 2021), C# (Unity — Inventrack, 2023), SQL (basic)
+Frontend: React 18, Vite, Tailwind CSS
+Backend & Infra: Supabase (auth + database), Stripe Checkout, Vercel, Git, GitHub
+ML / Data: NumPy, Pandas, Jupyter Notebooks (DS 637 / DS 644 coursework)
+Generative AI: Stable Diffusion (SD.Next, ComfyUI), Prompt Engineering, Claude Code (agentic dev)
+Concepts: SDLC
+PROFESSIONAL EXPERIENCE
+Ramp Service Employee Oct 2025 – Present
+United Airlines · Newark, NJ
+•
+Perform aircraft ground handling and cargo operations in a safety-critical, high-compliance environment with strict SOPs.
+•
+Collaborate with flight and ground crews to ensure on-time departures; demonstrate reliability and precise execution under time pressure.
+Clinical Patient Safety Attendant Jul 2021 – Nov 2024
+University of Vermont Health Network · Burlington, VT
+•
+Collaborated with interdisciplinary care teams to maintain safe patient environments across 3+ years of consistent service.
+•
+Developed strong documentation habits and attention to protocol; communicated with medical staff to de-escalate critical situations.
+Lead Line Cook / Kitchen Lead Sep 2018 – Jul 2020
+Trader Dukes Tavern (Delta by Marriott) / Hilton Garden Inn · South Burlington, VT
+•
+Supervised food service teams of 5–8 staff, managing schedules, inventory, and production workflows.
+Kitchen Manager Nov 2013 – Sep 2017
+Big Sky Ski Resort · Big Sky, MT
+•
+Demonstrated leadership progression from Line Cook to Kitchen Manager over 4 years — built and directed a team of 10 across multiple resort kitchens, overseeing hiring, scheduling, and operations.
+ADDITIONAL
+•
+Authorized to work in the US for any employer
+•
+Available for internships until 2028
