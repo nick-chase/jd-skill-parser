@@ -614,3 +614,62 @@ describe('scoreSkillEvidence() — confidence', () => {
     expect(scoreSkillEvidence([]).confidence).toBe('low')
   })
 })
+
+// ---------------------------------------------------------------------------
+// scoreSkillEvidence — per-section aggregation
+// ---------------------------------------------------------------------------
+
+describe('scoreSkillEvidence() — per-section aggregation', () => {
+  // Test 1: Projects wins when its single contribution (0.5) > sum of Summary (4 × 0.1 = 0.4)
+  // projects: wType=1.0, durationMonths=null, bloomC=1.0 → D=0.5 → contribution = 0.5
+  // summary ×4: wType=0.5, durationMonths=null, bloomC=0.5 → D=0.4 → each = 0.1, sum = 0.4
+  test('projects single contribution (0.5) beats 4 summary mentions (sum 0.4) → primarySection is projects', () => {
+    const result = scoreSkillEvidence([
+      { wType: 1.0, durationMonths: null, sectionName: 'projects', bloomC: 1.0 },
+      { wType: 0.5, durationMonths: null, sectionName: 'summary', bloomC: 0.5 },
+      { wType: 0.5, durationMonths: null, sectionName: 'summary', bloomC: 0.5 },
+      { wType: 0.5, durationMonths: null, sectionName: 'summary', bloomC: 0.5 },
+      { wType: 0.5, durationMonths: null, sectionName: 'summary', bloomC: 0.5 },
+    ])
+    expect(result.primarySection).toBe('projects')
+  })
+
+  // Test 2: Summary wins when projects single contribution (0.3) < sum of Summary (4 × 0.1 = 0.4)
+  // projects: wType=1.0, durationMonths=null, bloomC=0.6 → D=0.5 → contribution = 0.3
+  // summary ×4: same as above → sum = 0.4
+  // This is the case the old winner-takes-all code got wrong.
+  test('summary aggregate (4 × 0.1 = 0.4) beats projects single (0.3) → primarySection is summary', () => {
+    const result = scoreSkillEvidence([
+      { wType: 1.0, durationMonths: null, sectionName: 'projects', bloomC: 0.6 },
+      { wType: 0.5, durationMonths: null, sectionName: 'summary', bloomC: 0.5 },
+      { wType: 0.5, durationMonths: null, sectionName: 'summary', bloomC: 0.5 },
+      { wType: 0.5, durationMonths: null, sectionName: 'summary', bloomC: 0.5 },
+      { wType: 0.5, durationMonths: null, sectionName: 'summary', bloomC: 0.5 },
+    ])
+    expect(result.primarySection).toBe('summary')
+  })
+
+  // Test 3: Single instance — primarySection unchanged (same as old behavior)
+  test('single instance → primarySection matches that instance\'s sectionName', () => {
+    const result = scoreSkillEvidence([
+      { wType: 1.0, durationMonths: 24, sectionName: 'experience' },
+    ])
+    expect(result.primarySection).toBe('experience')
+  })
+
+  // Test 4: perSectionScores is present and correct for a two-section skill
+  // experience: wType=1.0, durationMonths=24, bloomC=1.0 → D=1.3 → contribution = 1.3
+  // projects: wType=0.5, durationMonths=null, bloomC=1.0 → D=0.4 → contribution = 0.2
+  test('perSectionScores contains aggregate contribution per section', () => {
+    const result = scoreSkillEvidence([
+      { wType: 1.0, durationMonths: 24, sectionName: 'experience' },
+      { wType: 0.5, durationMonths: null, sectionName: 'projects' },
+    ])
+    expect(result).toHaveProperty('perSectionScores')
+    expect(typeof result.perSectionScores).toBe('object')
+    expect(result.perSectionScores).toHaveProperty('experience')
+    expect(result.perSectionScores).toHaveProperty('projects')
+    expect(result.perSectionScores.experience).toBeCloseTo(1.3, 4)
+    expect(result.perSectionScores.projects).toBeCloseTo(0.2, 4)
+  })
+})
