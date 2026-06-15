@@ -764,13 +764,13 @@ export function parseResume(text) {
     }
 
     const technicalSignals = [...skillMap.entries()].map(([name, { category, instances }]) => {
-        const { score, level: levelStr, confidence, primarySignal, primarySection, suggestion, limitingFactor } = scoreSkillEvidence(instances)
+        const { score, level: levelStr, confidence, primarySignal, primarySection, suggestion, limitingFactor, perSectionScores } = scoreSkillEvidence(instances)
         const level = levelStr === 'certified' ? 'certified' : parseInt(levelStr.slice(1), 10)
         const source = SECTION_SOURCE_LABEL[primarySection] ?? primarySection
         const durationMonths = instances.reduce((max, i) =>
             (i.durationMonths != null && (max == null || i.durationMonths > max)) ? i.durationMonths : max
         , null)
-        return { name, category, level, score, confidence, source, primarySignal, suggestion, limitingFactor, durationMonths, contextCount: instances.length }
+        return { name, category, level, score, confidence, source, primarySignal, suggestion, limitingFactor, durationMonths, contextCount: instances.length, perSectionScores }
     }).sort((a, b) => {
         const aLvl = a.level === 'certified' ? -1 : a.level
         const bLvl = b.level === 'certified' ? -1 : b.level

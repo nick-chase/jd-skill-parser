@@ -58,3 +58,5 @@ tests/diagnostic-output/
 package-lock.json.backup
 yarn-error.log
 .claude/settings.local.json
+/tmp
+/tmp

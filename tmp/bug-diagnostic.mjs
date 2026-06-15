@@ -99,6 +99,7 @@ const aiSignals = parseResult.technicalSignals.filter(s =>
 out(`\nFrom technicalSignals: ${aiSignals.length} AI-related skill(s) detected`)
 for (const sig of aiSignals) {
     out(`  name="${sig.name}" source="${sig.source}" level=${sig.level} confidence=${sig.confidence} contextCount=${sig.contextCount}`)
+    out(`  perSectionScores=${JSON.stringify(sig.perSectionScores ?? null)}`)
 }
 
 // Raw text scan — find every occurrence with context

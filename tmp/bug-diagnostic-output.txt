@@ -36,6 +36,7 @@ OBSERVATION 2 — AI / Artificial Intelligence matches
 
 From technicalSignals: 1 AI-related skill(s) detected
   name="Artificial Intelligence" source="Projects" level=2 confidence=medium contextCount=3
+  perSectionScores=null
 
 Raw text occurrences (AI / artificial intelligence):
   [1] matched="Artificial Intelligence" section="unknown" ctx: ...NICHOLAS CHASE↵M.S. Artificial Intelligence Candidate · Data Science · NJIT↵Edgewa...
@@ -67,8 +68,8 @@ GPA: 3.44 · Dean's List — Summer 2023
 Certifications: Cybersecurity Fundamentals (2023), Java Programming (2021)
 
 extractAllDegrees() returned 2 degree(s):
-  {"degreeLevel":2,"field":"Software Development Apr","institution":"Champlain College Online · South Burlington, VT","startYear":null,"graduationYear":2023}
-  {"degreeLevel":3,"field":null,"institution":"New Jersey Institute of Technology · Ying Wu College of Computing · Newark, NJ","startYear":2026,"graduationYear":2028,"graduationStatus":"in_progress"}
+  {"degreeLevel":2,"field":"Software Development","institution":"Champlain College Online · South Burlington, VT","startYear":null,"graduationYear":2023}
+  {"degreeLevel":3,"field":"Artificial Intelligence","institution":"New Jersey Institute of Technology · Ying Wu College of Computing · Newark, NJ","startYear":2026,"graduationYear":2028,"graduationStatus":"in_progress"}
 
 B.S. block starts at education line index 8: "B.S. Software Development Apr 2020 – Dec 2023"
 Lines passed to extractGraduationYearFromBlock (up to maxLook=4 ahead):
