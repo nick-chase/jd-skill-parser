@@ -46,7 +46,7 @@
     { "id": "fine-tuning", "canonical": "Fine-Tuning", "category": "ML / AI", "aliases": ["fine-tuning", "fine tuning", "finetuning"], "patterns": ["\\bfine[- ]tuning\\b", "\\bfinetuning\\b"], "guardWords": [] },
     { "id": "anomaly-detection", "canonical": "Anomaly Detection", "category": "ML / AI", "aliases": ["anomaly detection"], "patterns": ["\\banomaly detection\\b"], "guardWords": [] },
     { "id": "time-series", "canonical": "Time Series Analysis", "category": "ML / AI", "aliases": ["time series", "time-series"], "patterns": ["\\btime[- ]series\\b"], "guardWords": [] },
-    { "id": "artificial-intelligence", "canonical": "Artificial Intelligence", "category": "ML / AI", "aliases": ["AI", "artificial intelligence"], "patterns": ["\\bAI\\b", "\\bartificial intelligence\\b"], "guardWords": [] },
+    { "id": "artificial-intelligence", "canonical": "Artificial Intelligence", "category": "ML / AI", "aliases": ["AI", "artificial intelligence"], "patterns": ["\\bAI\\b", "\\bartificial intelligence\\b"], "guardWords": ["generative ai", "ml/ai", "ai/ml"] },
 
     { "id": "scikit-learn", "canonical": "scikit-learn", "category": "ML Framework", "aliases": ["scikit-learn", "sklearn", "scikit learn"], "patterns": ["\\bscikit[- ]?learn\\b", "\\bsklearn\\b"], "guardWords": [] },
     { "id": "tensorflow", "canonical": "TensorFlow", "category": "ML Framework", "aliases": ["tensorflow"], "patterns": ["\\btensorflow\\b"], "guardWords": [] },
