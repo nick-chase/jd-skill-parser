@@ -24,6 +24,7 @@ data-private/
 tests-private/
 
 # Personal resume fixtures (any extension)
+tests/fixtures/nick_text.txt
 tests/fixtures/nick_*
 tests/fixtures/*resume*
 

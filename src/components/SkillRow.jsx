@@ -90,7 +90,7 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
   const skillLevel     = isMissing ? 1 : (skill.resumeLevel ?? 1)
   const showResources  = isMissing || (isGap && (skill.resumeLevel ?? 0) <= 2)
   const skillResources = showResources
-    ? getAffiliateResources(nameToResourceId(skill.name), skillLevel)
+    ? getAffiliateResources(nameToResourceId(skill.name), skillLevel, 'tech', skill.name)
     : []
 
   // Row-level background tints
