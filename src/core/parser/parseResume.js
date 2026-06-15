@@ -531,7 +531,7 @@ function stripFieldPrefix(raw) {
 function extractDegreeField(line) {
     // "Master of Science — Artificial Intelligence" / "Bachelor of Science — Software Development"
     // Must check this FIRST — the generic "master of" pattern below would otherwise grab "Science"
-    let m = line.match(/\b(?:Master|Bachelor|Doctor|Associate)'?s?\s+of\s+\w+(?:\s+\w+)?\s*(?:–|—)\s*([A-Za-z][A-Za-z\s,&\/]+?)(?=\s*(?:\||\(|\bfrom\b|\bat\b|\d{4})|\s*$)/i)
+    let m = line.match(/\b(?:Master|Bachelor|Doctor|Associate)'?s?\s+of\s+\w+(?:\s+\w+)?\s*(?:–|—)\s*([A-Za-z][A-Za-z\s,&\/]+?)(?=\s*(?:\||\(|\bfrom\b|\bat\b|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b|\d{4})|\s*$)/i)
     if (m) {
         const candidate = m[1].trim().replace(/\s+/g, ' ')
         if (candidate.length <= 60) return stripFieldPrefix(candidate)
@@ -539,18 +539,18 @@ function extractDegreeField(line) {
 
     // "degree in X", "Bachelor's in X", "Bachelor of X", "B.S. in X"
     // "Master of Science in X" — captures everything after the final "in"
-    m = line.match(/\b(?:degree\s+(?:in|of)|bachelor'?s?\s+(?:in|of)|master'?s?\s+(?:in|of)|b\.?s\.?\s+in|m\.?s\.?\s+in)\s+([A-Za-z][A-Za-z\s,&\/]+?)(?=\s*(?:–|—|-{1,2}|,\s|\(|\bfrom\b|\bat\b|\d{4})|\s*$)/i)
+    m = line.match(/\b(?:degree\s+(?:in|of)|bachelor'?s?\s+(?:in|of)|master'?s?\s+(?:in|of)|b\.?s\.?\s+in|m\.?s\.?\s+in)\s+([A-Za-z][A-Za-z\s,&\/]+?)(?=\s*(?:–|—|-{1,2}|,\s|\(|\bfrom\b|\bat\b|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b|\d{4})|\s*$)/i)
     if (m) return stripFieldPrefix(m[1].trim().replace(/\s+/g, ' '))
 
     // "Master of Science in X" and similar long-form patterns not caught above
-    m = line.match(/\bMaster\s+of\s+(?:Science|Arts|Engineering|Business Administration|Fine Arts|Philosophy)\s+in\s+([A-Za-z][A-Za-z\s,&\/]+?)(?=\s*(?:–|—|-{1,2}|,\s|\(|\bfrom\b|\bat\b|\d{4})|\s*$)/i)
+    m = line.match(/\bMaster\s+of\s+(?:Science|Arts|Engineering|Business Administration|Fine Arts|Philosophy)\s+in\s+([A-Za-z][A-Za-z\s,&\/]+?)(?=\s*(?:–|—|-{1,2}|,\s|\(|\bfrom\b|\bat\b|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b|\d{4})|\s*$)/i)
     if (m) return stripFieldPrefix(m[1].trim().replace(/\s+/g, ' '))
 
-    m = line.match(/\bBachelor\s+of\s+(?:Science|Arts|Engineering|Business Administration|Fine Arts|Philosophy)\s+in\s+([A-Za-z][A-Za-z\s,&\/]+?)(?=\s*(?:–|—|-{1,2}|,\s|\(|\bfrom\b|\bat\b|\d{4})|\s*$)/i)
+    m = line.match(/\bBachelor\s+of\s+(?:Science|Arts|Engineering|Business Administration|Fine Arts|Philosophy)\s+in\s+([A-Za-z][A-Za-z\s,&\/]+?)(?=\s*(?:–|—|-{1,2}|,\s|\(|\bfrom\b|\bat\b|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b|\d{4})|\s*$)/i)
     if (m) return stripFieldPrefix(m[1].trim().replace(/\s+/g, ' '))
 
-    // "B.S. Computer Science" — field immediately after abbreviation, stopped by separator or year
-    m = line.match(/\b(?:B\.S|B\.A|M\.S|M\.A|B\.Eng|M\.Eng|M\.B\.A|B\.Sc|M\.Sc)\.?\s+([A-Z][A-Za-z][A-Za-z\s&,]+?)(?=\s*(?:–|—|-{1,2}|\bfrom\b|\bat\b|\d{4})|\s*$)/i)
+    // "B.S. Computer Science" — field immediately after abbreviation, stopped by separator, paren, month, or year
+    m = line.match(/\b(?:B\.S|B\.A|M\.S|M\.A|B\.Eng|M\.Eng|M\.B\.A|B\.Sc|M\.Sc)\.?\s+([A-Z][A-Za-z][A-Za-z\s&,]+?)(?=\s*(?:–|—|-{1,2}|\(|\bfrom\b|\bat\b|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b|\d{4})|\s*$)/i)
     if (m) {
         const candidate = m[1].trim().replace(/\s+/g, ' ')
         if (candidate.length <= 60) return stripFieldPrefix(candidate)
@@ -764,13 +764,13 @@ export function parseResume(text) {
     }
 
     const technicalSignals = [...skillMap.entries()].map(([name, { category, instances }]) => {
-        const { score, level: levelStr, confidence, primarySignal, primarySection, suggestion, limitingFactor } = scoreSkillEvidence(instances)
+        const { score, level: levelStr, confidence, primarySignal, primarySection, suggestion, limitingFactor, perSectionScores } = scoreSkillEvidence(instances)
         const level = levelStr === 'certified' ? 'certified' : parseInt(levelStr.slice(1), 10)
         const source = SECTION_SOURCE_LABEL[primarySection] ?? primarySection
         const durationMonths = instances.reduce((max, i) =>
             (i.durationMonths != null && (max == null || i.durationMonths > max)) ? i.durationMonths : max
         , null)
-        return { name, category, level, score, confidence, source, primarySignal, suggestion, limitingFactor, durationMonths, contextCount: instances.length }
+        return { name, category, level, score, confidence, source, primarySignal, suggestion, limitingFactor, durationMonths, contextCount: instances.length, perSectionScores }
     }).sort((a, b) => {
         const aLvl = a.level === 'certified' ? -1 : a.level
         const bLvl = b.level === 'certified' ? -1 : b.level

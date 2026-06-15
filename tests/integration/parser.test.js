@@ -279,6 +279,39 @@ describe('parseJobDescription() -- guardWords suppress false positives', () => {
     const { technicalSignals } = parseJobDescription(synthetic);
     expect(technicalSignals.map((s) => s.name)).toContain('React');
   });
+
+  // --- Artificial Intelligence ---
+  test("does NOT extract Artificial Intelligence from 'Generative AI: Stable Diffusion, Midjourney' category label", () => {
+    // "Generative AI" is a category header in technicalSkills sections, not evidence
+    // that the candidate has general AI skills. The guardWord "generative ai" suppresses
+    // this false positive.
+    const synthetic = 'Technical Skills\nGenerative AI: Stable Diffusion, Midjourney, DALL-E';
+    const { technicalSignals } = parseJobDescription(synthetic);
+    expect(technicalSignals.map((s) => s.name)).not.toContain('Artificial Intelligence');
+  });
+
+  test("does NOT extract Artificial Intelligence from 'ML/AI or Data Science internships' enumeration", () => {
+    // "ML/AI" is a paired enumeration used as a category label in job summaries,
+    // not a standalone AI skill claim. guardWord "ml/ai" suppresses this.
+    const synthetic = 'Seeking ML/AI or Data Science internships in the Bay Area.';
+    const { technicalSignals } = parseJobDescription(synthetic);
+    expect(technicalSignals.map((s) => s.name)).not.toContain('Artificial Intelligence');
+  });
+
+  test("DOES extract Artificial Intelligence from 'built an AI-powered chatbot using OpenAI APIs'", () => {
+    // Genuine AI skill claim — no guardWord present in the window.
+    const synthetic = 'Built an AI-powered chatbot using OpenAI APIs and deployed to production.';
+    const { technicalSignals } = parseJobDescription(synthetic);
+    expect(technicalSignals.map((s) => s.name)).toContain('Artificial Intelligence');
+  });
+
+  test("DOES extract Artificial Intelligence from 'M.S. Artificial Intelligence' degree mention", () => {
+    // Degree mention contains the full alias — guardWords only target the short "AI"
+    // alias, not the "artificial intelligence" pattern, so this still matches.
+    const synthetic = 'Education: M.S. Artificial Intelligence, Carnegie Mellon University, 2024';
+    const { technicalSignals } = parseJobDescription(synthetic);
+    expect(technicalSignals.map((s) => s.name)).toContain('Artificial Intelligence');
+  });
 });
 
 // ---------------------------------------------------------------------------

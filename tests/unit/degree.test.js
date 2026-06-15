@@ -385,3 +385,27 @@ describe('extractAllDegrees() — year extraction: last year = graduationYear', 
     expect(result[0].graduationStatus).toBe('in_progress')
   })
 })
+
+// ---------------------------------------------------------------------------
+// extractAllDegrees() — field extraction: month tokens must not leak into field
+// ---------------------------------------------------------------------------
+
+describe('extractAllDegrees() — field stops at month abbreviation', () => {
+  test('"B.S. Software Development Apr 2020 – Dec 2023" → field is "Software Development"', () => {
+    const result = extractAllDegrees('B.S. Software Development Apr 2020 – Dec 2023')
+    expect(result).toHaveLength(1)
+    expect(result[0].field).toBe('Software Development')
+  })
+
+  test('"B.A. Philosophy 2018" → field is "Philosophy"', () => {
+    const result = extractAllDegrees('B.A. Philosophy 2018')
+    expect(result).toHaveLength(1)
+    expect(result[0].field).toBe('Philosophy')
+  })
+
+  test('"M.S. Artificial Intelligence (In Progress) Jan 2026" → field is "Artificial Intelligence"', () => {
+    const result = extractAllDegrees('M.S. Artificial Intelligence (In Progress) Jan 2026')
+    expect(result).toHaveLength(1)
+    expect(result[0].field).toBe('Artificial Intelligence')
+  })
+})

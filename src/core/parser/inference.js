@@ -373,9 +373,25 @@ export function scoreSkillEvidence(instances) {
   const level      = mapLevel(score)
   const confidence = computeConfidence(instances, bloomCs)
 
-  const primaryEntry = contributions.reduce((best, cur) =>
-    cur.contribution > best.contribution ? cur : best
-  )
+  // Step A — aggregate contributions by section
+  const sectionTotals = new Map()
+  for (const c of contributions) {
+    const name = c.inst.sectionName
+    sectionTotals.set(name, (sectionTotals.get(name) ?? 0) + c.contribution)
+  }
+
+  // Step B — pick the section with the highest aggregate sum
+  let bestSection = null
+  let bestTotal = -Infinity
+  for (const [name, total] of sectionTotals) {
+    if (total > bestTotal) { bestTotal = total; bestSection = name }
+  }
+
+  // Step C — within the winning section, pick the best individual instance
+  const primaryEntry = contributions
+    .filter(c => c.inst.sectionName === bestSection)
+    .reduce((best, cur) => cur.contribution > best.contribution ? cur : best)
+
   const primary        = primaryEntry.inst
   const primarySection = primary.sectionName
   const primarySignal  = buildPrimarySignal(primary, primaryEntry.bloomC, count)
@@ -408,5 +424,5 @@ export function scoreSkillEvidence(instances) {
     return { score, level: 'certified', confidence: 'high', primarySignal: 'certifications', primarySection: 'certifications', suggestion: null, limitingFactor: 'none' }
   }
 
-  return { score, level, confidence, primarySignal, primarySection, suggestion: SUGGESTIONS[level], limitingFactor }
+  return { score, level, confidence, primarySignal, primarySection, suggestion: SUGGESTIONS[level], limitingFactor, perSectionScores: Object.fromEntries(sectionTotals) }
 }
