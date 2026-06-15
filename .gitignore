@@ -23,6 +23,10 @@ operations/
 data-private/
 tests-private/
 
+# Personal resume fixtures (any extension)
+tests/fixtures/nick_*
+tests/fixtures/*resume*
+
 # Personal files
 *resume*.pdf
 *Resume*.pdf
@@ -58,5 +62,7 @@ tests/diagnostic-output/
 package-lock.json.backup
 yarn-error.log
 .claude/settings.local.json
-/tmp
-/tmp
+
+# Throwaway diagnostic scripts and output
+tmp/
+/tmp/
