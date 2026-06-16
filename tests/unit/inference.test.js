@@ -673,3 +673,48 @@ describe('scoreSkillEvidence() — per-section aggregation', () => {
     expect(result.perSectionScores.projects).toBeCloseTo(0.2, 4)
   })
 })
+
+// ---------------------------------------------------------------------------
+// Regression: per-bullet bloomC must be used when provided
+// ---------------------------------------------------------------------------
+// Bug: parseResume was dropping bloomC when building the skill instance map,
+// causing scoreSkillEvidence to fall back to classifyBloomLevel(bulletText)
+// on the entire job block. A high-Bloom verb elsewhere in the block (e.g.
+// "architected", "led") inflated every skill in that block, not just the one
+// mentioned in that specific bullet.
+//
+// Fix: parseResume now preserves bloomC through the skill map. scoreSkillEvidence
+// always uses inst.bloomC when present.
+//
+// Regression guard: a skill with a weak per-bullet bloomC (1.00) must not
+// receive a score as if the block's strongest verb (1.40) were applied.
+// ---------------------------------------------------------------------------
+
+describe('scoreSkillEvidence() — per-bullet bloomC propagation (regression: E16 over-scoring)', () => {
+  // A skill mentioned in one bullet ("developed gRPC services") — C=1.00 from that bullet.
+  // The block also contains "architected" (C=1.40), but that should NOT apply to this skill.
+  // wType=1.0 (full-time job), durationMonths capped at 12 (single-mention in long block) → D=1.0.
+  // Skills section entry: wType=0.05, durationMonths=null → D=0.4. R=1.2 (2 contexts).
+  // Score = (1.0×1.00×1.0 + 0.05×1.00×0.4) × 1.2 = (1.0 + 0.02) × 1.2 = 1.224 → L4, NOT L5.
+  test('single-bullet skill with bloomC=1.00 does not reach L5 even with high-Bloom verbs elsewhere in block', () => {
+    const result = scoreSkillEvidence([
+      { wType: 1.0, durationMonths: 12, sectionName: 'experience', bloomC: 1.00 },
+      { wType: 0.05, durationMonths: null, sectionName: 'skills', bloomC: 1.00 },
+    ])
+    expect(result.level).toBe('L4')
+    expect(result.score).toBeLessThan(1.80)
+  })
+
+  // Confirm: if bloomC is NOT provided, scoreSkillEvidence falls back to classifyBloomLevel
+  // on bulletText. With the architected verb present, the fallback would produce C=1.40
+  // and push the score to L5 — reproducing the original bug for callers that omit bloomC.
+  // This test documents that the fallback path still works for callers without bloomC.
+  test('without bloomC, falls back to classifyBloomLevel on bulletText — high verb gives higher score', () => {
+    const result = scoreSkillEvidence([
+      { wType: 1.0, durationMonths: 12, sectionName: 'experience', bulletText: 'Architected the entire gRPC service layer' },
+      { wType: 0.05, durationMonths: null, sectionName: 'skills' },
+    ])
+    // "Architected" → C=1.40. Score = (1.0×1.40×1.0 + 0.05×1.00×0.4) × 1.2 = 1.704 → L4.
+    expect(result.score).toBeGreaterThan(1.224)
+  })
+})

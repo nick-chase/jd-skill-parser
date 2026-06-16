@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "report": "vitest run --config vitest.report.config.js",
-    "test:coverage-gaps": "vitest run --config vitest.coverage-gaps.config.js"
+    "test:coverage-gaps": "vitest run --config vitest.coverage-gaps.config.js",
+    "validate:fixtures": "node scripts/validate-fixtures.js"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

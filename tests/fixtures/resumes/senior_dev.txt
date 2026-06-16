@@ -1,0 +1,106 @@
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+DANIEL REYES
+Hoboken, NJ  |  daniel.reyes@email.com  |  (201) 555-0142
+linkedin.com/in/danielreyes-dev  |  github.com/dreyes-eng
+
+
+SUMMARY
+Senior backend engineer with 7+ years building secure, distributed systems in regulated
+industries. Strong background in cloud architecture, security engineering, and mentoring.
+
+
+PROFESSIONAL EXPERIENCE
+
+Senior Software Engineer
+Aegis Financial Services — Jersey City, NJ
+April 2022 – Present
+
+- Led the architecture and rollout of a microservices platform processing 2.4M
+  transactions per day, replacing a legacy monolith over a 14-month migration
+- Designed authentication and authorization layer using OAuth 2.0, OpenID Connect,
+  and JWT, reducing unauthorized access incidents by 78% year-over-year
+- Architected a Kafka-based event pipeline for fraud detection, cutting end-to-end
+  detection latency from 4 minutes to under 12 seconds
+- Established the team's code review standards and security review checklist;
+  mentored 6 engineers, 2 of whom were promoted to senior within 18 months
+- Owned the AWS infrastructure for the payments service: EC2, Lambda, S3, RDS
+  PostgreSQL, and CloudWatch monitoring across 3 regions
+- Implemented Terraform-based infrastructure-as-code, replacing 200+ pages of
+  manual runbook procedures
+- Drove the adoption of OWASP secure coding practices across 4 engineering teams
+- Coordinated with the compliance team for SOC 2 Type II audit, owned the
+  technical evidence collection across 12 controls
+
+Software Engineer II
+Northbridge Logistics — Newark, NJ
+February 2019 – March 2022 (3 years, 1 month)
+
+- Built the warehouse management API in Java and Spring Boot, serving 47
+  distribution centers and 2,800 concurrent users
+- Designed the PostgreSQL schema for inventory tracking, optimizing query
+  performance by 64% through indexing strategy and partitioning
+- Developed REST APIs and gRPC services for the inventory and shipment domains
+- Containerized 14 legacy services using Docker and orchestrated deployment with
+  Kubernetes on AWS EKS
+- Set up CI/CD pipelines in Jenkins and later migrated the team to GitHub Actions
+- Implemented Prometheus and Grafana monitoring, established SLO definitions for
+  3 critical services
+- Mentored 3 junior engineers through their first production deployments
+- Participated in on-call rotation; reduced mean-time-to-resolution by 41% through
+  improved runbooks and observability tooling
+
+Junior Developer
+Northbridge Logistics — Newark, NJ
+July 2017 – January 2019
+
+- Wrote Java services for the order processing system
+- Contributed to bug fixes, code reviews, and unit testing using JUnit
+- Supported the migration from SVN to Git
+- Worked on internal tools using Python and Bash scripting
+
+
+EDUCATION
+
+Master of Science in Cybersecurity
+New Jersey Institute of Technology (NJIT) — Newark, NJ
+September 2020 – May 2022
+- Concentration: Secure Software Engineering
+- Thesis: "Detecting Anomalous API Access Patterns Using Sequence Models"
+- GPA: 3.87
+
+Bachelor of Arts in Computer Science
+Rutgers University–New Brunswick — New Brunswick, NJ
+September 2013 – May 2017
+- Minor in Mathematics
+- Dean's List: Fall 2015, Spring 2016, Fall 2016
+- GPA: 3.6
+
+
+CERTIFICATIONS
+
+CompTIA Security+ (SY0-701)
+Credential ID: COMP001022837401  |  Issued: March 2023  |  Valid through March 2026
+
+AWS Certified Solutions Architect – Associate
+Credential ID: AWS-ASA-2024-DR-8821  |  Issued: August 2024
+
+Certified Kubernetes Administrator (CKA)
+The Linux Foundation  |  Issued: November 2023  |  Valid through November 2026
+
+
+TECHNICAL SKILLS
+
+Languages: Java, Python, SQL, Bash, JavaScript, Go (learning)
+Backend: Spring Boot, REST APIs, gRPC, OAuth 2.0, JWT, OpenID Connect
+Cloud & Infra: AWS (EC2, Lambda, S3, RDS, EKS, CloudWatch), Terraform, Docker, Kubernetes
+Data: PostgreSQL, Kafka, Redis, Elasticsearch
+DevOps: GitHub Actions, Jenkins, Prometheus, Grafana, Datadog
+Security: OWASP, IAM, SSL/TLS, Penetration Testing concepts, SOC 2 compliance
+Methods: Agile/Scrum, TDD, Code Review, CI/CD, Microservices, Event-Driven Architecture
+
+
+PROFESSIONAL DEVELOPMENT
+
+- Speaker, "Pragmatic Microservices Migration" — NJ Tech Meetup, October 2024
+- Open source contributor to the OpenTelemetry Java SDK (3 merged PRs, 2023-2024)
+- Reviewer, OWASP Application Security Verification Standard (community feedback round, 2024)

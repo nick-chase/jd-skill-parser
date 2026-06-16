@@ -350,12 +350,13 @@ describe('parseResumeText() -- technicalSignals extraction from sample resume', 
 
   // B4 weighted scoring: Python appears in Technical Skills (wType=0.05) + intern Experience
   // (wType=0.65, durationMonths=3 — "Summer 2023" is now parsed as 3 months).
-  // 0.05×0.4 + 0.65×1.0×0.6 = 0.02 + 0.39 = 0.41 × 1.2 ≈ 0.49 → L3 (score ≥ 0.55 with bloomC).
-  // Note: actual bloomC from experience block raises score above L3 threshold.
-  test('Python is level 3 -- weighted scoring: skills-section + intern experience (Summer 2023 = 3 months)', () => {
+  // Per-bullet bloomC: the one Python bullet ("Processed and cleaned datasets") has no
+  // recognised Bloom verb → C=1.00. Score = (0.05×0.4 + 0.65×1.0×0.6) × 1.2 = 0.492 → L2.
+  // Previously scored L3 due to block-level Bloom inflation (now fixed).
+  test('Python is level 2 -- weighted scoring: skills-section + intern experience (Summer 2023 = 3 months)', () => {
     const python = resumeSkills.find((s) => s.name === 'Python');
     expect(python).toBeDefined();
-    expect(python.level).toBe(3);
+    expect(python.level).toBe(2);
     expect(python.score).toBeGreaterThan(0.30);
     expect(python.source).toMatch(/experience/i);
   });

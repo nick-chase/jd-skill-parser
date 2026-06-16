@@ -21,7 +21,7 @@
 | Document | Path | Contains |
 |----------|------|----------|
 | Open tasks + current phase | `../nat20-core/OPEN_TASKS.md` | Active task IDs, DoDs, what's in flight |
-| Master plan | `../nat20-core/docs/master-plan-v4.md` | Phase definitions, completed history, architecture decisions |
+| Master plan | `../nat20-core/docs/master-plan-v5.md` | Phase definitions, completed history, architecture decisions |
 | Scoring spec | `../nat20-core/docs/scoring-model.md` | Full E×C×D×R tables, weight values, score→level map |
 | Known bugs | `../nat20-core/KNOWN_BUGS.md` | Open bugs, priority, status — single source of truth |
 | Affiliate plan | `../nat20-core/docs/affiliate_masterplan.md` | Affiliate program strategy and implementation |
