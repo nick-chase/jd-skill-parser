@@ -67,3 +67,4 @@ yarn-error.log
 # Throwaway diagnostic scripts and output
 tmp/
 /tmp/
+PATH_TO_LAUNCH.md
