@@ -1,0 +1,113 @@
+MICHELLE ABERNATHY
+Montclair, NJ  |  michelle.abernathy@email.com  |  (973) 555-0264
+github.com/mabernathy-dev  |  linkedin.com/in/michelle-abernathy
+michelleabernathy.dev
+
+
+SUMMARY
+
+Former high school educator transitioning into software engineering. Completed full-stack
+bootcamp in late 2024, with 7+ months of self-directed project work since. Background in
+curriculum design, classroom management, and instructional technology — bringing strong
+communication, structured problem-solving, and the patience to debug at 2am.
+
+
+PROJECTS
+
+LessonLoop — Lesson Plan Collaboration Tool
+Personal project, ongoing  |  February 2025 – Present
+- Built a full-stack web app for teachers to share, version, and remix lesson plans;
+  inspired by frustrations from my own teaching career
+- Frontend: React, TypeScript, Tailwind CSS; Backend: Node.js, Express, PostgreSQL
+- Implemented user authentication using JWT and Auth0 integration
+- Designed the database schema for nested lesson plan versions (currently 12 tables)
+- Deployed on Vercel (frontend) and Railway (backend); ~85 beta users from my
+  former teaching network
+- Repo: github.com/mabernathy-dev/lessonloop
+
+GradeWise — Gradebook Analytics Dashboard
+Personal project  |  September 2024 – January 2025
+- Built a data visualization tool that takes CSV gradebook exports and surfaces
+  student-level patterns (declining trends, missing assignment clusters)
+- React frontend with Recharts; Python (Flask) backend processing the CSV input
+- Used pandas for the data analysis; ~3,200 lines of Python total
+- Walked through the project in a 14-minute YouTube tutorial that has 1.8K views
+
+Capstone: CommunityKitchen — Recipe Sharing Platform
+Springboard Software Engineering Bootcamp  |  August 2024 – November 2024
+- Team of 3; I owned the frontend and authentication
+- Built with React, Node.js, MongoDB, and integrated the Spoonacular API
+- Wrote unit tests using Jest (~70% coverage on the components I owned)
+- Presented final demo to the bootcamp cohort (~40 people) and 2 industry mentors
+
+
+EDUCATION
+
+Springboard — Software Engineering Career Track
+Full-stack bootcamp, online  |  May 2024 – November 2024
+- 700+ hours of structured coursework + 1:1 mentorship
+- Built 4 projects across the curriculum, culminating in the team capstone
+- Final program assessment: 94/100
+
+Bachelor of Arts in English Literature
+Drew University — Madison, NJ
+September 2010 – May 2014
+- Minor in Education
+- GPA: 3.6
+
+Postgraduate Teaching Certification
+Montclair State University  |  Completed 2015
+- New Jersey K-12 English Language Arts teaching credential
+
+
+PROFESSIONAL EXPERIENCE
+
+English Teacher, 9th & 11th Grade
+Lakeside High School — West Caldwell, NJ
+August 2015 – June 2024 (9 years)
+
+- Designed and taught a year-long English Language Arts curriculum to ~130 students
+  per year across 5 sections, aligned to NJSLA state standards
+- Built and maintained the department's first shared lesson-plan repository using
+  Google Workspace, adopted by 8 colleagues across grade levels
+- Led the school's "Tech in the Classroom" working group (2019-2022), evaluating
+  and rolling out 4 new instructional technology tools across the building
+- Served as faculty advisor to the student newspaper (2017-2023); managed a
+  publishing workflow that produced 6 issues per year with student staff of 12-18
+- Trained 3 first-year teachers as a department mentor (2020, 2022, 2023)
+- Implemented data-driven grading analysis that identified students at risk of
+  failing 6+ weeks earlier than the previous mid-quarter system
+- Department lead for vertical alignment of writing instruction across grades 9-12
+
+
+CERTIFICATIONS
+
+freeCodeCamp — Responsive Web Design Certification
+Issued: April 2024
+
+freeCodeCamp — JavaScript Algorithms and Data Structures Certification
+Issued: June 2024
+
+
+TECHNICAL SKILLS
+
+Languages: JavaScript, TypeScript, Python, HTML, CSS, SQL
+Frontend: React, Tailwind CSS, Recharts
+Backend: Node.js, Express, Flask
+Databases: PostgreSQL, MongoDB
+Tools: Git, GitHub, VS Code, Postman, Vercel
+Testing: Jest
+Auth: JWT, Auth0
+Currently learning: Next.js, TypeScript advanced patterns
+
+
+VOLUNTEER & COMMUNITY
+
+Volunteer Tutor, Code in the Schools (Newark)
+January 2025 – Present
+- Teach Saturday morning intro-to-web-development sessions to 8-12 high school
+  students; designed the 8-week curriculum
+
+Member, Women Who Code NJ
+- Attend monthly meetups; spoke at the November 2024 "Career Change Stories"
+  panel about transitioning from teaching to engineering

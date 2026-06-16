@@ -1,0 +1,35 @@
+{
+  "meta": {
+    "audience": "career-changer",
+    "notes": "Former teacher (9 yrs) transitioning to SWE via bootcamp; project portfolio only, zero paid tech experience; tests bootcamp evidence weight, transferable behavioral signals, and 'currently learning' L1 detection"
+  },
+  "skills": {
+    "JavaScript":        { "level": 3, "minLevel": 2, "maxLevel": 4 },
+    "TypeScript":        { "level": 2, "minLevel": 1, "maxLevel": 3 },
+    "React":             { "level": 3, "minLevel": 2, "maxLevel": 4 },
+    "Node.js":           { "level": 3, "minLevel": 2, "maxLevel": 4 },
+    "Express.js":        { "level": 2, "minLevel": 1, "maxLevel": 3 },
+    "Python":            { "level": 2, "minLevel": 1, "maxLevel": 3 },
+    "Flask":             { "level": 2, "minLevel": 1, "maxLevel": 3 },
+    "HTML":              { "level": 2, "minLevel": 1, "maxLevel": 3 },
+    "CSS":               { "level": 2, "minLevel": 1, "maxLevel": 3 },
+    "Tailwind":          { "level": 2, "minLevel": 1, "maxLevel": 3 },
+    "PostgreSQL":        { "level": 2, "minLevel": 1, "maxLevel": 3 },
+    "MongoDB":           { "level": 1, "minLevel": 1, "maxLevel": 2 },
+    "SQL":               { "level": 2, "minLevel": 1, "maxLevel": 3 },
+    "Git":               { "level": 2, "minLevel": 1, "maxLevel": 3 },
+    "Jest":              { "level": 2, "minLevel": 1, "maxLevel": 3 },
+    "JWT":               { "level": 2, "minLevel": 1, "maxLevel": 3 },
+    "Auth0":             { "level": 1, "minLevel": 1, "maxLevel": 2 },
+    "Pandas":            { "level": 2, "minLevel": 1, "maxLevel": 3 },
+    "Data Visualization":{ "level": 2, "minLevel": 1, "maxLevel": 3 },
+    "Recharts":          { "level": 1, "minLevel": 1, "maxLevel": 2 },
+    "Next.js":           { "level": 1, "minLevel": 1, "maxLevel": 2 },
+    "Vercel":            { "level": 2, "minLevel": 1, "maxLevel": 3 }
+  },
+  "behavioral": ["Communication", "Mentoring", "Data-Driven"],
+  "degree": {
+    "degreeLevel": 2,
+    "status": "completed"
+  }
+}

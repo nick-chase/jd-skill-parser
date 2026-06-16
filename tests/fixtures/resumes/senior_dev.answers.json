@@ -1,0 +1,45 @@
+{
+  "meta": {
+    "audience": "mid-career",
+    "notes": "Senior backend engineer with 7+ years; tests Bloom-Create verb detection, multi-role recurrence boosting, and skills-list-only vs demonstrated evidence — JavaScript/SQL/DevOps score L1 despite multi-year history (known bug E16 target)"
+  },
+  "skills": {
+    "Java":              { "level": 5, "minLevel": 4, "maxLevel": 5 },
+    "Python":            { "level": 3, "minLevel": 2, "maxLevel": 4 },
+    "JavaScript":        { "level": 2, "minLevel": 1, "maxLevel": 3 },
+    "SQL":               { "level": 4, "minLevel": 3, "maxLevel": 5 },
+    "Bash":              { "level": 2, "minLevel": 1, "maxLevel": 3 },
+    "Go":                { "level": 1, "minLevel": 1, "maxLevel": 2 },
+    "Spring Boot":       { "level": 4, "minLevel": 3, "maxLevel": 5 },
+    "REST API":          { "level": 4, "minLevel": 3, "maxLevel": 5 },
+    "gRPC":              { "level": 3, "minLevel": 2, "maxLevel": 4 },
+    "OAuth":             { "level": 4, "minLevel": 3, "maxLevel": 5 },
+    "JWT":               { "level": 3, "minLevel": 2, "maxLevel": 4 },
+    "OpenID Connect":    { "level": 3, "minLevel": 2, "maxLevel": 4 },
+    "AWS":               { "level": 5, "minLevel": 4, "maxLevel": 5 },
+    "Kubernetes":        { "level": 4, "minLevel": 3, "maxLevel": 5 },
+    "Docker":            { "level": 4, "minLevel": 3, "maxLevel": 5 },
+    "Terraform":         { "level": 4, "minLevel": 3, "maxLevel": 5 },
+    "PostgreSQL":        { "level": 4, "minLevel": 3, "maxLevel": 5 },
+    "Kafka":             { "level": 4, "minLevel": 3, "maxLevel": 5 },
+    "GitHub Actions":    { "level": 3, "minLevel": 2, "maxLevel": 4 },
+    "Jenkins":           { "level": 3, "minLevel": 2, "maxLevel": 4 },
+    "Prometheus":        { "level": 3, "minLevel": 2, "maxLevel": 4 },
+    "Grafana":           { "level": 3, "minLevel": 2, "maxLevel": 4 },
+    "CI/CD":             { "level": 3, "minLevel": 2, "maxLevel": 4 },
+    "Microservices":     { "level": 4, "minLevel": 3, "maxLevel": 5 },
+    "OWASP":             { "level": 3, "minLevel": 2, "maxLevel": 4 },
+    "Code Review":       { "level": 3, "minLevel": 2, "maxLevel": 4 },
+    "JUnit":             { "level": 2, "minLevel": 1, "maxLevel": 3 },
+    "Agile / Scrum":     { "level": 1, "minLevel": 1, "maxLevel": 2 },
+    "TDD":               { "level": 1, "minLevel": 1, "maxLevel": 2 },
+    "AWS Certified Solutions Architect": { "level": "certified", "minLevel": "certified", "maxLevel": "certified" },
+    "CKA":               { "level": "certified", "minLevel": "certified", "maxLevel": "certified" },
+    "CompTIA Security+": { "level": "certified", "minLevel": "certified", "maxLevel": "certified" }
+  },
+  "behavioral": ["Mentoring"],
+  "degree": {
+    "degreeLevel": 3,
+    "status": "completed"
+  }
+}

@@ -88,6 +88,8 @@ Exit code 1 = gate fails
 
 ## Fixture Index
 
-| File          | Audience     | Notes |
-|---------------|--------------|-------|
-| new_grad      | early-career | CS new grad, two internships, two projects, coursework as certifications |
+| File            | Audience       | Notes |
+|-----------------|----------------|-------|
+| new_grad        | early-career   | CS new grad, two internships, two projects, coursework as certifications |
+| career_changer  | career-changer | Former teacher transitioning to SWE via bootcamp; project portfolio only, zero paid tech experience |
+| senior_dev      | mid-career     | 7+ year backend engineer with multi-role recurrence and Bloom-Create verbs; surfaces weak-framing bug where JavaScript/SQL score L1 despite multi-year implied history (E16 accuracy gate target) |
