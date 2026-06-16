@@ -132,7 +132,11 @@ function matchSkillsInText(text) {
     const matches = []
     if (!text) return matches
     const entries = registry.getAllSkillEntries()
-    const used = new Set()
+    // Track used positions per canonical so that different canonicals can legitimately
+    // match overlapping text (e.g. "PostgreSQL" correctly fires for both the
+    // "PostgreSQL" canonical and the "SQL" canonical), while still preventing a
+    // single canonical from double-counting the same span via two of its own aliases.
+    const usedByCanonical = new Map()
     for (const { canonical, alias, category, guardWords, caseSensitive } of entries) {
         const isRegex = alias.includes('\\b') || alias.includes('(?')
         const flags = caseSensitive ? 'g' : 'gi'
@@ -144,6 +148,8 @@ function matchSkillsInText(text) {
                 ? new RegExp(alias, flags)
                 : new RegExp(`\\b${escapeRegex(alias)}\\b`, flags)
         }
+        if (!usedByCanonical.has(canonical)) usedByCanonical.set(canonical, new Set())
+        const used = usedByCanonical.get(canonical)
         let m
         while ((m = pattern.exec(text)) !== null) {
             let alreadyUsed = false
