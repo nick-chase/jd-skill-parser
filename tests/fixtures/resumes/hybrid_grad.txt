@@ -1,0 +1,65 @@
+Jordan Calloway
+jordan.calloway@email.com  |  (555) 204-8371  |  github.com/jcalloway-dev
+
+SUMMARY
+Computer Information Technology graduate with 3 years of prior experience in healthcare support
+and hospitality operations. Built a shift-scheduling web app to solve a real workflow problem from
+my previous career. Strong communicator and quick learner with hands-on project experience in
+Python, SQL, and React.
+
+EDUCATION
+
+B.S. Computer Information Technology
+Westfield University of Applied Sciences
+September 2022 – May 2025
+GPA: 3.4
+
+PROJECTS
+
+ShiftBridge — Shift Scheduling and Coverage Tool
+Personal project  |  August 2024 – Present
+- Built a full-stack scheduling web app used by 3 former colleagues at Riverside Community Clinic
+  to manage shift swaps, coverage requests, and weekly availability
+- Backend: Python (Flask), SQLite database with 8 tables; wrote all SQL schema and migration scripts
+- Frontend: React with vanilla CSS; built reusable shift calendar component
+- Implemented user authentication using session-based login with Flask-Login
+- Deployed on a personal VPS using Nginx and Gunicorn; ~40 active users
+- Repo: github.com/jcalloway-dev/shiftbridge
+
+Patient Intake Tracker (Capstone)
+Westfield University of Applied Sciences  |  January 2025 – April 2025
+- Team of 2; built a command-line Python tool for tracking outpatient intake forms
+- Used Python's csv module and argparse for CLI interface; wrote unit tests with pytest
+- Designed SQLite schema for patient visit records (anonymized synthetic data)
+- Presented to 3 faculty reviewers; received highest mark in cohort
+
+PROFESSIONAL EXPERIENCE
+
+Front Desk Coordinator
+Riverside Community Clinic — Glenbrook, IL
+March 2021 – July 2022 (1 year, 4 months)
+
+- Managed scheduling for 6 providers across 3 specialties using manual spreadsheet system;
+  identified inefficiencies that later motivated the ShiftBridge project
+- Handled patient intake, insurance verification, and appointment reminders for ~80 patients/day
+- Trained 4 new front desk staff on clinic check-in procedures and HIPAA protocols
+- Coordinated with billing team to resolve 30–40 insurance discrepancy cases per month
+- Maintained patient records in EHR system with high accuracy under time pressure
+
+Guest Services Associate
+Summit Hotel Group — Chicago, IL
+June 2019 – February 2021 (1 year, 8 months)
+
+- Assisted 100+ guests per shift with check-in, room requests, and issue resolution at a
+  240-room property
+- Resolved escalated guest complaints and coordinated with housekeeping and maintenance teams
+- Recognized as "Associate of the Month" three times for guest satisfaction scores
+- Processed reservations and billing adjustments using hotel property management software
+
+TECHNICAL SKILLS
+
+Languages: Python, SQL, JavaScript
+Frontend: React, CSS, HTML
+Backend: Flask, SQLite
+Tools: Git, GitHub, Nginx, pytest
+Currently learning: TypeScript, PostgreSQL

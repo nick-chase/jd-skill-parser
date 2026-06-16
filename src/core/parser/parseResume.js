@@ -486,12 +486,25 @@ function extractSkillsFromExperience(text) {
 
         const wType = classifyEvidenceType('experience', roleTitle)
         const bulletLines = splitIntoBulletLines(block)
+        // Restrict Bloom scoring and mention counting to actual content lines (bullet-marked)
+        // so that skill names that appear in the role title don't dilute Bloom multipliers
+        // or inflate mention counts for the duration cap.
+        const contentLines = bulletLines.filter(l => /^[-•\*‣◦→]/.test(l))
+        const bloomSource = contentLines.length > 0 ? contentLines : bulletLines
 
         for (const { canonical, category } of matchSkillsInText(block)) {
+            const needle = canonical.toLowerCase()
+            const mentionCount = bloomSource.filter(l => l.toLowerCase().includes(needle)).length
+            // Cap duration at 12 months when a skill appears in only one bullet line.
+            // A single mention cannot represent the full block tenure; the full duration
+            // multiplier is only earned when the skill recurs across multiple bullets.
+            const effectiveDuration = (mentionCount <= 1 && durationMonths !== null && durationMonths > 12)
+                ? 12
+                : durationMonths
             instances.push({
-                canonical, category, wType, durationMonths, sectionName: 'experience',
+                canonical, category, wType, durationMonths: effectiveDuration, sectionName: 'experience',
                 bulletText: block,
-                bloomC: averageBloomForSkill(canonical, bulletLines),
+                bloomC: averageBloomForSkill(canonical, bloomSource),
             })
         }
     }
@@ -750,7 +763,7 @@ export function parseResume(text) {
 
     const skillMap = new Map()
 
-    for (const { canonical, category, wType, durationMonths, sectionName, bulletText } of allInstances) {
+    for (const { canonical, category, wType, durationMonths, sectionName, bulletText, bloomC } of allInstances) {
         if (!skillMap.has(canonical)) {
             skillMap.set(canonical, { category, instances: [] })
         }
@@ -759,7 +772,7 @@ export function parseResume(text) {
             i => i.sectionName === sectionName && i.wType === wType && i.durationMonths === durationMonths
         )
         if (!duplicate) {
-            entry.instances.push({ wType, durationMonths, sectionName, bulletText })
+            entry.instances.push({ wType, durationMonths, sectionName, bulletText, bloomC })
         }
     }
 

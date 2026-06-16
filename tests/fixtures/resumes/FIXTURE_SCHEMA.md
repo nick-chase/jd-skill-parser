@@ -93,3 +93,4 @@ Exit code 1 = gate fails
 | new_grad        | early-career   | CS new grad, two internships, two projects, coursework as certifications |
 | career_changer  | career-changer | Former teacher transitioning to SWE via bootcamp; project portfolio only, zero paid tech experience |
 | senior_dev      | mid-career     | 7+ year backend engineer with multi-role recurrence and Bloom-Create verbs; surfaces weak-framing bug where JavaScript/SQL score L1 despite multi-year implied history (E16 accuracy gate target) |
+| hybrid_grad     | early-career + career-changer (hybrid) | Hospitality/healthcare background pivoting to CS via IT degree and a self-built scheduling app; counts toward BOTH early-career and career-changer audience buckets |
