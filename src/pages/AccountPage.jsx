@@ -5,7 +5,6 @@ import { redirectToPortal } from '../lib/stripe.js'
 import { getUserPlanStatus, loadResumeProfile } from '../lib/supabase.js'
 import SignInButton from '../components/SignInButton.jsx'
 import StatBlock from '../components/StatBlock.jsx'
-import UpgradePrompt from '../components/UpgradePrompt.jsx'
 import AppFooter from '../components/AppFooter.jsx'
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
@@ -145,10 +144,6 @@ export default function AccountPage() {
       )}
 
       {/* Profile tab */}
-      {activeTab === 'profile' && !isPaid && (
-        <UpgradePrompt reason="profile" />
-      )}
-
       {activeTab === 'profile' && isPaid && (
         <div className="space-y-6">
           {/* Header */}

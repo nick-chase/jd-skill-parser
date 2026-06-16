@@ -10,16 +10,12 @@ import { getResumeBoostSkills, getMatchBoostSkills } from './utils/boostSkills.j
 import { getOrCreateUser, onAuthStateChange } from './lib/auth.js'
 import { analytics } from './lib/analytics.js';
 import { saveResumeProfile, loadResumeProfile, getUserPlanStatus } from './lib/supabase.js';
-import { checkAndIncrementParseCount, FREE_DAILY_LIMIT, isPaid } from './lib/limits.js';
 import SignInButton from './components/SignInButton.jsx';
 import UserMenu from './components/UserMenu.jsx';
-import UpgradePrompt from './components/UpgradePrompt.jsx'
-import AdSlot from './components/AdSlot.jsx';
 import AppFooter from './components/AppFooter.jsx';
 import HowToTour from './components/HowToTour.jsx'
 import FeedbackForm from './components/FeedbackForm.jsx';
 import { getAffiliateResources } from '@utils/affiliateLoader.js';
-import { buildFingerprint, saveFingerprint } from './utils/resumeFingerprint.js';
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
 const betaFeedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
@@ -1353,9 +1349,6 @@ export function runBehavioralGap(jdBehavioral, resumeBehavioral) {
 export default function App() {
     const [user, setUser] = useState(null);
     const [isPaidStatus, setIsPaidStatus] = useState(false);
-    const [parseCount, setParseCount] = useState(null);
-    const [showParseLimit, setShowParseLimit] = useState(false);
-    const [showPdfLimit, setShowPdfLimit] = useState(false);
     const [jdInputError, setJdInputError] = useState(false);
     const [resumeInputError, setResumeInputError] = useState(false);
     const [activeTab, setActiveTab] = useState('jd');
@@ -1369,6 +1362,12 @@ export default function App() {
     const [pdfStatus, setPdfStatus] = useState('idle'); // idle | loading | done | error
     const [pdfInfo, setPdfInfo] = useState(null);       // { name, numPages }
     const fileInputRef = useRef(null);
+
+    useEffect(() => {
+        try {
+            ['nat20_resume_fp', 'nat20_parse_date', 'nat20_parse_count'].forEach(k => localStorage.removeItem(k));
+        } catch (_) {}
+    }, []);
 
     useEffect(() => {
         if (paymentsEnabled) {
@@ -1408,15 +1407,6 @@ export default function App() {
             return;
         }
         setJdInputError(false);
-        if (paymentsEnabled) {
-            const { allowed, remaining } = await checkAndIncrementParseCount(user, isPaid(user, isPaidStatus));
-            if (!allowed) {
-                setShowParseLimit(true);
-                return;
-            }
-            setParseCount(remaining);
-            setShowParseLimit(false);
-        }
 
         const { companyName: extractedCompany, jobRole: extractedRole } = parseCompanyAndRole(input);
         const meta = parseJobMeta(input);
@@ -1441,8 +1431,6 @@ export default function App() {
         setResumeInputError(false);
         const parsed = parseResumeInput(resumeInput, 'text');
         setResumeResults(parsed);
-        // Fire-and-forget fingerprint — stable identity signal for gate
-        saveFingerprint(buildFingerprint(parsed));
         sessionStorage.setItem('beta_resume_results', JSON.stringify(parsed));
         sessionStorage.setItem('beta_resume_count', parsed.technicalSignals.length);
         analytics.parseComplete('resume');
@@ -1602,14 +1590,6 @@ export default function App() {
                             </p>
                         )}
 
-                        {paymentsEnabled && parseCount !== null && !isPaid(user, isPaidStatus) && (
-                            <div className="text-xs text-slate-400 text-right">
-                                {parseCount} of {FREE_DAILY_LIMIT} parses remaining today
-                            </div>
-                        )}
-
-                        {paymentsEnabled && showParseLimit && <UpgradePrompt reason="parse_limit" />}
-
                         {results !== null && (
                             <ResultsView
                                 results={results.technicalSignals}
@@ -1655,19 +1635,12 @@ export default function App() {
                                     }}
                                 />
                                 <button
-                                    onClick={() => {
-                                        const canUploadPDF = !paymentsEnabled || isPaidStatus;
-                                        if (!canUploadPDF) {
-                                            setShowPdfLimit(true);
-                                            return;
-                                        }
-                                        fileInputRef.current?.click();
-                                    }}
+                                    onClick={() => fileInputRef.current?.click()}
                                     disabled={pdfStatus === 'loading'}
                                     className="text-xs px-2.5 py-1 border border-slate-300 rounded hover:bg-slate-100 transition"
                                     style={{ opacity: pdfStatus === 'loading' ? 0.5 : 1, cursor: pdfStatus === 'loading' ? 'not-allowed' : 'pointer' }}
                                 >
-                                    Upload PDF {paymentsEnabled && !isPaidStatus ? '🔒' : ''}
+                                    Upload PDF
                                 </button>
                             </div>
                         </div>
@@ -1682,8 +1655,6 @@ export default function App() {
                         {pdfStatus === 'error' && (
                             <p className="text-xs text-red-600">Extraction failed — try a different file.</p>
                         )}
-
-                        {paymentsEnabled && showPdfLimit && <UpgradePrompt reason="pdf" />}
 
                         <textarea
                             value={resumeInput}
@@ -1757,7 +1728,6 @@ export default function App() {
                                     degreeFlag={computeDegreeFlag(resumeResults.degree, results.degree)}
                                     isPaid={isPaidStatus}
                                 />
-                                <AdSlot isPaid={isPaidStatus} />
                             </>
                         )}
                     </div>
