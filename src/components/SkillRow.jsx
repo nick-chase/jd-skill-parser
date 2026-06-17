@@ -10,16 +10,7 @@
 
 import ResourceLink from './ResourceLink.jsx'
 import { getAffiliateResources } from '../utils/affiliateLoader.js'
-import { LEVEL_NAMES, IMPORTANCE_NAMES } from '@utils/constants.js'
-
-function nameToResourceId(name) {
-  return (name || '')
-    .toLowerCase()
-    .replace(/\./g, '')
-    .replace(/[/\s]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/[^a-z0-9-]/g, '')
-}
+import { LEVEL_NAMES, IMPORTANCE_NAMES, nameToResourceId } from '@utils/constants.js'
 
 const LEVEL_TIPS = [
   '',
