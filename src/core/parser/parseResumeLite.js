@@ -18,7 +18,7 @@
 
 import { parseResume } from './parseResume.js'
 import { getDecision } from './decision.js'
-import { runGapAnalysis, runBehavioralGap } from '../../jd-skill-parser.jsx'
+import { runGapAnalysis, runBehavioralGap } from './gap.js'
 
 export function parseResumeLite(resumeText, jdProfile) {
     // 1. Full parse — existing logic, no reimplementation
