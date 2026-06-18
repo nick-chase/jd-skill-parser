@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import * as registry from '@core/registry.js';
 import { extractTextFromPdf } from './lib/pdfExtract.js';
 import { parseResume, extractBehavioralSignals } from './core/parser/parseResume.js';
+import { parseResumeLite } from './core/parser/parseResumeLite.js';
 import { getDecision } from '@core/parser/decision.js';
 import SkillRow from './components/SkillRow.jsx'
+import RookieResultsView from './components/RookieResultsView.jsx'
 import BoostSection from './components/BoostSection.jsx'
 import { getResumeBoostSkills, getMatchBoostSkills } from './utils/boostSkills.js';
 import { getOrCreateUser, onAuthStateChange } from './lib/auth.js'
@@ -1350,10 +1352,10 @@ export default function App() {
             return;
         }
         setResumeInputError(false);
-        const parsed = parseResumeInput(resumeInput, 'text');
+        const parsed = isPaidStatus ? parseResumeInput(resumeInput, 'text') : parseResumeLite(resumeInput, results);
         setResumeResults(parsed);
         sessionStorage.setItem('beta_resume_results', JSON.stringify(parsed));
-        sessionStorage.setItem('beta_resume_count', parsed.technicalSignals.length);
+        sessionStorage.setItem('beta_resume_count', parsed.technicalSignals?.length ?? parsed.topSkills?.totalDetected ?? 0);
         analytics.parseComplete('resume');
         // Auto-switch to Gap Analysis if JD already parsed
         if (results?.technicalSignals?.length > 0) {
@@ -1619,19 +1621,19 @@ export default function App() {
                 {/* Gap Analysis Tab */}
                 {activeTab === 'compare' && (
                     <div>
-                        {(!results?.technicalSignals || !resumeResults?.technicalSignals) ? (
+                        {(!results?.technicalSignals || !resumeResults) ? (
                             <div className="text-sm text-slate-500 p-12 text-center border border-dashed border-slate-300 rounded-lg bg-white">
                                 <div style={{ marginBottom: '12px' }}>Complete both steps first:</div>
                                 <div style={{ display: 'flex', justifyContent: 'center', gap: '10px' }}>
                                     <div style={{ color: results?.technicalSignals ? '#059669' : '#dc2626' }}>
                                         {results?.technicalSignals ? '✅' : '❌'} Job Description
                                     </div>
-                                    <div style={{ color: resumeResults?.technicalSignals ? '#059669' : '#dc2626' }}>
-                                        {resumeResults?.technicalSignals ? '✅' : '❌'} Resume
+                                    <div style={{ color: resumeResults ? '#059669' : '#dc2626' }}>
+                                        {resumeResults ? '✅' : '❌'} Resume
                                     </div>
                                 </div>
                             </div>
-                        ) : (
+                        ) : isPaidStatus ? (
                             <>
                                 <p className="text-xs text-slate-400 mb-4">
                                     Scores reflect how your resume communicates each skill — not your actual ability.
@@ -1650,6 +1652,8 @@ export default function App() {
                                     isPaid={isPaidStatus}
                                 />
                             </>
+                        ) : (
+                            <RookieResultsView liteResults={resumeResults} />
                         )}
                     </div>
                 )}
