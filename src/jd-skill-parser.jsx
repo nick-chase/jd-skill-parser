@@ -16,6 +16,7 @@ import AppFooter from './components/AppFooter.jsx';
 import HowToTour from './components/HowToTour.jsx'
 import FeedbackForm from './components/FeedbackForm.jsx';
 import { getAffiliateResources } from '@utils/affiliateLoader.js';
+import { nameToResourceId } from '@utils/constants.js';
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
 const betaFeedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
@@ -483,15 +484,6 @@ const EVIDENCE_BANDS = [
     { key: 'limited',   label: 'Limited Evidence',  levels: [2],    color: 'text-amber-700'  },
     { key: 'mentioned', label: 'Mentioned',         levels: [1],    color: 'text-slate-400'  },
 ];
-
-function nameToResourceId(name) {
-    return (name || '')
-        .toLowerCase()
-        .replace(/\./g, '')
-        .replace(/[/\s]+/g, '-')
-        .replace(/-+/g, '-')
-        .replace(/[^a-z0-9-]/g, '');
-}
 
 function getGapSuggestion(name, resumeLevel, requiredLevel) {
     if (!resumeLevel || resumeLevel <= 1) {
