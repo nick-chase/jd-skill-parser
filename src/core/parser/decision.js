@@ -1,7 +1,7 @@
 // decision.js — owns: matchScore, isEntryLevel
 // Gap arrays (levelGaps, matched, critical, bonus) are computed
-// in runGapAnalysis() in jd-skill-parser.jsx, not here.
-// If updating gap logic: edit jd-skill-parser.jsx, not this file.
+// in runGapAnalysis() in src/core/parser/gap.js, not here.
+// If updating gap logic: edit gap.js, not this file.
 
 /**
  * Decision engine — gap analysis and match scoring.

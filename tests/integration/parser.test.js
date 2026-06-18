@@ -26,10 +26,9 @@ import { readFileSync } from 'fs';
 import {
   parseJobDescription,
   parseResumeText,
-  runGapAnalysis,
-  runBehavioralGap,
   parseJobMeta,
 } from '../../src/jd-skill-parser.jsx';
+import { runGapAnalysis, runBehavioralGap } from '../../src/core/parser/gap.js';
 
 // ---------------------------------------------------------------------------
 // Fixture loading
