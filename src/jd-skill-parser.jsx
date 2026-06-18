@@ -1341,7 +1341,7 @@ export default function App() {
         sessionStorage.setItem('beta_jd_results', JSON.stringify(jdResults));
         sessionStorage.setItem('beta_jd_count', jdResults.technicalSignals.length);
         analytics.parseComplete('jd');
-        if (resumeResults?.technicalSignals?.length > 0) {
+        if (resumeResults != null) {
             setActiveTab('compare');
         }
     }
@@ -1358,7 +1358,7 @@ export default function App() {
         sessionStorage.setItem('beta_resume_count', parsed.technicalSignals?.length ?? parsed.topSkills?.totalDetected ?? 0);
         analytics.parseComplete('resume');
         // Auto-switch to Gap Analysis if JD already parsed
-        if (results?.technicalSignals?.length > 0) {
+        if (results != null) {
             setActiveTab('compare');
         }
         // Save to Supabase only for paid users — free users don't accumulate stored data
