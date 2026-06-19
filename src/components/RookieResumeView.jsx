@@ -84,37 +84,36 @@ export default function RookieResumeView({ liteResults }) {
       )}
 
       {/* Behavioral signals */}
-      {allBehavioralSignals.length > 0 && (
-        <div
-          className="rounded-lg border border-slate-200 bg-white p-5"
-          data-testid="resume-behavioral-signals"
-        >
-          <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">
-            Behavioral signals
-          </div>
+      <div
+        className="rounded-lg border border-slate-200 bg-white p-5"
+        data-testid="resume-behavioral-signals"
+      >
+        <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">
+          Behavioral signals
+        </div>
+        {allBehavioralSignals.filter(s => s.present).length === 0 ? (
+          <p className="text-sm text-slate-500">No behavioral signals detected on your resume.</p>
+        ) : (
           <ul className="space-y-1">
-            {allBehavioralSignals.map((signal, i) => (
+            {allBehavioralSignals.filter(s => s.present).map((signal, i) => (
               <li
                 key={signal.name ?? i}
                 className="flex items-center gap-2 text-sm"
               >
                 <span
-                  className={signal.present
-                    ? 'text-emerald-600 font-semibold'
-                    : 'text-slate-400'
-                  }
-                  aria-label={signal.present ? 'present' : 'not found'}
+                  className="text-emerald-600 font-semibold"
+                  aria-label="present"
                 >
-                  {signal.present ? '●' : '○'}
+                  ●
                 </span>
-                <span className={signal.present ? 'text-slate-800' : 'text-slate-500'}>
+                <span className="text-slate-800">
                   {signal.name}
                 </span>
               </li>
             ))}
           </ul>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Credentials */}
       <div
