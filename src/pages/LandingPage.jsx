@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { onAuthStateChange } from '../lib/auth.js'
+import TierBadge from '../components/TierBadge.jsx'
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
 
@@ -28,9 +29,7 @@ export default function LandingPage() {
       <nav className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
         <div className="flex items-center gap-2">
           <span className="font-bold text-slate-800 text-lg">⚔ Nat20</span>
-          <span className="text-xs font-semibold px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full border border-amber-200 tracking-wide">
-            Beta
-          </span>
+          <TierBadge isPaidStatus={false} />
         </div>
         <div className="flex items-center gap-4">
           <Link to="/app"
