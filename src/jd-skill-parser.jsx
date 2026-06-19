@@ -36,6 +36,13 @@ const betaFeedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true
 const LEVEL_NAMES = ['—', 'Mentioned', 'Limited evidence', 'Supported', 'Strong evidence', 'Extensive evidence'];
 const IMPORTANCE_NAMES = ['—', 'Optional', 'Nice-to-have', 'Preferred', 'Required', 'Critical'];
 
+/** Single source of truth for matchScore → label. Used by GapAnalysisView and RookieResultsView. */
+export function getMatchScoreLabel(score) {
+    if (score >= 70) return 'Strong Match';
+    if (score >= 40) return 'Partial Match';
+    return 'Weak Match';
+}
+
 const IMPORTANCE_STYLES = {
     5: 'bg-rose-50 text-rose-700 border-rose-200',
     4: 'bg-amber-50 text-amber-800 border-amber-200',
@@ -826,7 +833,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
     // Use the decision engine's matchScore as the single source of truth (fixes B-FIX-01).
     const score = decisionResult?.matchScore ?? 0;
     const scoreColor = score >= 70 ? '#059669' : score >= 40 ? '#d97706' : '#dc2626';
-    const scoreLabel = score >= 70 ? 'Strong Match' : score >= 40 ? 'Partial Match' : 'Weak Match';
+    const scoreLabel = getMatchScoreLabel(score);
 
     return (
         <div className="flex flex-col gap-4">
@@ -1661,6 +1668,7 @@ export default function App() {
                             <RookieResultsView
                                 resumeData={resumeResults}
                                 liteMatch={computeLiteMatch(resumeResults, results)}
+                                duties={results?.jobDuties ?? []}
                             />
                         )}
                     </div>

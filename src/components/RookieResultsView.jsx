@@ -18,8 +18,14 @@
  *     missingBehavioral: object[]
  *     teaserCounts:      { lowMatchCount: number, criticalGapCount: number,
  *                          lowMatchTeaser?: string, criticalTeaser?: string }
+ *     matchedCount:      number
+ *     missingCount:      number
+ *     levelGapsCount:    number
  *   }
+ *   duties  string[]   — JD duty bullets from results.jobDuties
  */
+
+import { getMatchScoreLabel } from '../jd-skill-parser.jsx'
 
 const LEVEL_NAMES = {
   1: 'Awareness',
@@ -29,7 +35,7 @@ const LEVEL_NAMES = {
   5: 'Expert',
 }
 
-export default function RookieResultsView({ resumeData, liteMatch }) {
+export default function RookieResultsView({ resumeData, liteMatch, duties = [] }) {
   if (!resumeData) return null
 
   const {
@@ -42,6 +48,9 @@ export default function RookieResultsView({ resumeData, liteMatch }) {
     closestGap        = null,
     missingBehavioral = [],
     teaserCounts      = { lowMatchCount: 0, criticalGapCount: 0 },
+    matchedCount      = 0,
+    missingCount      = 0,
+    levelGapsCount    = 0,
   } = liteMatch ?? {}
 
   // Sentinel: JD not yet parsed — show empty state instead of stale/wrong data
@@ -54,6 +63,13 @@ export default function RookieResultsView({ resumeData, liteMatch }) {
       </div>
     )
   }
+
+  const scoreLabel = getMatchScoreLabel(matchScore)
+  const scoreColor = matchScore >= 70
+    ? 'text-emerald-700'
+    : matchScore >= 40
+      ? 'text-amber-700'
+      : 'text-red-700'
 
   // Credential gap copy — boolean-derived only, zero specifics
   function credentialCopy() {
@@ -78,7 +94,7 @@ export default function RookieResultsView({ resumeData, liteMatch }) {
   return (
     <div className="space-y-6">
 
-      {/* 1. Match score */}
+      {/* 1. Match-summary banner */}
       <div
         className="rounded-lg border border-slate-200 bg-white p-5"
         data-testid="match-score-section"
@@ -86,39 +102,59 @@ export default function RookieResultsView({ resumeData, liteMatch }) {
         <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1">
           Match score
         </div>
-        <div className="text-4xl font-bold text-slate-900" data-testid="match-score-value">
-          {matchScore}
+        <div className="flex items-baseline gap-3 mb-3">
+          <div
+            className={`text-4xl font-bold ${scoreColor}`}
+            data-testid="match-score-value"
+          >
+            {matchScore}%
+          </div>
+          <div
+            className={`text-sm font-semibold ${scoreColor}`}
+            data-testid="match-score-label"
+          >
+            {scoreLabel}
+          </div>
         </div>
-        <div className="text-xs text-slate-500 mt-1">
+        <div
+          className="flex flex-wrap gap-4 text-xs"
+          data-testid="match-summary-counts"
+        >
+          <span>
+            <span className="font-semibold uppercase tracking-wide text-slate-400">Matched </span>
+            <span className="font-bold text-emerald-700" data-testid="matched-count">{matchedCount}</span>
+          </span>
+          <span>
+            <span className="font-semibold uppercase tracking-wide text-slate-400">Missing </span>
+            <span className="font-bold text-red-700" data-testid="missing-count">{missingCount}</span>
+          </span>
+          <span>
+            <span className="font-semibold uppercase tracking-wide text-slate-400">Level Gaps </span>
+            <span className="font-bold text-amber-700" data-testid="level-gaps-count">{levelGapsCount}</span>
+          </span>
+        </div>
+        <div className="text-xs text-slate-500 mt-3">
           Based on how your resume reads today — not your actual ability.
         </div>
       </div>
 
-      {/* 2. Top skills */}
-      {topSkills.skills.length > 0 && (
+      {/* 2. What this role does */}
+      {duties.length > 0 && (
         <div
           className="rounded-lg border border-slate-200 bg-white p-5"
-          data-testid="top-skills-section"
+          data-testid="job-duties-section"
         >
           <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">
-            Your strongest signals
+            What this role does
           </div>
-          <ul className="space-y-2">
-            {topSkills.skills.slice(0, 5).map((skill, i) => (
-              <li
-                key={skill.name ?? i}
-                className="flex items-center justify-between text-sm"
-              >
-                <span className="font-medium text-slate-800">{skill.name}</span>
-                <span className="text-xs text-emerald-600 font-semibold">
-                  L{skill.level} · {LEVEL_NAMES[skill.level] ?? ''}
-                </span>
+          <ul className="space-y-1">
+            {duties.map((duty, i) => (
+              <li key={i} className="flex gap-2 text-sm text-slate-600">
+                <span className="text-slate-300 shrink-0 mt-0.5">·</span>
+                <span>{duty}</span>
               </li>
             ))}
           </ul>
-          <div className="text-xs text-slate-400 mt-3">
-            {topSkills.skills.length} of {topSkills.totalDetected} detected
-          </div>
         </div>
       )}
 

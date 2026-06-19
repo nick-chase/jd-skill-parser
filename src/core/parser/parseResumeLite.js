@@ -156,5 +156,8 @@ export function computeLiteMatch(resumeData, jdProfile) {
         closestGap,
         missingBehavioral,
         teaserCounts,
+        matchedCount:    (gapResult?.matched   ?? []).length,
+        missingCount:    critical.length,
+        levelGapsCount:  levelGaps.length,
     }
 }
