@@ -21,6 +21,7 @@ import FeedbackForm from './components/FeedbackForm.jsx';
 import { getAffiliateResources } from '@utils/affiliateLoader.js';
 import { nameToResourceId } from '@utils/constants.js';
 import { runGapAnalysis, runBehavioralGap } from './core/parser/gap.js';
+import TierBadge from './components/TierBadge.jsx';
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
 const betaFeedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
@@ -1417,9 +1418,7 @@ export default function App() {
                 <header className="mb-8">
                     <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-center flex items-center justify-center gap-2">
                         <Link to="/" className="hover:opacity-80 transition-opacity">Nat20</Link>
-                        <span className="text-xs font-semibold px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full border border-amber-200 tracking-wide">
-                            Beta
-                        </span>
+                        <TierBadge isPaidStatus={isPaidStatus} />
                     </h1>
                     <p className="text-sm sm:text-base text-slate-600 mt-2 text-center">
                         Skill-based job matching, leveled.
