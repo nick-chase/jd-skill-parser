@@ -7,6 +7,7 @@ import { parseResumeLite } from './core/parser/parseResumeLite.js';
 import { getDecision } from '@core/parser/decision.js';
 import SkillRow from './components/SkillRow.jsx'
 import RookieResultsView from './components/RookieResultsView.jsx'
+import RookieResumeView from './components/RookieResumeView.jsx'
 import BoostSection from './components/BoostSection.jsx'
 import { getResumeBoostSkills, getMatchBoostSkills } from './utils/boostSkills.js';
 import { getOrCreateUser, onAuthStateChange } from './lib/auth.js'
@@ -1600,19 +1601,23 @@ export default function App() {
                         )}
 
                         {resumeResults !== null && (
-                            resumeResults.technicalSignals.length === 0 ? (
-                                <div className="text-sm text-slate-500 p-8 text-center border border-dashed border-slate-300 rounded-lg bg-white">
-                                    No recognized skills detected. Make sure your resume has a TECHNICAL SKILLS or EDUCATION section.
-                                </div>
+                            isPaidStatus ? (
+                                resumeResults.technicalSignals.length === 0 ? (
+                                    <div className="text-sm text-slate-500 p-8 text-center border border-dashed border-slate-300 rounded-lg bg-white">
+                                        No recognized skills detected. Make sure your resume has a TECHNICAL SKILLS or EDUCATION section.
+                                    </div>
+                                ) : (
+                                    <>
+                                        <ResumeResultsView
+                                            results={resumeResults.technicalSignals}
+                                            behavioralSignals={resumeResults.behavioralSignals}
+                                            degree={resumeResults.degree}
+                                            isPaid={isPaidStatus}
+                                        />
+                                    </>
+                                )
                             ) : (
-                                <>
-                                    <ResumeResultsView
-                                        results={resumeResults.technicalSignals}
-                                        behavioralSignals={resumeResults.behavioralSignals}
-                                        degree={resumeResults.degree}
-                                        isPaid={isPaidStatus}
-                                    />
-                                </>
+                                <RookieResumeView liteResults={resumeResults} />
                             )
                         )}
                     </div>

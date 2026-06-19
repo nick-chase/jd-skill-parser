@@ -39,12 +39,14 @@ describe('parseResumeLite() — return shape', () => {
         'topSkills',
         'closestGap',
         'missingBehavioral',
+        'allBehavioralSignals',
         'credentialGap',
+        'sectionsPresent',
         'teaserCounts',
         'matchScore',
     ])
 
-    test('returns exactly the 6 documented top-level fields', () => {
+    test('returns exactly the 8 documented top-level fields', () => {
         const keys = Object.keys(result)
         expect(keys).toHaveLength(EXPECTED_KEYS.size)
         for (const key of EXPECTED_KEYS) {
@@ -61,10 +63,26 @@ describe('parseResumeLite() — return shape', () => {
         expect(Array.isArray(result.missingBehavioral)).toBe(true)
     })
 
-    test('credentialGap has exactly degreePresent and certPresent', () => {
+    test('credentialGap has degreePresent, degreeLevel, certCount, and certPresent', () => {
         const keys = Object.keys(result.credentialGap)
-        expect(keys).toEqual(expect.arrayContaining(['degreePresent', 'certPresent']))
-        expect(keys).toHaveLength(2)
+        expect(keys).toEqual(expect.arrayContaining(['degreePresent', 'degreeLevel', 'certCount', 'certPresent']))
+        expect(keys).toHaveLength(4)
+    })
+
+    test('allBehavioralSignals is an array of { name, present } objects', () => {
+        expect(Array.isArray(result.allBehavioralSignals)).toBe(true)
+        if (result.allBehavioralSignals.length > 0) {
+            const first = result.allBehavioralSignals[0]
+            expect(typeof first.name).toBe('string')
+            expect(typeof first.present).toBe('boolean')
+        }
+    })
+
+    test('sectionsPresent is an array of strings', () => {
+        expect(Array.isArray(result.sectionsPresent)).toBe(true)
+        for (const s of result.sectionsPresent) {
+            expect(typeof s).toBe('string')
+        }
     })
 
     test('teaserCounts has lowMatchCount and criticalGapCount as numbers', () => {
@@ -78,25 +96,44 @@ describe('parseResumeLite() — return shape', () => {
 // ---------------------------------------------------------------------------
 
 describe('parseResumeLite() — credentialGap leak guard', () => {
-    test('credentialGap contains only boolean values — no strings', () => {
+    test('credentialGap contains only boolean values for degreePresent and certPresent', () => {
         const result = parseResumeLite(newGradText, jdProfile)
         const { credentialGap } = result
-        for (const [key, val] of Object.entries(credentialGap)) {
-            expect(typeof val, `field "${key}" must be boolean`).toBe('boolean')
+        expect(typeof credentialGap.degreePresent).toBe('boolean')
+        expect(typeof credentialGap.certPresent).toBe('boolean')
+    })
+
+    test('credentialGap.degreeLevel is null or a short type token (≤6 chars, no field/institution)', () => {
+        const resumes = [newGradText, careerChangerText, hybridGradText, seniorDevText]
+        for (const resumeText of resumes) {
+            const result = parseResumeLite(resumeText, jdProfile)
+            const { degreeLevel } = result.credentialGap
+            if (degreeLevel !== null) {
+                expect(typeof degreeLevel).toBe('string')
+                expect(degreeLevel.length).toBeLessThanOrEqual(6)
+                // Must not contain spaces (no "Computer Science", no institution words)
+                expect(degreeLevel).not.toMatch(/\s/)
+                // Must match known tokens only
+                expect(degreeLevel).toMatch(/^(B\.S\.|M\.S\.|Ph\.D\.|A\.A\.)$/)
+            } else {
+                expect(degreeLevel).toBeNull()
+            }
         }
     })
 
-    test('stringify of credentialGap contains no degree field/institution/year text', () => {
-        // Run against all 4 fixtures to widen the net
+    test('credentialGap.certCount is a non-negative integer', () => {
+        const result = parseResumeLite(newGradText, jdProfile)
+        expect(typeof result.credentialGap.certCount).toBe('number')
+        expect(result.credentialGap.certCount).toBeGreaterThanOrEqual(0)
+        expect(Number.isInteger(result.credentialGap.certCount)).toBe(true)
+    })
+
+    test('credentialGap serialization contains no year-like patterns', () => {
         const resumes = [newGradText, careerChangerText, hybridGradText, seniorDevText]
         for (const resumeText of resumes) {
             const result  = parseResumeLite(resumeText, jdProfile)
             const serialized = JSON.stringify(result.credentialGap)
-            // No year-like strings (4-digit numbers)
             expect(serialized).not.toMatch(/\b(19|20)\d{2}\b/)
-            // No institution-like strings (more than 2 words = likely an institution name)
-            // Safest check: must only contain the two keys and boolean values
-            expect(serialized).not.toMatch(/"(?!degreePresent|certPresent)[a-zA-Z]/)
         }
     })
 })
@@ -196,6 +233,65 @@ describe('parseResumeLite() — fixture smoke tests', () => {
             expect(result).toBeDefined()
             expect(typeof result.matchScore).toBe('number')
             expect(Array.isArray(result.topSkills.skills)).toBe(true)
+            expect(Array.isArray(result.allBehavioralSignals)).toBe(true)
+            expect(Array.isArray(result.sectionsPresent)).toBe(true)
         })
     }
+})
+
+// ---------------------------------------------------------------------------
+// 7. allBehavioralSignals — full registry set, no raw text leaked
+// ---------------------------------------------------------------------------
+
+describe('parseResumeLite() — allBehavioralSignals', () => {
+    test('allBehavioralSignals entries have exactly name and present', () => {
+        const result = parseResumeLite(newGradText, jdProfile)
+        for (const entry of result.allBehavioralSignals) {
+            const keys = Object.keys(entry)
+            expect(keys).toEqual(expect.arrayContaining(['name', 'present']))
+            expect(keys).toHaveLength(2)
+            expect(typeof entry.name).toBe('string')
+            expect(typeof entry.present).toBe('boolean')
+        }
+    })
+
+    test('allBehavioralSignals contains no resume text content — only signal names', () => {
+        const result = parseResumeLite(newGradText, jdProfile)
+        for (const entry of result.allBehavioralSignals) {
+            // Signal names are short canonical labels, not bullet text
+            expect(entry.name.length).toBeLessThan(60)
+            // No year-like patterns in signal names
+            expect(entry.name).not.toMatch(/\b(19|20)\d{2}\b/)
+        }
+    })
+
+    test('each canonical in the registry appears exactly once in allBehavioralSignals', () => {
+        const result = parseResumeLite(newGradText, jdProfile)
+        const names = result.allBehavioralSignals.map(e => e.name)
+        const uniqueNames = new Set(names)
+        expect(names.length).toBe(uniqueNames.size)
+    })
+})
+
+// ---------------------------------------------------------------------------
+// 8. sectionsPresent — labels only, no content
+// ---------------------------------------------------------------------------
+
+describe('parseResumeLite() — sectionsPresent', () => {
+    test('sectionsPresent entries are non-empty strings without colons', () => {
+        const result = parseResumeLite(seniorDevText, jdProfile)
+        for (const s of result.sectionsPresent) {
+            expect(typeof s).toBe('string')
+            expect(s.length).toBeGreaterThan(0)
+            expect(s).not.toContain(':')
+        }
+    })
+
+    test('sectionsPresent contains known section labels only', () => {
+        const KNOWN_LABELS = new Set(['Summary', 'Education', 'Skills', 'Projects', 'Experience', 'Certifications'])
+        const result = parseResumeLite(seniorDevText, jdProfile)
+        for (const s of result.sectionsPresent) {
+            expect(KNOWN_LABELS.has(s)).toBe(true)
+        }
+    })
 })
