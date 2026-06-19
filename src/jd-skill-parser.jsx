@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import * as registry from '@core/registry.js';
 import { extractTextFromPdf } from './lib/pdfExtract.js';
 import { parseResume, extractBehavioralSignals } from './core/parser/parseResume.js';
-import { parseResumeLite } from './core/parser/parseResumeLite.js';
+import { parseResumeLite, computeLiteMatch } from './core/parser/parseResumeLite.js';
 import { getDecision } from '@core/parser/decision.js';
 import SkillRow from './components/SkillRow.jsx'
 import RookieResultsView from './components/RookieResultsView.jsx'
@@ -1353,7 +1353,7 @@ export default function App() {
             return;
         }
         setResumeInputError(false);
-        const parsed = isPaidStatus ? parseResumeInput(resumeInput, 'text') : parseResumeLite(resumeInput, results);
+        const parsed = isPaidStatus ? parseResumeInput(resumeInput, 'text') : parseResumeLite(resumeInput);
         setResumeResults(parsed);
         sessionStorage.setItem('beta_resume_results', JSON.stringify(parsed));
         sessionStorage.setItem('beta_resume_count', parsed.technicalSignals?.length ?? parsed.topSkills?.totalDetected ?? 0);
@@ -1658,7 +1658,10 @@ export default function App() {
                                 />
                             </>
                         ) : (
-                            <RookieResultsView liteResults={resumeResults} />
+                            <RookieResultsView
+                                resumeData={resumeResults}
+                                liteMatch={computeLiteMatch(resumeResults, results)}
+                            />
                         )}
                     </div>
                 )}

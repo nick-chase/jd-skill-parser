@@ -6,14 +6,18 @@
  * Withhold only specifics. No blur, no locks, no fake walls.
  *
  * Props:
- *   liteResults {
+ *   resumeData {
  *     topSkills:        { skills: object[], totalDetected: number }
- *     closestGap:       object | null
- *     missingBehavioral: object[]
  *     credentialGap:    { degreePresent: boolean, certPresent: boolean }
- *     teaserCounts:     { lowMatchCount: number, criticalGapCount: number,
- *                         lowMatchTeaser?: string, criticalTeaser?: string }
- *     matchScore:       number
+ *     allBehavioralSignals: { name: string, present: boolean }[]
+ *     sectionsPresent:  string[]
+ *   }
+ *   liteMatch {
+ *     matchScore:        number | null   (null = JD not yet parsed — show empty state)
+ *     closestGap:        object | null
+ *     missingBehavioral: object[]
+ *     teaserCounts:      { lowMatchCount: number, criticalGapCount: number,
+ *                          lowMatchTeaser?: string, criticalTeaser?: string }
  *   }
  */
 
@@ -25,17 +29,31 @@ const LEVEL_NAMES = {
   5: 'Expert',
 }
 
-export default function RookieResultsView({ liteResults }) {
-  if (!liteResults) return null
+export default function RookieResultsView({ resumeData, liteMatch }) {
+  if (!resumeData) return null
 
   const {
-    topSkills       = { skills: [], totalDetected: 0 },
-    closestGap      = null,
+    topSkills     = { skills: [], totalDetected: 0 },
+    credentialGap = { degreePresent: true, certPresent: true },
+  } = resumeData
+
+  const {
+    matchScore        = null,
+    closestGap        = null,
     missingBehavioral = [],
-    credentialGap   = { degreePresent: true, certPresent: true },
-    teaserCounts    = { lowMatchCount: 0, criticalGapCount: 0 },
-    matchScore      = 0,
-  } = liteResults
+    teaserCounts      = { lowMatchCount: 0, criticalGapCount: 0 },
+  } = liteMatch ?? {}
+
+  // Sentinel: JD not yet parsed — show empty state instead of stale/wrong data
+  if (matchScore === null) {
+    return (
+      <div className="rounded-lg border border-slate-200 bg-white p-8 text-center">
+        <p className="text-sm text-slate-500">
+          Paste a job description in the JD tab to see how your resume reads against it.
+        </p>
+      </div>
+    )
+  }
 
   // Credential gap copy — boolean-derived only, zero specifics
   function credentialCopy() {
