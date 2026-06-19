@@ -113,7 +113,7 @@ function extractSectionWithAliases(text, aliases) {
     return ''
 }
 
-function extractResumeSections(text) {
+export function extractResumeSections(text) {
     return {
         summary:         extractSectionWithAliases(text, SECTION_ALIASES.summary),
         education:       extractSectionWithAliases(text, SECTION_ALIASES.education),

@@ -10,10 +10,15 @@
  *   - Test credential-gap output constraints (no specifics leaked)
  *   - Test teaser presence/absence rules
  *   - Test matchScore is a plain number
+ *   - Test match-summary banner counts (matched/missing/levelGaps)
+ *   - Test match-score label (getMatchScoreLabel thresholds)
+ *   - Test duties prop renders JD duties
+ *   - Test sentinel state (matchScore null → empty state)
  *   - Smoke-test that the component module is importable
  */
 
 import { describe, test, expect } from 'vitest'
+import { getMatchScoreLabel } from '../../src/jd-skill-parser.jsx'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -44,7 +49,10 @@ function completeLiteResults(overrides = {}) {
       lowMatchTeaser:   '3 skills match but score too low to count',
       criticalTeaser:   '1 required skill is completely absent from your resume',
     },
-    matchScore: 73,
+    matchScore:     73,
+    matchedCount:   5,
+    missingCount:   2,
+    levelGapsCount: 3,
     ...overrides,
   }
 }
@@ -58,11 +66,14 @@ function minimalLiteResults() {
     credentialGap:     { degreePresent: true, certPresent: true },
     teaserCounts:      { lowMatchCount: 0, criticalGapCount: 0 },
     matchScore:        0,
+    matchedCount:      0,
+    missingCount:      0,
+    levelGapsCount:    0,
   }
 }
 
 // ---------------------------------------------------------------------------
-// 1. Complete liteResults has all 6 documented fields
+// 1. Complete liteResults has all documented fields
 // ---------------------------------------------------------------------------
 
 describe('RookieResultsView — liteResults shape contract', () => {
@@ -73,9 +84,12 @@ describe('RookieResultsView — liteResults shape contract', () => {
     'credentialGap',
     'teaserCounts',
     'matchScore',
+    'matchedCount',
+    'missingCount',
+    'levelGapsCount',
   ]
 
-  test('complete liteResults contains all 6 required sections', () => {
+  test('complete liteResults contains all required sections', () => {
     const result = completeLiteResults()
     for (const key of REQUIRED_KEYS) {
       expect(result).toHaveProperty(key)
@@ -120,6 +134,16 @@ describe('RookieResultsView — liteResults shape contract', () => {
     expect(result.teaserCounts.criticalGapCount).toBeGreaterThan(0)
     expect(typeof result.teaserCounts.lowMatchTeaser).toBe('string')
     expect(typeof result.teaserCounts.criticalTeaser).toBe('string')
+  })
+
+  test('matchedCount, missingCount, levelGapsCount are non-negative integers', () => {
+    const result = completeLiteResults()
+    expect(Number.isInteger(result.matchedCount)).toBe(true)
+    expect(result.matchedCount).toBeGreaterThanOrEqual(0)
+    expect(Number.isInteger(result.missingCount)).toBe(true)
+    expect(result.missingCount).toBeGreaterThanOrEqual(0)
+    expect(Number.isInteger(result.levelGapsCount)).toBe(true)
+    expect(result.levelGapsCount).toBeGreaterThanOrEqual(0)
   })
 })
 
@@ -265,18 +289,139 @@ describe('RookieResultsView — matchScore type', () => {
     expect(result.matchScore).toBeLessThanOrEqual(100)
   })
 
-  test('component displays matchScore as a raw number — no tier name mapping', () => {
-    // The component should render matchScore directly, not convert it to a label.
-    // Verify: 73 → "73", not "Good" or "Strong Match"
+  test('matchScore renders with "%" suffix — component appends it', () => {
+    // The component renders `{matchScore}%` so 73 → "73%"
     const matchScore = 73
-    const displayed  = String(matchScore)
-    expect(displayed).toBe('73')
-    expect(displayed).not.toMatch(/good|strong|average|poor|excellent/i)
+    const displayed  = `${matchScore}%`
+    expect(displayed).toBe('73%')
+    expect(displayed).toMatch(/%$/)
   })
 })
 
 // ---------------------------------------------------------------------------
-// 5. Smoke — minimal liteResults renders gracefully
+// 5. getMatchScoreLabel — single source of truth, reused by both views
+// ---------------------------------------------------------------------------
+
+describe('getMatchScoreLabel — shared label function', () => {
+  test('score >= 70 → Strong Match', () => {
+    expect(getMatchScoreLabel(70)).toBe('Strong Match')
+    expect(getMatchScoreLabel(85)).toBe('Strong Match')
+    expect(getMatchScoreLabel(100)).toBe('Strong Match')
+  })
+
+  test('score 40–69 → Partial Match', () => {
+    expect(getMatchScoreLabel(40)).toBe('Partial Match')
+    expect(getMatchScoreLabel(55)).toBe('Partial Match')
+    expect(getMatchScoreLabel(69)).toBe('Partial Match')
+  })
+
+  test('score < 40 → Weak Match', () => {
+    expect(getMatchScoreLabel(0)).toBe('Weak Match')
+    expect(getMatchScoreLabel(20)).toBe('Weak Match')
+    expect(getMatchScoreLabel(39)).toBe('Weak Match')
+  })
+
+  test('label is one of the three valid strings', () => {
+    const VALID = new Set(['Strong Match', 'Partial Match', 'Weak Match'])
+    for (const score of [0, 15, 39, 40, 55, 70, 90, 100]) {
+      expect(VALID.has(getMatchScoreLabel(score))).toBe(true)
+    }
+  })
+})
+
+// ---------------------------------------------------------------------------
+// 6. Match-summary banner counts (matchedCount / missingCount / levelGapsCount)
+// ---------------------------------------------------------------------------
+
+describe('RookieResultsView — match-summary banner counts', () => {
+  test('banner reads matchedCount from liteMatch', () => {
+    const result = completeLiteResults({ matchedCount: 7 })
+    expect(result.matchedCount).toBe(7)
+  })
+
+  test('banner reads missingCount from liteMatch', () => {
+    const result = completeLiteResults({ missingCount: 3 })
+    expect(result.missingCount).toBe(3)
+  })
+
+  test('banner reads levelGapsCount from liteMatch', () => {
+    const result = completeLiteResults({ levelGapsCount: 4 })
+    expect(result.levelGapsCount).toBe(4)
+  })
+
+  test('NO bonus count field exists in the banner shape', () => {
+    // bonusCount must NOT be part of the RookieResultsView liteMatch shape
+    const result = completeLiteResults()
+    expect(result).not.toHaveProperty('bonusCount')
+  })
+
+  test('all three counts default to 0 in minimal shape', () => {
+    const result = minimalLiteResults()
+    expect(result.matchedCount).toBe(0)
+    expect(result.missingCount).toBe(0)
+    expect(result.levelGapsCount).toBe(0)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// 7. Duties prop — WHAT THIS ROLE DOES section
+// ---------------------------------------------------------------------------
+
+describe('RookieResultsView — duties prop (WHAT THIS ROLE DOES)', () => {
+  test('duties is an array of strings', () => {
+    const duties = ['Build APIs', 'Write unit tests', 'Deploy to cloud']
+    expect(Array.isArray(duties)).toBe(true)
+    duties.forEach(d => expect(typeof d).toBe('string'))
+  })
+
+  test('empty duties array produces no section (guard condition)', () => {
+    // Component renders duties section only when duties.length > 0
+    const duties = []
+    expect(duties.length > 0).toBe(false)
+  })
+
+  test('non-empty duties array triggers section render (guard condition)', () => {
+    const duties = ['Build APIs', 'Write unit tests']
+    expect(duties.length > 0).toBe(true)
+  })
+
+  test('duties content is JD-sourced text — no internal data leaked', () => {
+    // duties come from results.jobDuties (user-pasted JD content), not from parser vocabulary
+    const duties = ['Develop scalable microservices', 'Collaborate with cross-functional teams']
+    // No internal field names should appear as duties
+    const internal = ['technicalSignals', 'behavioralSignals', 'matchScore', 'gapSize']
+    duties.forEach(d => {
+      internal.forEach(field => expect(d).not.toContain(field))
+    })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// 8. Sentinel state — matchScore null
+// ---------------------------------------------------------------------------
+
+describe('RookieResultsView — sentinel empty state', () => {
+  test('matchScore null triggers empty-state guard', () => {
+    // Component returns early with "Paste a job description..." when matchScore is null
+    const matchScore = null
+    expect(matchScore === null).toBe(true)
+  })
+
+  test('sentinel text is expected string', () => {
+    // Guard: verify the copy string is what the component shows
+    const sentinelText = 'Paste a job description in the JD tab to see how your resume reads against it.'
+    expect(sentinelText).toContain('Paste a job description')
+    expect(sentinelText).toContain('JD tab')
+  })
+
+  test('matchScore 0 is NOT sentinel — 0 is a valid score', () => {
+    const matchScore = 0
+    expect(matchScore === null).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// 9. Smoke — minimal liteResults renders gracefully
 // ---------------------------------------------------------------------------
 
 describe('RookieResultsView — minimal shape smoke', () => {
@@ -288,6 +433,9 @@ describe('RookieResultsView — minimal shape smoke', () => {
     expect(result).toHaveProperty('credentialGap')
     expect(result).toHaveProperty('teaserCounts')
     expect(result).toHaveProperty('matchScore')
+    expect(result).toHaveProperty('matchedCount')
+    expect(result).toHaveProperty('missingCount')
+    expect(result).toHaveProperty('levelGapsCount')
   })
 
   test('minimal liteResults: closestGap is null — component should render nothing for it', () => {

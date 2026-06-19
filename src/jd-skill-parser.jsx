@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom';
 import * as registry from '@core/registry.js';
 import { extractTextFromPdf } from './lib/pdfExtract.js';
 import { parseResume, extractBehavioralSignals } from './core/parser/parseResume.js';
-import { parseResumeLite } from './core/parser/parseResumeLite.js';
+import { parseResumeLite, computeLiteMatch } from './core/parser/parseResumeLite.js';
 import { getDecision } from '@core/parser/decision.js';
 import SkillRow from './components/SkillRow.jsx'
 import RookieResultsView from './components/RookieResultsView.jsx'
+import RookieResumeView from './components/RookieResumeView.jsx'
 import BoostSection from './components/BoostSection.jsx'
 import { getResumeBoostSkills, getMatchBoostSkills } from './utils/boostSkills.js';
 import { getOrCreateUser, onAuthStateChange } from './lib/auth.js'
@@ -34,6 +35,13 @@ const betaFeedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true
 
 const LEVEL_NAMES = ['—', 'Mentioned', 'Limited evidence', 'Supported', 'Strong evidence', 'Extensive evidence'];
 const IMPORTANCE_NAMES = ['—', 'Optional', 'Nice-to-have', 'Preferred', 'Required', 'Critical'];
+
+/** Single source of truth for matchScore → label. Used by GapAnalysisView and RookieResultsView. */
+export function getMatchScoreLabel(score) {
+    if (score >= 70) return 'Strong Match';
+    if (score >= 40) return 'Partial Match';
+    return 'Weak Match';
+}
 
 const IMPORTANCE_STYLES = {
     5: 'bg-rose-50 text-rose-700 border-rose-200',
@@ -825,7 +833,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
     // Use the decision engine's matchScore as the single source of truth (fixes B-FIX-01).
     const score = decisionResult?.matchScore ?? 0;
     const scoreColor = score >= 70 ? '#059669' : score >= 40 ? '#d97706' : '#dc2626';
-    const scoreLabel = score >= 70 ? 'Strong Match' : score >= 40 ? 'Partial Match' : 'Weak Match';
+    const scoreLabel = getMatchScoreLabel(score);
 
     return (
         <div className="flex flex-col gap-4">
@@ -1352,7 +1360,7 @@ export default function App() {
             return;
         }
         setResumeInputError(false);
-        const parsed = isPaidStatus ? parseResumeInput(resumeInput, 'text') : parseResumeLite(resumeInput, results);
+        const parsed = isPaidStatus ? parseResumeInput(resumeInput, 'text') : parseResumeLite(resumeInput);
         setResumeResults(parsed);
         sessionStorage.setItem('beta_resume_results', JSON.stringify(parsed));
         sessionStorage.setItem('beta_resume_count', parsed.technicalSignals?.length ?? parsed.topSkills?.totalDetected ?? 0);
@@ -1600,19 +1608,23 @@ export default function App() {
                         )}
 
                         {resumeResults !== null && (
-                            resumeResults.technicalSignals.length === 0 ? (
-                                <div className="text-sm text-slate-500 p-8 text-center border border-dashed border-slate-300 rounded-lg bg-white">
-                                    No recognized skills detected. Make sure your resume has a TECHNICAL SKILLS or EDUCATION section.
-                                </div>
+                            isPaidStatus ? (
+                                resumeResults.technicalSignals.length === 0 ? (
+                                    <div className="text-sm text-slate-500 p-8 text-center border border-dashed border-slate-300 rounded-lg bg-white">
+                                        No recognized skills detected. Make sure your resume has a TECHNICAL SKILLS or EDUCATION section.
+                                    </div>
+                                ) : (
+                                    <>
+                                        <ResumeResultsView
+                                            results={resumeResults.technicalSignals}
+                                            behavioralSignals={resumeResults.behavioralSignals}
+                                            degree={resumeResults.degree}
+                                            isPaid={isPaidStatus}
+                                        />
+                                    </>
+                                )
                             ) : (
-                                <>
-                                    <ResumeResultsView
-                                        results={resumeResults.technicalSignals}
-                                        behavioralSignals={resumeResults.behavioralSignals}
-                                        degree={resumeResults.degree}
-                                        isPaid={isPaidStatus}
-                                    />
-                                </>
+                                <RookieResumeView liteResults={resumeResults} />
                             )
                         )}
                     </div>
@@ -1653,7 +1665,11 @@ export default function App() {
                                 />
                             </>
                         ) : (
-                            <RookieResultsView liteResults={resumeResults} />
+                            <RookieResultsView
+                                resumeData={resumeResults}
+                                liteMatch={computeLiteMatch(resumeResults, results)}
+                                duties={results?.jobDuties ?? []}
+                            />
                         )}
                     </div>
                 )}
