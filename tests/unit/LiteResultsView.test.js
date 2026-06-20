@@ -1,5 +1,5 @@
 /**
- * Tests for RookieResultsView
+ * Tests for LiteResultsView
  *
  * React Testing Library is not installed in this project, so these tests
  * verify the component's data contracts and render-logic invariants
@@ -76,7 +76,7 @@ function minimalLiteResults() {
 // 1. Complete liteResults has all documented fields
 // ---------------------------------------------------------------------------
 
-describe('RookieResultsView — liteResults shape contract', () => {
+describe('LiteResultsView — liteResults shape contract', () => {
   const REQUIRED_KEYS = [
     'topSkills',
     'closestGap',
@@ -151,7 +151,7 @@ describe('RookieResultsView — liteResults shape contract', () => {
 // 2. Teaser strings absent when counts are 0
 // ---------------------------------------------------------------------------
 
-describe('RookieResultsView — teaser omission when counts are 0', () => {
+describe('LiteResultsView — teaser omission when counts are 0', () => {
   test('lowMatchTeaser is undefined when lowMatchCount is 0', () => {
     const result = completeLiteResults({
       teaserCounts: { lowMatchCount: 0, criticalGapCount: 0 },
@@ -184,7 +184,7 @@ describe('RookieResultsView — teaser omission when counts are 0', () => {
 // 3. Credential gap output contains no specifics
 // ---------------------------------------------------------------------------
 
-describe('RookieResultsView — credential gap leak guard', () => {
+describe('LiteResultsView — credential gap leak guard', () => {
   test('credentialGap values are booleans only', () => {
     const result = completeLiteResults()
     for (const [key, val] of Object.entries(result.credentialGap)) {
@@ -270,7 +270,7 @@ describe('RookieResultsView — credential gap leak guard', () => {
 // 4. matchScore is a plain number
 // ---------------------------------------------------------------------------
 
-describe('RookieResultsView — matchScore type', () => {
+describe('LiteResultsView — matchScore type', () => {
   test('matchScore in liteResults is a plain number', () => {
     const result = completeLiteResults()
     expect(typeof result.matchScore).toBe('number')
@@ -309,10 +309,10 @@ describe('getMatchScoreLabel — shared label function', () => {
     expect(getMatchScoreLabel(100)).toBe('Strong Match')
   })
 
-  test('score 40–69 → Partial Match', () => {
-    expect(getMatchScoreLabel(40)).toBe('Partial Match')
-    expect(getMatchScoreLabel(55)).toBe('Partial Match')
-    expect(getMatchScoreLabel(69)).toBe('Partial Match')
+  test('score 40–69 → Moderate Match', () => {
+    expect(getMatchScoreLabel(40)).toBe('Moderate Match')
+    expect(getMatchScoreLabel(55)).toBe('Moderate Match')
+    expect(getMatchScoreLabel(69)).toBe('Moderate Match')
   })
 
   test('score < 40 → Weak Match', () => {
@@ -322,7 +322,7 @@ describe('getMatchScoreLabel — shared label function', () => {
   })
 
   test('label is one of the three valid strings', () => {
-    const VALID = new Set(['Strong Match', 'Partial Match', 'Weak Match'])
+    const VALID = new Set(['Strong Match', 'Moderate Match', 'Weak Match'])
     for (const score of [0, 15, 39, 40, 55, 70, 90, 100]) {
       expect(VALID.has(getMatchScoreLabel(score))).toBe(true)
     }
@@ -333,7 +333,7 @@ describe('getMatchScoreLabel — shared label function', () => {
 // 6. Match-summary banner counts (matchedCount / missingCount / levelGapsCount)
 // ---------------------------------------------------------------------------
 
-describe('RookieResultsView — match-summary banner counts', () => {
+describe('LiteResultsView — match-summary banner counts', () => {
   test('banner reads matchedCount from liteMatch', () => {
     const result = completeLiteResults({ matchedCount: 7 })
     expect(result.matchedCount).toBe(7)
@@ -367,7 +367,7 @@ describe('RookieResultsView — match-summary banner counts', () => {
 // 7. Duties prop — WHAT THIS ROLE DOES section
 // ---------------------------------------------------------------------------
 
-describe('RookieResultsView — duties prop (WHAT THIS ROLE DOES)', () => {
+describe('LiteResultsView — duties prop (WHAT THIS ROLE DOES)', () => {
   test('duties is an array of strings', () => {
     const duties = ['Build APIs', 'Write unit tests', 'Deploy to cloud']
     expect(Array.isArray(duties)).toBe(true)
@@ -400,7 +400,7 @@ describe('RookieResultsView — duties prop (WHAT THIS ROLE DOES)', () => {
 // 8. Sentinel state — matchScore null
 // ---------------------------------------------------------------------------
 
-describe('RookieResultsView — sentinel empty state', () => {
+describe('LiteResultsView — sentinel empty state', () => {
   test('matchScore null triggers empty-state guard', () => {
     // Component returns early with "Paste a job description..." when matchScore is null
     const matchScore = null
@@ -424,7 +424,7 @@ describe('RookieResultsView — sentinel empty state', () => {
 // 9. Smoke — minimal liteResults renders gracefully
 // ---------------------------------------------------------------------------
 
-describe('RookieResultsView — minimal shape smoke', () => {
+describe('LiteResultsView — minimal shape smoke', () => {
   test('minimal liteResults has all required keys with safe defaults', () => {
     const result = minimalLiteResults()
     expect(result).toHaveProperty('topSkills')
@@ -460,7 +460,7 @@ describe('RookieResultsView — minimal shape smoke', () => {
 
   test('component module is importable without error', async () => {
     // Dynamic import verifies the file parses and exports correctly
-    const mod = await import('../../src/components/RookieResultsView.jsx')
+    const mod = await import('../../src/components/LiteResultsView.jsx')
     expect(typeof mod.default).toBe('function')
   })
 })

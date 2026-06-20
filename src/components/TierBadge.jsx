@@ -4,8 +4,7 @@
  * Props:
  *   isPaidStatus {boolean} — true = Pro user, false = Lite (free) user
  *
- * Visual style is copied exactly from the canonical "Beta" pill in the
- * header area of jd-skill-parser.jsx.
+ * Visual style: amber pill matching the tier indicator in the header area of jd-skill-parser.jsx.
  */
 export default function TierBadge({ isPaidStatus }) {
   return (

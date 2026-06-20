@@ -11,7 +11,7 @@ export function sendFeedback({ title, body, results }) {
             body,
             results,
             to_email: 'devteam@nat20app.com',
-            name: 'Beta User',
+            name: 'Nat20 User',
             email: 'feedback@nat20app.com',
         }
     );
