@@ -1,5 +1,5 @@
 /**
- * RookieResultsView — free-tier (Rookie) output panel.
+ * LiteResultsView — free-tier (Lite) output panel.
  *
  * Renders a compressed-but-true version of the gap report.
  * Philosophy: generous-with-mystery. Show shape and existence.
@@ -35,7 +35,7 @@ const LEVEL_NAMES = {
   5: 'Expert',
 }
 
-export default function RookieResultsView({ resumeData, liteMatch, duties = [] }) {
+export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) {
   if (!resumeData) return null
 
   const {

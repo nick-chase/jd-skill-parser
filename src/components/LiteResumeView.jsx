@@ -1,5 +1,5 @@
 /**
- * RookieResumeView — free-tier resume detection panel.
+ * LiteResumeView — free-tier resume detection panel.
  *
  * Shows what the parser detected on the user's resume.
  * Philosophy: factual, specific-signal-free, respectful.
@@ -21,7 +21,7 @@
  *   }
  */
 
-export default function RookieResumeView({ liteResults }) {
+export default function LiteResumeView({ liteResults }) {
   if (!liteResults) return null
 
   const {

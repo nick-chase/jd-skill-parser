@@ -1,5 +1,5 @@
 /**
- * Tests for RookieResumeView
+ * Tests for LiteResumeView
  *
  * React Testing Library is not installed in this project, so these tests
  * verify the component's data contracts and render-logic invariants
@@ -78,9 +78,9 @@ function completeLiteResults(overrides = {}) {
 // 1. Component is importable
 // ---------------------------------------------------------------------------
 
-describe('RookieResumeView — module smoke', () => {
+describe('LiteResumeView — module smoke', () => {
     test('component module is importable without error', async () => {
-        const mod = await import('../../src/components/RookieResumeView.jsx')
+        const mod = await import('../../src/components/LiteResumeView.jsx')
         expect(typeof mod.default).toBe('function')
     })
 })
@@ -89,7 +89,7 @@ describe('RookieResumeView — module smoke', () => {
 // 2. liteResults shape contract
 // ---------------------------------------------------------------------------
 
-describe('RookieResumeView — liteResults shape contract', () => {
+describe('LiteResumeView — liteResults shape contract', () => {
     test('complete liteResults has all required fields', () => {
         const result = completeLiteResults()
         expect(result).toHaveProperty('topSkills')
@@ -131,7 +131,7 @@ describe('RookieResumeView — liteResults shape contract', () => {
 // 3. Credential summary logic — no specifics leaked
 // ---------------------------------------------------------------------------
 
-describe('RookieResumeView — credentialSummary logic', () => {
+describe('LiteResumeView — credentialSummary logic', () => {
     // Replicate the component's credentialSummary() for unit testing
     function credentialSummary(credentialGap) {
         const parts = []
@@ -191,7 +191,7 @@ describe('RookieResumeView — credentialSummary logic', () => {
 // 4. allBehavioralSignals — Resume tab shows detected signals only
 // ---------------------------------------------------------------------------
 
-describe('RookieResumeView — behavioral signals (resume tab shows detected only)', () => {
+describe('LiteResumeView — behavioral signals (resume tab shows detected only)', () => {
     test('only present === true signals are shown in the resume view', () => {
         const result = completeLiteResults()
         // Simulate the component filter: only present signals render
@@ -245,7 +245,7 @@ describe('RookieResumeView — behavioral signals (resume tab shows detected onl
 // 5. sectionsPresent list
 // ---------------------------------------------------------------------------
 
-describe('RookieResumeView — sectionsPresent', () => {
+describe('LiteResumeView — sectionsPresent', () => {
     test('sectionsPresent values are non-empty strings', () => {
         const result = completeLiteResults()
         for (const s of result.sectionsPresent) {
@@ -265,7 +265,7 @@ describe('RookieResumeView — sectionsPresent', () => {
 // 6. All 4 fixtures produce RookieResumeView-compatible output
 // ---------------------------------------------------------------------------
 
-describe('RookieResumeView — fixture smoke tests', () => {
+describe('LiteResumeView — fixture smoke tests', () => {
     const fixtures = [
         ['new_grad',       newGradText],
         ['career_changer', careerChangerText],
@@ -274,7 +274,7 @@ describe('RookieResumeView — fixture smoke tests', () => {
     ]
 
     for (const [name, resumeText] of fixtures) {
-        test(`${name}: parseResumeLite output has all RookieResumeView fields`, () => {
+        test(`${name}: parseResumeLite output has all LiteResumeView fields`, () => {
             const result = parseResumeLite(resumeText, jdProfile)
             expect(result).toHaveProperty('topSkills')
             expect(result).toHaveProperty('allBehavioralSignals')

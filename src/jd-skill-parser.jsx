@@ -6,8 +6,8 @@ import { parseResume, extractBehavioralSignals } from './core/parser/parseResume
 import { parseResumeLite, computeLiteMatch } from './core/parser/parseResumeLite.js';
 import { getDecision } from '@core/parser/decision.js';
 import SkillRow from './components/SkillRow.jsx'
-import RookieResultsView from './components/RookieResultsView.jsx'
-import RookieResumeView from './components/RookieResumeView.jsx'
+import LiteResultsView from './components/LiteResultsView.jsx'
+import LiteResumeView from './components/LiteResumeView.jsx'
 import BoostSection from './components/BoostSection.jsx'
 import { getResumeBoostSkills, getMatchBoostSkills } from './utils/boostSkills.js';
 import { getOrCreateUser, onAuthStateChange } from './lib/auth.js'
@@ -24,7 +24,7 @@ import { runGapAnalysis, runBehavioralGap } from './core/parser/gap.js';
 import TierBadge from './components/TierBadge.jsx';
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
-const betaFeedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
+const feedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
 
 // ============================================================
 // CLASSIFICATION SYSTEM
@@ -37,10 +37,10 @@ const betaFeedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true
 const LEVEL_NAMES = ['—', 'Mentioned', 'Limited evidence', 'Supported', 'Strong evidence', 'Extensive evidence'];
 const IMPORTANCE_NAMES = ['—', 'Optional', 'Nice-to-have', 'Preferred', 'Required', 'Critical'];
 
-/** Single source of truth for matchScore → label. Used by GapAnalysisView and RookieResultsView. */
+/** Single source of truth for matchScore → label. Used by GapAnalysisView and LiteResultsView. */
 export function getMatchScoreLabel(score) {
     if (score >= 70) return 'Strong Match';
-    if (score >= 40) return 'Partial Match';
+    if (score >= 40) return 'Moderate Match';
     return 'Weak Match';
 }
 
@@ -1347,6 +1347,7 @@ export default function App() {
         setJobMeta(meta);
         const jdResults = parseJobDescription(input);
         setResults(jdResults);
+        // sessionStorage keys retain "beta_" prefix for historical continuity; renaming would invalidate active user sessions
         sessionStorage.setItem('beta_jd_results', JSON.stringify(jdResults));
         sessionStorage.setItem('beta_jd_count', jdResults.technicalSignals.length);
         analytics.parseComplete('jd');
@@ -1451,7 +1452,7 @@ export default function App() {
                                 {label}
                             </button>
                         ))}
-                        {betaFeedbackEnabled && (
+                        {feedbackEnabled && (
                             <button
                                 onClick={() => setActiveTab('feedback')}
                                 className={`flex-1 sm:flex-none py-3 px-4 sm:px-5 text-xs sm:text-sm font-semibold border-b-2 -mb-px transition-colors ${
@@ -1623,7 +1624,7 @@ export default function App() {
                                     </>
                                 )
                             ) : (
-                                <RookieResumeView liteResults={resumeResults} />
+                                <LiteResumeView liteResults={resumeResults} />
                             )
                         )}
                     </div>
@@ -1664,7 +1665,7 @@ export default function App() {
                                 />
                             </>
                         ) : (
-                            <RookieResultsView
+                            <LiteResultsView
                                 resumeData={resumeResults}
                                 liteMatch={computeLiteMatch(resumeResults, results)}
                                 duties={results?.jobDuties ?? []}
@@ -1674,7 +1675,7 @@ export default function App() {
                 )}
 
                 {/* Feedback Tab */}
-                {betaFeedbackEnabled && activeTab === 'feedback' && (
+                {feedbackEnabled && activeTab === 'feedback' && (
                     <div className="mt-6">
                         <FeedbackForm />
                     </div>

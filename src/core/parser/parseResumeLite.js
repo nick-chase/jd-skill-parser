@@ -1,5 +1,5 @@
 /**
- * parseResumeLite() — compressed-output orchestrator for the Rookie (free) tier.
+ * parseResumeLite() — compressed-output orchestrator for the Lite (free) tier.
  *
  * COMPOSITION ONLY. Calls existing functions; no new scoring or parsing logic.
  * ANONYMOUS-SAFE. Zero Supabase imports, no auth, no localStorage writes.

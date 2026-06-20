@@ -10,7 +10,7 @@ import AppFooter from '../components/AppFooter.jsx'
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
 
 function deriveClass(skills) {
-  if (!skills?.length) return 'Adventurer'
+  if (!skills?.length) return 'Unranked'
   const counts = {}
   skills.forEach(s => {
     if ((s.level ?? 0) >= 3) counts[s.category] = (counts[s.category] ?? 0) + 1

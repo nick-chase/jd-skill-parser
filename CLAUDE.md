@@ -30,6 +30,31 @@ Do not rely on anything in this file for current task state, bug status,
 or test counts. Read the live documents directly.
 
 ---
+## Tier vocabulary
+
+The product has two tiers: **Lite** (free) and **Pro** (paid).
+
+Earlier product writing used three deprecated terms:
+- "Rookie" referred to the free tier (now: Lite)
+- "Adventurer" referred to the paid tier (now: Pro)
+- "Beta" referred to either the free tier OR the product's release
+  status; both usages are deprecated
+
+Going forward:
+- All new code, tests, comments, commits, and PR descriptions use
+  "Lite" and "Pro" exclusively
+- All new doc writing uses "Lite tier" and "Pro tier"
+- Never refer to the product as "in beta" or "a beta product"
+- Existing pre-2026-06-21 documents containing these legacy terms
+  are historical and should not be revised in place
+- When editing a doc for substantive reasons, update tier references
+  opportunistically; do not edit solely to rename
+- Exception: sessionStorage keys with `beta_` prefix (`beta_jd_results`,
+  `beta_jd_count`, `beta_resume_results`, `beta_resume_count`) are
+  retained unchanged for historical continuity — renaming them would
+  invalidate active user sessions
+
+---
 
 ## Two-Repo Workflow
 
