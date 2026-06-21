@@ -1572,7 +1572,10 @@ export default function App() {
                                     }}
                                 />
                                 <button
-                                    onClick={() => fileInputRef.current?.click()}
+                                    onClick={() => {
+                                        if (!isPaidStatus) { setPdfStatus('pro-only'); return; }
+                                        fileInputRef.current?.click();
+                                    }}
                                     disabled={pdfStatus === 'loading'}
                                     className="text-xs px-2.5 py-1 border border-slate-300 rounded hover:bg-slate-100 transition"
                                     style={{ opacity: pdfStatus === 'loading' ? 0.5 : 1, cursor: pdfStatus === 'loading' ? 'not-allowed' : 'pointer' }}
