@@ -1386,6 +1386,11 @@ export default function App() {
 
     const handlePdfUpload = async (file) => {
         if (!file || file.type !== 'application/pdf') return;
+        // PDF upload is a Pro feature — gate on subscription status
+        if (paymentsEnabled && !isPaidStatus) {
+            setPdfStatus('pro-only');
+            return;
+        }
         setPdfStatus('loading');
         setPdfInfo(null);
         try {
@@ -1585,6 +1590,14 @@ export default function App() {
                         )}
                         {pdfStatus === 'error' && (
                             <p className="text-xs text-red-600">Extraction failed — try a different file.</p>
+                        )}
+                        {pdfStatus === 'pro-only' && (
+                            <p className="text-xs text-indigo-700">
+                                PDF upload reads your resume exactly as it's formatted — no copy-paste gaps.{' '}
+                                <a href="/pricing" className="font-semibold underline hover:text-indigo-900">
+                                    Get the full report — closer to your next offer.
+                                </a>
+                            </p>
                         )}
 
                         <textarea
