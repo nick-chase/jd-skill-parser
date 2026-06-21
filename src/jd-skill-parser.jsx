@@ -1386,6 +1386,12 @@ export default function App() {
 
     const handlePdfUpload = async (file) => {
         if (!file || file.type !== 'application/pdf') return;
+        // PDF upload is a Pro feature — gate on subscription status, not on whether
+        // payments are enabled. A Lite user is always Lite regardless of build flags.
+        if (!isPaidStatus) {
+            setPdfStatus('pro-only');
+            return;
+        }
         setPdfStatus('loading');
         setPdfInfo(null);
         try {
@@ -1566,7 +1572,10 @@ export default function App() {
                                     }}
                                 />
                                 <button
-                                    onClick={() => fileInputRef.current?.click()}
+                                    onClick={() => {
+                                        if (!isPaidStatus) { setPdfStatus('pro-only'); return; }
+                                        fileInputRef.current?.click();
+                                    }}
                                     disabled={pdfStatus === 'loading'}
                                     className="text-xs px-2.5 py-1 border border-slate-300 rounded hover:bg-slate-100 transition"
                                     style={{ opacity: pdfStatus === 'loading' ? 0.5 : 1, cursor: pdfStatus === 'loading' ? 'not-allowed' : 'pointer' }}
@@ -1585,6 +1594,14 @@ export default function App() {
                         )}
                         {pdfStatus === 'error' && (
                             <p className="text-xs text-red-600">Extraction failed — try a different file.</p>
+                        )}
+                        {pdfStatus === 'pro-only' && (
+                            <p className="text-xs text-indigo-700">
+                                PDF upload reads your resume exactly as it's formatted — no copy-paste gaps.{' '}
+                                <a href="/pricing" className="font-semibold underline hover:text-indigo-900">
+                                    Get the full report — closer to your next offer.
+                                </a>
+                            </p>
                         )}
 
                         <textarea

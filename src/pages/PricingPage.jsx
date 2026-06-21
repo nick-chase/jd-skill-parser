@@ -58,7 +58,7 @@ export default function PricingPage() {
           {/* Features */}
           <ul className="space-y-3">
             {[
-              'Unlimited JD parses (free: 15/day)',
+              'Unlimited JD parses',
               'PDF resume upload',
               'Resume profile saved — no re-paste',
               'Skill profile — evidence strength per skill',
@@ -93,7 +93,7 @@ export default function PricingPage() {
 
         {/* Free tier reminder */}
         <div className="text-center text-sm text-slate-400">
-          Free tier: unlimited resume parses + 15 JD parses/day — always free
+          Free tier: unlimited resume + JD parses — always free
         </div>
       </div>
     </div>
