@@ -1386,8 +1386,9 @@ export default function App() {
 
     const handlePdfUpload = async (file) => {
         if (!file || file.type !== 'application/pdf') return;
-        // PDF upload is a Pro feature — gate on subscription status
-        if (paymentsEnabled && !isPaidStatus) {
+        // PDF upload is a Pro feature — gate on subscription status, not on whether
+        // payments are enabled. A Lite user is always Lite regardless of build flags.
+        if (!isPaidStatus) {
             setPdfStatus('pro-only');
             return;
         }

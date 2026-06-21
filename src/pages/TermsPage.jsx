@@ -28,10 +28,9 @@ export default function TermsPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-slate-800">2. Free tier</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
-            The free tier allows up to 15 job description parses per day with no account required.
-            Resume parsing is unlimited. Free-tier results are not saved — they disappear when you
-            close the tab. The free tier is ad-supported. We reserve the right to adjust free-tier
-            limits with reasonable notice.
+            The Lite tier allows unlimited job description and resume parses with no account required.
+            Lite-tier results are not saved — they disappear when you close the tab. The Lite tier
+            is ad-supported. We reserve the right to adjust Lite-tier limits with reasonable notice.
           </p>
         </section>
 
