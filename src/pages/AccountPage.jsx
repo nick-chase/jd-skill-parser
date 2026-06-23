@@ -32,7 +32,7 @@ export default function AccountPage() {
   const [isPaid, setIsPaid] = useState(false)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('profile')
+  const [activeTab, setActiveTab] = useState('account')
   const [searchParams] = useSearchParams()
   const justUpgraded = searchParams.get('upgraded') === 'true'
 
@@ -119,7 +119,7 @@ export default function AccountPage() {
 
       {/* Internal tab nav */}
       <div className="flex gap-1 border-b border-slate-200">
-        {['profile', 'account'].map(tab => (
+        {['account', 'profile'].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
