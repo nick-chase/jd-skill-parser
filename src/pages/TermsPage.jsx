@@ -26,7 +26,7 @@ export default function TermsPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-800">2. Free tier</h2>
+          <h2 className="text-lg font-semibold text-slate-800">2. Lite tier</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
             The Lite tier allows unlimited job description and resume parses with no account required.
             Lite-tier results are not saved — they disappear when you close the tab. The Lite tier
@@ -56,7 +56,7 @@ export default function TermsPage() {
           <h2 className="text-lg font-semibold text-slate-800">4. Your content</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
             You own your resume content and any job descriptions you paste. By using Nat20 you
-            grant us a limited license to process that content locally in your browser (free tier)
+            grant us a limited license to process that content locally in your browser (Lite tier)
             or on our servers (Pro saved profile) solely to provide the service. We do not use your
             resume content to train models or for any purpose other than returning results to you.
           </p>

@@ -43,7 +43,7 @@ export default function PricingPage() {
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="text-3xl font-bold text-slate-800">Upgrade to Pro</div>
-          <div className="text-slate-500">Unlock your full character sheet</div>
+          <div className="text-slate-500">See the full skill gap map</div>
         </div>
 
         {/* Pricing card */}
@@ -93,7 +93,7 @@ export default function PricingPage() {
 
         {/* Free tier reminder */}
         <div className="text-center text-sm text-slate-400">
-          Free tier: unlimited resume + JD parses — always free
+          Lite tier: unlimited resume + JD parses — always free
         </div>
       </div>
     </div>

@@ -92,7 +92,7 @@ export default function LandingPage() {
               },
               {
                 icon: '⚔️',
-                title: 'Character sheet',
+                title: 'Full skill detail',
                 body: 'A visual breakdown of how your resume communicates each skill — grouped by category, scored by evidence. Not a mastery rating. A read on how your resume reads.'
               },
               {
@@ -135,7 +135,7 @@ export default function LandingPage() {
               a: "Most resume scanners give you a keyword match score and a list of missing words. Nat20 gives you a skill proficiency map — it shows not just what's missing, but how the evidence on your resume lines up against what the role requires. And at $9.99/mo, it's a fraction of the cost of premium alternatives."
             },
             {
-              q: 'What does the character sheet do?',
+              q: 'What does the full skill detail show?',
               a: "Pro users get a visual breakdown of how strongly their resume backs up each skill — grouped by category, based on where skills appear, how long, and what context. It is not a mastery score. It is a read on how your resume communicates each skill."
             },
             {
