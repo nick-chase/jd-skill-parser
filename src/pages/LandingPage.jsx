@@ -121,7 +121,7 @@ export default function LandingPage() {
           {[
             {
               q: 'Does this actually work for non-tech jobs?',
-              a: 'Right now Nat20 is optimized for Software Engineering, ML/AI, and Data Science roles. Finance and other industries are planned for later this year.'
+              a: 'Right now Nat20 is optimized for Software Engineering, ML/AI, and Data Science roles. Finance and other industries are on the roadmap.'
             },
             {
               q: 'Who is this for?',
