@@ -41,7 +41,7 @@ export default function ResourceLink({ resources }) {
       </div>
       {hasAffiliate && (
         <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px', lineHeight: '1.4' }}>
-          Some resources above are affiliate links. If you enroll through our link, we earn a small commission — it costs you nothing extra.
+          All links on this page are affiliate links. If you enroll through our link, we earn a small commission — it costs you nothing extra.
         </div>
       )}
     </div>

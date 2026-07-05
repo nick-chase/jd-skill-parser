@@ -909,7 +909,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                         <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#d97706' }}>{levelGaps.length}</div>
                     </div>
                     <div>
-                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Bonus</div>
+                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Skill Inventory</div>
                         <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#7c3aed' }}>{bonus.length}</div>
                     </div>
                 </div>
@@ -1103,9 +1103,9 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                 </div>
             )}
 
-            {/* Bonus skills — collapsed */}
+            {/* Skill inventory — skills present but not active for this role, collapsed */}
             {bonus.length > 0 && (
-                <CollapsibleSection label="Bonus Skills" count={bonus.length} color="text-violet-600">
+                <CollapsibleSection label="Skill Inventory" count={bonus.length} color="text-violet-600">
                     <div className="flex flex-wrap gap-1">
                         {bonus.map(skill => (
                             <span key={skill.name}
