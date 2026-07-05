@@ -10,21 +10,7 @@
  * importance >= 4 = Required/Critical.
  */
 
-/**
- * Converts a skill display name to a resource lookup ID.
- * Matches the nameToResourceId logic in SkillRow.jsx and affiliateLoader.js.
- *
- * @param {string} name
- * @returns {string}
- */
-export function nameToResourceId(name) {
-  return (name || '')
-    .toLowerCase()
-    .replace(/\./g, '')
-    .replace(/[/\s]+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/[^a-z0-9-]/g, '')
-}
+import { nameToResourceId } from './constants.js'
 
 /**
  * Returns up to 4 low-evidence skills from the user's resume for Zone 1.
