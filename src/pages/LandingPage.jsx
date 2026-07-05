@@ -49,7 +49,8 @@ export default function LandingPage() {
         <p className="text-lg text-slate-500 max-w-2xl mx-auto">
           Paste a job description and your resume. Nat20 maps how strongly your
           resume backs up each required skill — not just which keywords are
-          missing, but how well your resume communicates what you know.
+          missing, but how well your resume communicates what you know. Nat20
+          helps you close the gap between your work and how your resume describes it.
         </p>
         <div className="flex items-center justify-center gap-4 pt-2">
           <Link to="/app"
@@ -120,15 +121,15 @@ export default function LandingPage() {
           {[
             {
               q: 'Does this actually work for non-tech jobs?',
-              a: 'Right now Nat20 is optimized for Software Engineering, ML/AI, and Data Science roles. Finance and other industries are planned for later this year.'
+              a: 'Right now Nat20 is optimized for Software Engineering, ML/AI, and Data Science roles. Finance and other industries are on the roadmap.'
             },
             {
               q: 'Who is this for?',
-              a: "Early-career job seekers — students, bootcamp grads, new grads — who need to turn a skills list into evidence-backed bullets. And experienced professionals or career changers who have done the work but need to reframe how their resume describes it. The gap looks different depending on where you are. The tool reads the same signal either way."
+              a: "Right now, Nat20 is built for tech roles — Software Engineering, ML/AI, and Data Science. Within that scope: early-career job seekers — students, bootcamp grads, new grads — who need to turn a skills list into evidence-backed bullets. And experienced professionals or career changers who have done the work but need to reframe how their resume describes it. The gap looks different depending on where you are. The tool reads the same signal either way."
             },
             {
               q: 'Is my resume data stored?',
-              a: "Free users: nothing is stored — results disappear when you close the tab. Pro users: your parsed resume profile is saved so you don't have to re-paste on return visits."
+              a: "Free users: your results are held in your browser's session storage — they survive a page refresh but clear when you close the tab or restart your browser. Nothing is saved to a server. Pro users: on top of that, your parsed resume profile is saved server-side, so it auto-loads on return — even after closing the tab, restarting your browser, or switching devices."
             },
             {
               q: 'How is this different from other resume tools?',
@@ -155,7 +156,7 @@ export default function LandingPage() {
       <footer className="border-t border-slate-100 py-8 px-6">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="text-sm text-slate-400">
-            ⚔ Nat20 · Mind the gap.
+            ⚔ Nat20 · Know your stats before you apply.
           </div>
           <div className="flex items-center gap-6 text-sm text-slate-400">
             <Link to="/app" className="hover:text-slate-600 transition">App</Link>

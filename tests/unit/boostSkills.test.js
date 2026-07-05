@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { getResumeBoostSkills, getMatchBoostSkills, nameToResourceId } from '../../src/utils/boostSkills.js'
+import { getResumeBoostSkills, getMatchBoostSkills } from '../../src/utils/boostSkills.js'
+import { nameToResourceId } from '../../src/utils/constants.js'
 
 describe('nameToResourceId', () => {
   it('lowercases and replaces spaces with hyphens', () => {
