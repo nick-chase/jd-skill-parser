@@ -8,6 +8,7 @@
     "Python":            { "level": 3, "minLevel": 2, "maxLevel": 4 },
     "JavaScript":        { "level": 2, "minLevel": 1, "maxLevel": 3 },
     "SQL":               { "level": 4, "minLevel": 3, "maxLevel": 5 },
+    "DevOps":            { "level": 2, "minLevel": 1, "maxLevel": 3 },
     "Bash":              { "level": 2, "minLevel": 1, "maxLevel": 3 },
     "Go":                { "level": 1, "minLevel": 1, "maxLevel": 2 },
     "Spring Boot":       { "level": 4, "minLevel": 3, "maxLevel": 5 },
