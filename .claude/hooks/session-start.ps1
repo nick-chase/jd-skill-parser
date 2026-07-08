@@ -24,32 +24,32 @@ if ($modified) {
 Write-Output ""
 
 # ─── Master plan phase headers ───────────────────────────
-$masterPlan = "..\nat20-core\docs\master-plan-v4.md"
+$masterPlan = "..\nat20-core\docs\master-plan-v5.md"
 if (Test-Path $masterPlan) {
-    Write-Output "=== Phase Status (master-plan-v4.md) ==="
+    Write-Output "=== Phase Status (master-plan-v5.md) ==="
     Select-String -Path $masterPlan -Pattern "^## Phase|^### Phase" |
         Select-Object -First 10 |
         ForEach-Object { Write-Output "  $($_.Line)" }
     Write-Output ""
 } else {
-    Write-Output "WARNING: master-plan-v4.md not found at $masterPlan"
+    Write-Output "WARNING: master-plan-v5.md not found at $masterPlan"
     Write-Output ""
 }
 
-# ─── Open tasks ──────────────────────────────────────────
-$openTasks = "..\nat20-core\docs\OPEN_TASKS.md"
-if (Test-Path $openTasks) {
-    Write-Output "=== Open Tasks (OPEN_TASKS.md) ==="
+# ─── Path to launch (tasks + bugs, combined) ─────────────
+$pathToLaunch = "..\nat20-core\PATH_TO_LAUNCH.md"
+if (Test-Path $pathToLaunch) {
+    Write-Output "=== Path to Launch (PATH_TO_LAUNCH.md) ==="
 
     # Current phase header
-    $phaseHeader = Select-String -Path $openTasks -Pattern "^## Current Phase" |
+    $phaseHeader = Select-String -Path $pathToLaunch -Pattern "^## Current Phase" |
         Select-Object -First 1
     if ($phaseHeader) {
         Write-Output "  $($phaseHeader.Line)"
     }
 
     # Unchecked task lines
-    Select-String -Path $openTasks -Pattern "^- \[ \]" |
+    Select-String -Path $pathToLaunch -Pattern "^- \[ \]" |
         Select-Object -First 10 |
         ForEach-Object {
             $line = $_.Line -replace "^- \[ \]\s*", "  "
@@ -57,22 +57,9 @@ if (Test-Path $openTasks) {
             Write-Output $line
         }
 
-    Write-Output ""
-    Write-Output "  Full details: ..\nat20-core\docs\OPEN_TASKS.md"
-    Write-Output ""
-} else {
-    Write-Output "WARNING: OPEN_TASKS.md not found at $openTasks"
-    Write-Output ""
-}
-
-# ─── Known bugs ──────────────────────────────────────────
-$knownBugs = "..\nat20-core\docs\KNOWN_BUGS.md"
-if (Test-Path $knownBugs) {
-    Write-Output "=== Open Bugs (KNOWN_BUGS.md) ==="
-
-    # Extract rows from the Open table only
+    # Extract rows from the Open bugs table, if present
     # Reads lines between "## Open" and the next "## " heading
-    $bugContent = Get-Content $knownBugs
+    $bugContent = Get-Content $pathToLaunch
     $inOpenSection = $false
     $bugCount = 0
 
@@ -98,11 +85,11 @@ if (Test-Path $knownBugs) {
     }
 
     Write-Output ""
-    Write-Output "  Full details: ..\nat20-core\docs\KNOWN_BUGS.md"
+    Write-Output "  Full details: ..\nat20-core\PATH_TO_LAUNCH.md"
     Write-Output ""
 } else {
-    Write-Output "WARNING: KNOWN_BUGS.md not found at $knownBugs"
-    Write-Output "         Create it at: ..\nat20-core\docs\KNOWN_BUGS.md"
+    Write-Output "WARNING: PATH_TO_LAUNCH.md not found at $pathToLaunch"
+    Write-Output "         Create it at: ..\nat20-core\PATH_TO_LAUNCH.md"
     Write-Output ""
 }
 

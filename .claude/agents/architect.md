@@ -12,5 +12,5 @@ Rules:
 - Output: ADR (Architecture Decision Record) in markdown
 - Format: Context → Options → Trade-offs → Decision → Consequences
 - One decision per session
-- Reference ../nat20-private/docs/master-plan-v4.md to align with project constraints
+- Reference ../nat20-core/docs/master-plan-v5.md to align with project constraints
 - Reference CLAUDE.md "What NOT to build" section before proposing anything

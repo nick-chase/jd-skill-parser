@@ -20,10 +20,9 @@
 
 | Document | Path | Contains |
 |----------|------|----------|
-| Open tasks + current phase | `../nat20-core/OPEN_TASKS.md` | Active task IDs, DoDs, what's in flight |
+| Open tasks + known bugs + current phase | `../nat20-core/PATH_TO_LAUNCH.md` | Active task IDs, DoDs, open bugs, what's in flight — single source of truth |
 | Master plan | `../nat20-core/docs/master-plan-v5.md` | Phase definitions, completed history, architecture decisions |
 | Scoring spec | `../nat20-core/docs/scoring-model.md` | Full E×C×D×R tables, weight values, score→level map |
-| Known bugs | `../nat20-core/KNOWN_BUGS.md` | Open bugs, priority, status — single source of truth |
 | Affiliate plan | `../nat20-core/docs/affiliate_masterplan.md` | Affiliate program strategy and implementation |
 
 Do not rely on anything in this file for current task state, bug status,
@@ -82,7 +81,7 @@ edit the copy in this repo. Nicholas copies changes back to nat20-core manually.
 
 - NEVER commit. NEVER push. Nicholas commits manually via GitHub Desktop.
 - NEVER write to `../nat20-core/`.
-- NEVER edit `OPEN_TASKS.md`, `master-plan-v4.md`, or `KNOWN_BUGS.md` —
+- NEVER edit `PATH_TO_LAUNCH.md` or `master-plan-v5.md` —
   Nicholas updates those.
 - NEVER bypass the pre-commit hook with `--no-verify`.
 - NEVER add new dependencies without explicit approval.
@@ -215,7 +214,7 @@ new patterns are added):
 | Season + year | `Summer 2023` | 3mo / Fall=4mo / Spring=5mo / Winter=3mo |
 | Duration only | `6 months` | duration, no dates |
 | Bare year | `2022` | null duration, known point-in-time |
-| Expected prefix | `Expected May 2026` | null until status shape-change (see KNOWN_BUGS.md #7) |
+| Expected prefix | `Expected May 2026` | null until status shape-change (see PATH_TO_LAUNCH.md #7) |
 
 Degree scoring rules (always enforced):
 - `in_progress` or `expected` status → no completed credential weight
@@ -309,8 +308,7 @@ Rules:
 3. Report to Nicholas: what changed, which files, test group summary
 4. Nicholas reviews staged changes
 5. Nicholas commits via GitHub Desktop
-6. Nicholas updates `OPEN_TASKS.md` and `master-plan-v4.md` in nat20-core
-7. If a new bug was found, Nicholas adds it to `KNOWN_BUGS.md`
+6. Nicholas updates `PATH_TO_LAUNCH.md` and `master-plan-v5.md` in nat20-core (including any new bugs found)
 
 **Do not commit. Do not push. Do not write to nat20-core.**
 
@@ -333,7 +331,7 @@ Full agent specs: `.claude/agents/`
 
 ## Architecture Decisions
 
-Append-only. Full history in `master-plan-v4.md`.
+Append-only. Full history in `master-plan-v5.md`.
 Only the decisions most relevant to daily parser work are listed here.
 
 | Decision | Date |
@@ -355,7 +353,7 @@ Only the decisions most relevant to daily parser work are listed here.
 ## When Stuck
 
 1. Run `npm test` — are all groups still passing?
-2. Read `../nat20-core/docs/OPEN_TASKS.md` — what is the active task?
-3. Re-read the task's Definition of Done in `master-plan-v4.md`
-4. Check `../nat20-core/docs/KNOWN_BUGS.md` — is this a known issue?
+2. Read `../nat20-core/PATH_TO_LAUNCH.md` — what is the active task?
+3. Re-read the task's Definition of Done in `master-plan-v5.md`
+4. Check `../nat20-core/PATH_TO_LAUNCH.md` — is this a known issue?
 5. If genuinely blocked, stop and report — do not improvise

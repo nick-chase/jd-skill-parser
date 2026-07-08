@@ -9,17 +9,17 @@
 #
 # Checks:
 #   1.  CLAUDE.md exists and references live documents (not hardcoded state)
-#   2.  All five live documents exist and are readable
+#   2.  All live documents exist and are readable
 #   3.  CLAUDE.md does NOT contain a hardcoded test count
 #   4.  CLAUDE.md does NOT contain the old v1 scoring formula
 #   5.  CLAUDE.md has branch discipline section
 #   6.  CLAUDE.md task completion protocol prohibits direct commits/pushes
-#   7.  CLAUDE.md references KNOWN_BUGS.md (not an inline bugs table)
+#   7.  CLAUDE.md references PATH_TO_LAUNCH.md (not an inline bugs table)
 #   8.  Agent files all have model: field set to sonnet/haiku/opus
 #   9.  All six expected agents are present
 #   10. settings.json has deny rules for push and commit
 #   11. settings.json whitelists Read(**)
-#   12. OPEN_TASKS.md current phase header is readable
+#   12. PATH_TO_LAUNCH.md current phase marker is readable
 #   13. npm test exits cleanly (all groups green)
 
 Write-Output ""
@@ -45,14 +45,13 @@ if (Test-Path $claudeMd) {
 }
 
 # ─────────────────────────────────────────────
-# CHECK 2 — All five live documents exist
+# CHECK 2 — All live documents exist
 # ─────────────────────────────────────────────
 
 $liveDocs = @{
-    "OPEN_TASKS.md"        = "..\nat20-core\docs\OPEN_TASKS.md"
-    "master-plan-v4.md"    = "..\nat20-core\docs\master-plan-v4.md"
+    "PATH_TO_LAUNCH.md"    = "..\nat20-core\PATH_TO_LAUNCH.md"
+    "master-plan-v5.md"    = "..\nat20-core\docs\master-plan-v5.md"
     "scoring-model.md"     = "..\nat20-core\docs\scoring-model.md"
-    "KNOWN_BUGS.md"        = "..\nat20-core\docs\KNOWN_BUGS.md"
     "affiliate_masterplan" = "..\nat20-core\docs\affiliate_masterplan.md"
 }
 
@@ -137,21 +136,22 @@ if ($claudeContent) {
 }
 
 # ─────────────────────────────────────────────
-# CHECK 7 — CLAUDE.md references KNOWN_BUGS.md, not inline bug table
+# CHECK 7 — CLAUDE.md references PATH_TO_LAUNCH.md for bugs, not an inline bug table
 # ─────────────────────────────────────────────
 
 if ($claudeContent) {
-    $hasPointer    = $claudeContent -match 'KNOWN_BUGS\.md'
-    $hasInlineTable = $claudeContent -match '\|\s*#\s*\|\s*Bug\s*\|' -and $claudeContent -match '\|\s*\d+\s*\|.*priority'
+    $hasPointer     = $claudeContent -match 'PATH_TO_LAUNCH\.md'
+    $hasInlineTable = ($claudeContent -match '\|\s*#\s*\|\s*Bug\s*\|') `
+                      -and ($claudeContent -match '\|\s*\d+\s*\|.*priority')
 
     if ($hasPointer) {
-        $ok += "CLAUDE.md points to KNOWN_BUGS.md for bug tracking"
+        $ok += "CLAUDE.md points to PATH_TO_LAUNCH.md (single source for tasks + bugs)"
     } else {
-        $warnings += "CLAUDE.md does not reference KNOWN_BUGS.md — add a pointer so agents know where to look"
+        $warnings += "CLAUDE.md does not reference PATH_TO_LAUNCH.md — add a pointer so agents know where tasks and bugs live"
     }
 
     if ($hasInlineTable) {
-        $issues += "CLAUDE.md contains an inline bug table — move all bugs to KNOWN_BUGS.md and replace with a pointer"
+        $issues += "CLAUDE.md contains an inline bug table — move bugs to PATH_TO_LAUNCH.md's Known Bugs section and replace with a pointer"
     } else {
         $ok += "CLAUDE.md does not contain an inline bug table"
     }
@@ -239,24 +239,29 @@ if (Test-Path $settingsFile) {
 }
 
 # ─────────────────────────────────────────────
-# CHECK 12 — OPEN_TASKS.md current phase is readable
+# CHECK 12 — PATH_TO_LAUNCH.md current phase is readable
 # ─────────────────────────────────────────────
 
-$openTasksPath = "..\nat20-core\docs\OPEN_TASKS.md"
-if (Test-Path $openTasksPath) {
-    $tasksContent = Get-Content $openTasksPath -Raw
-    $phaseMatch = [regex]::Match($tasksContent, 'Current Phase:\s*([A-Z])\s*[—\-]')
+$pathToLaunchPath = "..\nat20-core\PATH_TO_LAUNCH.md"
+if (Test-Path $pathToLaunchPath) {
+    $planContent = Get-Content $pathToLaunchPath -Raw
+
+    # Primary: an explicit "Current Phase: E — ..." marker in the header note.
+    $phaseMatch = [regex]::Match($planContent, 'Current Phase:\s*([A-Z])\b')
+
     if ($phaseMatch.Success) {
         $currentPhase = $phaseMatch.Groups[1].Value
-        $ok += "Current phase readable from OPEN_TASKS.md: Phase $currentPhase"
+        $ok += "Current phase readable from PATH_TO_LAUNCH.md: Phase $currentPhase"
 
         # Verify CLAUDE.md at least mentions this phase
         if ($claudeContent -and -not ($claudeContent -match "Phase $currentPhase")) {
             $warnings += "CLAUDE.md does not mention Phase $currentPhase — may be referencing a stale phase"
         }
     } else {
-        $warnings += "Could not detect current phase from OPEN_TASKS.md — check the 'Current Phase:' header format"
+        $warnings += "Could not detect current phase from PATH_TO_LAUNCH.md — add a 'Current Phase: <letter> — ...' line to the header note section. session-start.ps1 reads the same marker, so without it both the audit and the session banner show no phase."
     }
+} else {
+    $issues += "PATH_TO_LAUNCH.md not found at $pathToLaunchPath — session context and phase detection will be missing"
 }
 
 # ─────────────────────────────────────────────
