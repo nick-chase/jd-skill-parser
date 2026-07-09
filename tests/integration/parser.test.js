@@ -379,12 +379,13 @@ describe('parseResumeText() -- technicalSignals extraction from sample resume', 
     expect(docker.source).toMatch(/project/i);
   });
 
-  // React appears only in Technical Skills (wType=0.1, no duration).
-  // Score = 0.1 × 0.4 × 1.0 = 0.04 → L1 Awareness. "Learning" phrase is expected future work.
-  test('React is level 1 -- skills-section-only, no project or experience evidence', () => {
+  // React appears only in Technical Skills (wType=0.05, no duration).
+  // Bug #8 fix: skills-section-only evidence uses the 0.6 E-weight override
+  // instead of the raw 0.05 floor. Score = 0.6 × 1.00 × 0.5 = 0.30 → L2.
+  test('React is level 2 -- skills-section-only, no project or experience evidence', () => {
     const react = resumeSkills.find((s) => s.name === 'React');
     expect(react).toBeDefined();
-    expect(react.level).toBe(1);
+    expect(react.level).toBe(2);
   });
 
   test('technicalSignals are sorted by descending level', () => {

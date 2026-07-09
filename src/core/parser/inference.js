@@ -198,7 +198,7 @@ const BLOOM_LEVELS = [
   { multiplier: 1.20, pattern: /\b(reviewed|validated|optimized|optimize|evaluated|assessed|audited|improve|improved|enhance|enhanced|streamline|streamlined)\b/i },
   { multiplier: 1.10, pattern: /\b(analyzed|debugged|refactored|diagnosed|investigated)\b/i },
   { multiplier: 1.00, pattern: /\b(built|used|implemented|developed|deployed|configured|wrote|created)\b/i },
-  { multiplier: 0.70, pattern: /\b(learned|studied|familiar|exposure|understanding|training)\b/i },
+  { multiplier: 0.70, pattern: /\b(learned|studied|familiar|exposure|understanding|training|worked)\b/i },
   { multiplier: 0.50, pattern: /\b(listed|named)\b/i },
 ]
 
@@ -358,10 +358,29 @@ export function scoreSkillEvidence(instances) {
     inst.bloomC != null ? inst.bloomC : classifyBloomLevel(inst.bulletText || '')
   )
 
+  // Effective E weight override — skills-section-only evidence (Bug #8).
+  // classifyEvidenceType() returns 0.05 for 'skills' section instances, which
+  // structurally floors the score at L1 (0.05 × 1.00 × 0.4 = 0.02) no matter
+  // what. That floor is correct when the skills-list mention is one of
+  // several contexts (it should stay a negligible nudge — other, demonstrated
+  // evidence should dominate). It is wrong when the skills list is the ONLY
+  // evidence for the skill: there is nothing to corroborate, but the skill was
+  // still explicitly claimed, and that claim deserves more than L1 forever.
+  // Gated on wType === 0.05 (classifyEvidenceType's actual current skills-section
+  // constant) so the override only fires for the real skills-only case, not for
+  // arbitrary test/caller-supplied weights, and every instance must be from the
+  // skills section so mixed-context skills (skills + experience/projects/etc.)
+  // are unaffected.
+  const SKILLS_ONLY_E = 0.6
+  const isSkillsSectionOnly = instances.every(
+    inst => (inst.sectionName || '').toLowerCase() === 'skills' && inst.wType === 0.05
+  )
+
   // Per-instance contribution: E × C × D
   const contributions = instances.map((inst, i) => {
-    const d = getDurationModifier(inst.wType, inst.durationMonths)
-    return { inst, bloomC: bloomCs[i], contribution: inst.wType * bloomCs[i] * d }
+    const effectiveWType = isSkillsSectionOnly ? SKILLS_ONLY_E : inst.wType
+    const d = getDurationModifier(effectiveWType, inst.durationMonths)
+    return { inst, bloomC: bloomCs[i], contribution: effectiveWType * bloomCs[i] * d }
   })
 
   const sum = contributions.reduce((acc, { contribution }) => acc + contribution, 0)

@@ -572,12 +572,16 @@ describe('scoreSkillEvidence()', () => {
 // ---------------------------------------------------------------------------
 
 describe('scoreSkillEvidence() — confidence', () => {
+  // Bug #8 fix: a single skills-section-only instance with the real
+  // classifyEvidenceType() weight (0.05) now uses the skills-only E override
+  // (0.6 × 1.00 × 0.5 = 0.30 → L2) instead of being floored at L1 forever.
+  // Confidence stays 'low' — a skills-list mention alone is still unconfirmed.
   test('skills-section-only → low confidence', () => {
     const result = scoreSkillEvidence([
       { wType: 0.05, durationMonths: null, sectionName: 'skills' },
     ])
     expect(result.confidence).toBe('low')
-    expect(result.level).toBe('L1')
+    expect(result.level).toBe('L2')
   })
 
   test('3-year FT job + Create verb → high confidence', () => {
