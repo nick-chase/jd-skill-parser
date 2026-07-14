@@ -35,6 +35,38 @@ const LEVEL_NAMES = {
   5: 'Expert',
 }
 
+// Compact duration formatter — mirrors formatDuration() in jd-skill-parser.jsx.
+// Not imported directly since that function is module-private there.
+function formatDurationCompact(months) {
+  if (months == null) return null
+  const yrs = Math.floor(months / 12)
+  const mos = months % 12
+  if (yrs >= 1 && mos === 0) return `${yrs} yr${yrs !== 1 ? 's' : ''}`
+  if (yrs >= 1) return `${yrs} yr${yrs !== 1 ? 's' : ''} ${mos} mo`
+  return `${months} mo`
+}
+
+// Compact evidence line for the closest-gap card — mirrors evidenceSummary()
+// in jd-skill-parser.jsx, scaled to Lite's single-card visual weight.
+function closestGapEvidenceLine(skill) {
+  if (skill.source === 'Technical Skills' || skill.source === 'Summary') {
+    return 'listed only'
+  }
+  const parts = []
+  const dur = formatDurationCompact(skill.durationMonths)
+  parts.push(dur ?? 'no duration stated')
+  const count = skill.contextCount ?? 1
+  if (count >= 3) parts.push('3+ contexts')
+  else if (count >= 2) parts.push('2 contexts')
+  return parts.join(' · ')
+}
+
+// Small confidence indicator dot — mirrors ConfidenceDot in jd-skill-parser.jsx.
+function ConfidenceDotInline({ confidence }) {
+  const color = confidence === 'high' ? '#22c55e' : confidence === 'medium' ? '#f59e0b' : '#94a3b8'
+  return <span style={{ color, fontSize: '10px', marginLeft: '4px', lineHeight: 1 }}>●</span>
+}
+
 export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) {
   if (!resumeData) return null
 
@@ -170,10 +202,14 @@ export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) 
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-slate-800">{closestGap.name}</span>
             <span className="text-xs text-amber-700 font-semibold">
-              {typeof closestGap.gapSize === 'number'
-                ? `${closestGap.gapSize} level${closestGap.gapSize !== 1 ? 's' : ''} away`
+              {typeof closestGap.gap === 'number'
+                ? `${closestGap.gap} level${closestGap.gap !== 1 ? 's' : ''} away`
                 : 'Gap detected'}
             </span>
+          </div>
+          <div className="flex items-center gap-1 text-xs text-amber-700 mt-1">
+            <span>{closestGapEvidenceLine(closestGap)}</span>
+            {closestGap.confidence && <ConfidenceDotInline confidence={closestGap.confidence} />}
           </div>
           <div className="text-xs text-amber-600 mt-1">
             This is the skill where a small resume edit would move the needle most.

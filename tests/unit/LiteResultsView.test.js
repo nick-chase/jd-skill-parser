@@ -37,7 +37,7 @@ function completeLiteResults(overrides = {}) {
       ],
       totalDetected: 9,
     },
-    closestGap: { name: 'AWS', gapSize: 2 },
+    closestGap: { name: 'AWS', gap: 2, level: 4, importance: 5, resumeLevel: 2, confidence: 'medium', source: 'Experience', durationMonths: 8, contextCount: 2 },
     missingBehavioral: [
       { name: 'Collaboration' },
       { name: 'Communication' },
@@ -106,11 +106,11 @@ describe('LiteResultsView — liteResults shape contract', () => {
     expect(result.topSkills.totalDetected).toBeGreaterThanOrEqual(result.topSkills.skills.length)
   })
 
-  test('closestGap has a name and gapSize', () => {
+  test('closestGap has a name and gap (level distance)', () => {
     const result = completeLiteResults()
     expect(result.closestGap).not.toBeNull()
     expect(typeof result.closestGap.name).toBe('string')
-    expect(typeof result.closestGap.gapSize).toBe('number')
+    expect(typeof result.closestGap.gap).toBe('number')
   })
 
   test('missingBehavioral is a non-empty array of signal objects', () => {
