@@ -1,3 +1,5 @@
+import AffiliateDisclosure from './AffiliateDisclosure.jsx'
+
 /**
  * ResourceLink — renders a small "Resources" block for a gap or missing skill.
  *
@@ -9,6 +11,7 @@ export default function ResourceLink({ resources }) {
   if (!resources || resources.length === 0) return null
 
   const hasAffiliate = resources.some(r => r.affiliate)
+  const affiliateCount = resources.filter(r => r.affiliate).length
 
   return (
     <div style={{ padding: '0 16px 8px 28px' }}>
@@ -40,9 +43,10 @@ export default function ResourceLink({ resources }) {
         ))}
       </div>
       {hasAffiliate && (
-        <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px', lineHeight: '1.4' }}>
-          All links on this page are affiliate links. If you enroll through our link, we earn a small commission — it costs you nothing extra.
-        </div>
+        <AffiliateDisclosure
+          count={affiliateCount}
+          style={{ fontSize: '10px', color: '#94a3b8', marginTop: '4px', lineHeight: '1.4' }}
+        />
       )}
     </div>
   )

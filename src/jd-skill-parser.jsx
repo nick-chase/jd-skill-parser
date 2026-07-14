@@ -22,6 +22,7 @@ import { getAffiliateResources } from '@utils/affiliateLoader.js';
 import { nameToResourceId } from '@utils/constants.js';
 import { runGapAnalysis, runBehavioralGap } from './core/parser/gap.js';
 import TierBadge from './components/TierBadge.jsx';
+import AffiliateDisclosure from './components/AffiliateDisclosure.jsx';
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
 const feedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
@@ -34,7 +35,8 @@ const feedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
 // Importance: inferred from JD section structure
 // ============================================================
 
-const LEVEL_NAMES = ['—', 'Mentioned', 'Limited evidence', 'Supported', 'Strong evidence', 'Extensive evidence'];
+/** Single source of truth for level number → label. Used by GapAnalysisView, BoostSection, and LiteResultsView. */
+export const LEVEL_NAMES = ['—', 'Mentioned', 'Limited evidence', 'Supported', 'Strong evidence', 'Extensive evidence'];
 const IMPORTANCE_NAMES = ['—', 'Optional', 'Nice-to-have', 'Preferred', 'Required', 'Critical'];
 
 /** Single source of truth for matchScore → label. Used by GapAnalysisView and LiteResultsView. */
@@ -490,7 +492,8 @@ To review our candidate privacy notice, click here.
 // SHARED DESIGN CONSTANTS
 // ============================================================
 
-const EVIDENCE_BANDS = [
+/** Single source of truth for evidence level → strength band. Used by GapAnalysisView and LiteResultsView. */
+export const EVIDENCE_BANDS = [
     { key: 'strong',    label: 'Strong Evidence',  levels: [4, 5], color: 'text-emerald-700' },
     { key: 'supported', label: 'Supported',         levels: [3],    color: 'text-blue-700'   },
     { key: 'limited',   label: 'Limited Evidence',  levels: [2],    color: 'text-amber-700'  },
@@ -1066,6 +1069,10 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                                                     {affiliateResource.platform} · affiliate
                                                 </span>
                                             </a>
+                                            <AffiliateDisclosure
+                                                count={1}
+                                                className="text-[10px] text-slate-400 mt-1"
+                                            />
                                         </div>
                                     )}
                                 </div>

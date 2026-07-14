@@ -25,15 +25,10 @@
  *   duties  string[]   — JD duty bullets from results.jobDuties
  */
 
-import { getMatchScoreLabel } from '../jd-skill-parser.jsx'
-
-const LEVEL_NAMES = {
-  1: 'Awareness',
-  2: 'Limited',
-  3: 'Supported',
-  4: 'Strong',
-  5: 'Expert',
-}
+import { getMatchScoreLabel, LEVEL_NAMES, EVIDENCE_BANDS } from '../jd-skill-parser.jsx'
+import { getAffiliateResources } from '@utils/affiliateLoader.js'
+import { nameToResourceId } from '@utils/constants.js'
+import AffiliateDisclosure from './AffiliateDisclosure.jsx'
 
 // Compact duration formatter — mirrors formatDuration() in jd-skill-parser.jsx.
 // Not imported directly since that function is module-private there.
@@ -65,6 +60,20 @@ function closestGapEvidenceLine(skill) {
 function ConfidenceDotInline({ confidence }) {
   const color = confidence === 'high' ? '#22c55e' : confidence === 'medium' ? '#f59e0b' : '#94a3b8'
   return <span style={{ color, fontSize: '10px', marginLeft: '4px', lineHeight: 1 }}>●</span>
+}
+
+// Level label lookup — mirrors resumeLabel/jdLabel derivation in GapAnalysisView (jd-skill-parser.jsx).
+function levelLabel(level) {
+  if (!level) return 'Not evidenced'
+  return LEVEL_NAMES[level] ?? `L${level}`
+}
+
+// Maps a resume evidence level to its strength band label — reuses Pro's EVIDENCE_BANDS
+// so Lite and Pro agree on what "Limited" vs "Strong" evidence means.
+function evidenceBandLabel(level) {
+  if (!level) return 'No evidence'
+  const band = EVIDENCE_BANDS.find(b => b.levels.includes(level))
+  return band ? band.label : `L${level}`
 }
 
 export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) {
@@ -208,12 +217,45 @@ export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) 
             </span>
           </div>
           <div className="flex items-center gap-1 text-xs text-amber-700 mt-1">
-            <span>{closestGapEvidenceLine(closestGap)}</span>
+            <span>You: {levelLabel(closestGap.resumeLevel)}</span>
             {closestGap.confidence && <ConfidenceDotInline confidence={closestGap.confidence} />}
+            <span>→ Role needs: {levelLabel(closestGap.level)}</span>
+          </div>
+          <div className="text-xs text-amber-700 mt-1">
+            {closestGapEvidenceLine(closestGap)} reads as {evidenceBandLabel(closestGap.resumeLevel)}
           </div>
           <div className="text-xs text-amber-600 mt-1">
             This is the skill where a small resume edit would move the needle most.
           </div>
+          {(() => {
+            const resource = getAffiliateResources(
+              nameToResourceId(closestGap.name),
+              closestGap.resumeLevel ?? 1,
+              'tech',
+              closestGap.name
+            )[0] ?? null
+            if (!resource) return null
+            return (
+              <>
+                <a
+                  href={resource.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-xs mt-2 px-3 py-2 bg-white border border-indigo-200 text-indigo-700 rounded-lg hover:bg-indigo-50 transition"
+                >
+                  <span>📚</span>
+                  <span className="font-medium">{resource.title}</span>
+                  <span className="text-[10px] text-indigo-400 ml-auto">
+                    {resource.platform} · affiliate
+                  </span>
+                </a>
+                <AffiliateDisclosure
+                  count={1}
+                  className="text-[10px] text-slate-400 mt-1"
+                />
+              </>
+            )
+          })()}
         </div>
       )}
 
