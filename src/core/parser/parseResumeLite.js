@@ -19,6 +19,7 @@
  * @returns {{
  *   matchScore:        number | null,
  *   closestGap:        object | null,
+ *   missingSpread:      { skills: object[], totalMissing: number, moreCount: number } | null,
  *   missingBehavioral: object[],
  *   teaserCounts:      { lowMatchCount: number, criticalGapCount: number, lowMatchTeaser?: string, criticalTeaser?: string },
  * }}
@@ -112,6 +113,7 @@ export function computeLiteMatch(resumeData, jdProfile) {
         return {
             matchScore:        null,
             closestGap:        null,
+            missingSpread:     null,
             missingBehavioral: [],
             teaserCounts:      { lowMatchCount: 0, criticalGapCount: 0 },
         }
@@ -138,6 +140,39 @@ export function computeLiteMatch(resumeData, jdProfile) {
     const critical   = gapResult?.critical   ?? []
     const closestGap = levelGaps[0] ?? null
 
+    // missingSpread — fallback for when there is no single level-gap skill to
+    // anchor the "Closest gap" card (levelGaps.length === 0). Buckets missing
+    // (critical) skills into three required-level tiers — low [L1-2], mid [L3],
+    // high [L4-5] — mirroring the existing EVIDENCE_BANDS convention in
+    // constants.js, which already treats L4-5 as one "Strong Evidence" band and
+    // L3 as its own "Supported" band. Within each tier, picks the single skill
+    // with the lowest jdOrder (earliest JD mention) — never importance — as the
+    // representative. Tiers with zero missing skills are omitted (never
+    // backfilled). Only computed when closestGap is null, since it is unused
+    // otherwise.
+    let missingSpread = null
+    if (!closestGap && critical.length > 0) {
+        const tiers = [
+            { key: 'low',  levels: [1, 2] },
+            { key: 'mid',  levels: [3] },
+            { key: 'high', levels: [4, 5] },
+        ]
+        const shown = []
+        for (const tier of tiers) {
+            const candidates = critical.filter(s => tier.levels.includes(s.level))
+            if (candidates.length === 0) continue
+            const pick = candidates.reduce((lowest, s) =>
+                (s.jdOrder ?? Infinity) < (lowest.jdOrder ?? Infinity) ? s : lowest
+            )
+            shown.push(pick)
+        }
+        missingSpread = {
+            skills: shown,
+            totalMissing: critical.length,
+            moreCount: critical.length - shown.length,
+        }
+    }
+
     // missingBehavioral — present/absent only, no scoring
     const missingBehavioral = behavioralGap?.missing ?? []
 
@@ -154,6 +189,7 @@ export function computeLiteMatch(resumeData, jdProfile) {
     return {
         matchScore,
         closestGap,
+        missingSpread,
         missingBehavioral,
         teaserCounts,
         matchedCount:    (gapResult?.matched   ?? []).length,

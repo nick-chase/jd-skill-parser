@@ -19,10 +19,19 @@ import AppFooter from './components/AppFooter.jsx';
 import HowToTour from './components/HowToTour.jsx'
 import FeedbackForm from './components/FeedbackForm.jsx';
 import { getAffiliateResources } from '@utils/affiliateLoader.js';
-import { nameToResourceId } from '@utils/constants.js';
+import {
+    nameToResourceId,
+    LEVEL_NAMES,
+    EVIDENCE_BANDS,
+    getMatchScoreLabel,
+    evidenceSummary,
+} from '@utils/constants.js';
+// Re-exported for backward compatibility — canonical definition lives in @utils/constants.js.
+export { getMatchScoreLabel };
 import { runGapAnalysis, runBehavioralGap } from './core/parser/gap.js';
 import TierBadge from './components/TierBadge.jsx';
-import AffiliateDisclosure from './components/AffiliateDisclosure.jsx';
+import ConfidenceDot from './components/ConfidenceDot.jsx';
+import GapResourceLink from './components/GapResourceLink.jsx';
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
 const feedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
@@ -35,16 +44,9 @@ const feedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
 // Importance: inferred from JD section structure
 // ============================================================
 
-/** Single source of truth for level number → label. Used by GapAnalysisView, BoostSection, and LiteResultsView. */
-export const LEVEL_NAMES = ['—', 'Mentioned', 'Limited evidence', 'Supported', 'Strong evidence', 'Extensive evidence'];
+// LEVEL_NAMES, EVIDENCE_BANDS, and getMatchScoreLabel now live in @utils/constants.js
+// (single source of truth, shared with LiteResultsView — see import above).
 const IMPORTANCE_NAMES = ['—', 'Optional', 'Nice-to-have', 'Preferred', 'Required', 'Critical'];
-
-/** Single source of truth for matchScore → label. Used by GapAnalysisView and LiteResultsView. */
-export function getMatchScoreLabel(score) {
-    if (score >= 70) return 'Strong Match';
-    if (score >= 40) return 'Moderate Match';
-    return 'Weak Match';
-}
 
 const IMPORTANCE_STYLES = {
     5: 'bg-rose-50 text-rose-700 border-rose-200',
@@ -94,12 +96,12 @@ function getSections(text) {
     boundaries.sort((a, b) => a.start - b.start);
 
     if (boundaries.length === 0) {
-        return [{ text, importance: 4, header: null }];
+        return [{ text, importance: 4, header: null, start: 0 }];
     }
 
     const sections = [];
     if (boundaries[0].start > 0) {
-        sections.push({ text: text.substring(0, boundaries[0].start), importance: 4, header: null });
+        sections.push({ text: text.substring(0, boundaries[0].start), importance: 4, header: null, start: 0 });
     }
     for (let i = 0; i < boundaries.length; i++) {
         const b = boundaries[i];
@@ -109,6 +111,7 @@ function getSections(text) {
             text: text.substring(start, end),
             importance: b.importance,
             header: b.keyword,
+            start,
         });
     }
     return sections;
@@ -359,6 +362,14 @@ export function parseJobDescription(text) {
                 const years = detectYears(context);
                 const level = Math.max(phraseLvl, yearsToLevel(years));
                 const importance = Math.max(detectImportance(context), section.importance);
+                // jdOrder: absolute position of the match within the full JD text.
+                // Section text is a substring of the full JD, so section.start
+                // (offset of this section within the whole document) must be
+                // added to m.index (offset within the section) to get a true
+                // document-wide position — this stays correct even though
+                // extraction loops over multiple sections and multiple skill
+                // entries/passes.
+                const jdOrder = section.start + m.index;
 
                 const existing = skills.get(canonical);
                 if (!existing) {
@@ -369,11 +380,13 @@ export function parseJobDescription(text) {
                         importance: importance,
                         years,
                         context: context.trim(),
+                        jdOrder,
                     });
                 } else {
                     if (level > existing.level) existing.level = level;
                     if (importance > existing.importance) existing.importance = importance;
                     if (years && (!existing.years || years > existing.years)) existing.years = years;
+                    if (jdOrder < existing.jdOrder) existing.jdOrder = jdOrder;
                 }
             }
         }
@@ -491,14 +504,9 @@ To review our candidate privacy notice, click here.
 // ============================================================
 // SHARED DESIGN CONSTANTS
 // ============================================================
-
-/** Single source of truth for evidence level → strength band. Used by GapAnalysisView and LiteResultsView. */
-export const EVIDENCE_BANDS = [
-    { key: 'strong',    label: 'Strong Evidence',  levels: [4, 5], color: 'text-emerald-700' },
-    { key: 'supported', label: 'Supported',         levels: [3],    color: 'text-blue-700'   },
-    { key: 'limited',   label: 'Limited Evidence',  levels: [2],    color: 'text-amber-700'  },
-    { key: 'mentioned', label: 'Mentioned',         levels: [1],    color: 'text-slate-400'  },
-];
+// EVIDENCE_BANDS, formatDuration, evidenceSummary, and ConfidenceDot now live
+// in @utils/constants.js / components/ConfidenceDot.jsx (single source of
+// truth, shared with LiteResultsView — see imports above).
 
 function getGapSuggestion(name, resumeLevel, requiredLevel) {
     if (!resumeLevel || resumeLevel <= 1) {
@@ -517,32 +525,6 @@ function getGapSuggestion(name, resumeLevel, requiredLevel) {
             `with a measurable outcome to close this gap.`;
     }
     return `Add duration and a specific outcome to your ${name} experience to close the one-level gap.`;
-}
-
-function formatDuration(months) {
-    if (months == null) return null;
-    const yrs = Math.floor(months / 12);
-    const mos = months % 12;
-    if (yrs >= 1 && mos === 0) return `${yrs} yr${yrs !== 1 ? 's' : ''}`;
-    if (yrs >= 1) return `${yrs} yr${yrs !== 1 ? 's' : ''} ${mos} mo`;
-    return `${months} mo`;
-}
-
-function evidenceSummary(skill) {
-    const isListedOnly = skill.source === 'Technical Skills' || skill.source === 'Summary';
-    if (isListedOnly) return 'listed only';
-    const parts = [];
-    const dur = formatDuration(skill.durationMonths);
-    parts.push(dur ?? 'no duration stated');
-    const count = skill.contextCount ?? 1;
-    if (count >= 3) parts.push('3+ contexts');
-    else if (count >= 2) parts.push('2 contexts');
-    return parts.join(' · ');
-}
-
-function ConfidenceDot({ confidence }) {
-    const color = confidence === 'high' ? '#22c55e' : confidence === 'medium' ? '#f59e0b' : '#94a3b8';
-    return <span style={{ color, fontSize: '10px', marginLeft: '2px', lineHeight: 1 }}>●</span>;
 }
 
 // ============================================================
@@ -1058,23 +1040,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                                     </div>
 
                                     {/* Resources */}
-                                    {affiliateResource && (
-                                        <div className="space-y-1">
-                                            <a href={affiliateResource.url}
-                                               target="_blank" rel="noopener noreferrer"
-                                               className="flex items-center gap-2 text-xs mt-2 px-3 py-2 bg-white border border-indigo-200 text-indigo-700 rounded-lg hover:bg-indigo-50 transition">
-                                                <span>📚</span>
-                                                <span className="font-medium">{affiliateResource.title}</span>
-                                                <span className="text-[10px] text-indigo-400 ml-auto">
-                                                    {affiliateResource.platform} · affiliate
-                                                </span>
-                                            </a>
-                                            <AffiliateDisclosure
-                                                count={1}
-                                                className="text-[10px] text-slate-400 mt-1"
-                                            />
-                                        </div>
-                                    )}
+                                    <GapResourceLink resource={affiliateResource} />
                                 </div>
                             );
                         })}
