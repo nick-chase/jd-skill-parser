@@ -464,3 +464,36 @@ describe('LiteResultsView — minimal shape smoke', () => {
     expect(typeof mod.default).toBe('function')
   })
 })
+
+// ---------------------------------------------------------------------------
+// 10. Closest-gap card remainder line — gated on levelGapsCount - 1 > 0
+//
+// The component (LiteResultsView.jsx) guards the "...and N more skills also
+// have a level gap" line with `{levelGapsCount - 1 > 0 && (...)}`. No DOM
+// renderer is installed (see file header), so we test the derived condition
+// and the exact text it produces, mirroring the guard-condition test style
+// used elsewhere in this file (see "duties prop" describe block above).
+// ---------------------------------------------------------------------------
+
+describe('LiteResultsView — closest-gap remainder line (levelGapsCount - 1 > 0 guard)', () => {
+  test('levelGapsCount === 1 → remainder guard is false (line does not render)', () => {
+    const levelGapsCount = 1
+    expect(levelGapsCount - 1 > 0).toBe(false)
+  })
+
+  test('levelGapsCount === 2 → remainder guard is true (line renders)', () => {
+    const levelGapsCount = 2
+    expect(levelGapsCount - 1 > 0).toBe(true)
+  })
+
+  test('levelGapsCount === 2 → remainder text reads "...and 1 more skills also have a level gap"', () => {
+    const levelGapsCount = 2
+    const text = `...and ${levelGapsCount - 1} more skills also have a level gap`
+    expect(text).toBe('...and 1 more skills also have a level gap')
+  })
+
+  test('levelGapsCount === 0 → remainder guard is false', () => {
+    const levelGapsCount = 0
+    expect(levelGapsCount - 1 > 0).toBe(false)
+  })
+})

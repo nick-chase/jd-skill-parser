@@ -22,6 +22,7 @@ import { getAffiliateResources } from '@utils/affiliateLoader.js';
 import {
     nameToResourceId,
     LEVEL_NAMES,
+    IMPORTANCE_NAMES,
     EVIDENCE_BANDS,
     getMatchScoreLabel,
     evidenceSummary,
@@ -44,9 +45,8 @@ const feedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
 // Importance: inferred from JD section structure
 // ============================================================
 
-// LEVEL_NAMES, EVIDENCE_BANDS, and getMatchScoreLabel now live in @utils/constants.js
+// LEVEL_NAMES, IMPORTANCE_NAMES, EVIDENCE_BANDS, and getMatchScoreLabel now live in @utils/constants.js
 // (single source of truth, shared with LiteResultsView — see import above).
-const IMPORTANCE_NAMES = ['—', 'Optional', 'Nice-to-have', 'Preferred', 'Required', 'Critical'];
 
 const IMPORTANCE_STYLES = {
     5: 'bg-rose-50 text-rose-700 border-rose-200',
