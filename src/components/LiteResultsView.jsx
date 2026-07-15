@@ -15,6 +15,7 @@
  *   liteMatch {
  *     matchScore:        number | null   (null = JD not yet parsed — show empty state)
  *     closestGap:        object | null
+ *     missingSpread:     { skills: object[], totalMissing: number, moreCount: number } | null
  *     missingBehavioral: object[]
  *     teaserCounts:      { lowMatchCount: number, criticalGapCount: number,
  *                          lowMatchTeaser?: string, criticalTeaser?: string }
@@ -25,14 +26,24 @@
  *   duties  string[]   — JD duty bullets from results.jobDuties
  */
 
-import { getMatchScoreLabel } from '../jd-skill-parser.jsx'
+import {
+  getMatchScoreLabel,
+  LEVEL_NAMES,
+  nameToResourceId,
+  evidenceSummary,
+} from '@utils/constants.js'
+import { getAffiliateResources } from '@utils/affiliateLoader.js'
+import ConfidenceDotInline from './ConfidenceDot.jsx'
+import GapResourceLink from './GapResourceLink.jsx'
 
-const LEVEL_NAMES = {
-  1: 'Awareness',
-  2: 'Limited',
-  3: 'Supported',
-  4: 'Strong',
-  5: 'Expert',
+// Compact evidence line for the closest-gap card — shared with GapAnalysisView
+// (jd-skill-parser.jsx) via @utils/constants.js.
+const closestGapEvidenceLine = evidenceSummary
+
+// Level label lookup — mirrors resumeLabel/jdLabel derivation in GapAnalysisView (jd-skill-parser.jsx).
+function levelLabel(level) {
+  if (!level) return 'Not evidenced'
+  return LEVEL_NAMES[level] ?? `L${level}`
 }
 
 export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) {
@@ -46,6 +57,7 @@ export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) 
   const {
     matchScore        = null,
     closestGap        = null,
+    missingSpread     = null,
     missingBehavioral = [],
     teaserCounts      = { lowMatchCount: 0, criticalGapCount: 0 },
     matchedCount      = 0,
@@ -170,14 +182,69 @@ export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) 
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-slate-800">{closestGap.name}</span>
             <span className="text-xs text-amber-700 font-semibold">
-              {typeof closestGap.gapSize === 'number'
-                ? `${closestGap.gapSize} level${closestGap.gapSize !== 1 ? 's' : ''} away`
+              {typeof closestGap.gap === 'number'
+                ? `${closestGap.gap} level${closestGap.gap !== 1 ? 's' : ''} away`
                 : 'Gap detected'}
             </span>
+          </div>
+          <div className="flex items-center gap-1 text-xs text-amber-700 mt-1">
+            <span>You: {levelLabel(closestGap.resumeLevel)} ({closestGapEvidenceLine(closestGap)})</span>
+            {closestGap.confidence && <ConfidenceDotInline confidence={closestGap.confidence} />}
+            <span>→ Role needs: {levelLabel(closestGap.level)}</span>
           </div>
           <div className="text-xs text-amber-600 mt-1">
             This is the skill where a small resume edit would move the needle most.
           </div>
+          {(() => {
+            const resource = getAffiliateResources(
+              nameToResourceId(closestGap.name),
+              closestGap.resumeLevel ?? 1,
+              'tech',
+              closestGap.name
+            )[0] ?? null
+            return <GapResourceLink resource={resource} />
+          })()}
+          {levelGapsCount - 1 > 0 && (
+            <div className="text-xs text-amber-600 mt-2" data-testid="closest-gap-more">
+              ...and {levelGapsCount - 1} more skills also have a level gap
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 3b. Requirement spread — fallback when no single level-gap skill exists to anchor
+             the Closest gap card. Shows up to one missing skill per required-level tier
+             (low/mid/high), picked by earliest JD mention (jdOrder), not importance. */}
+      {!closestGap && missingSpread && missingSpread.skills.length > 0 && (
+        <div
+          className="rounded-lg border border-amber-200 bg-amber-50 p-5"
+          data-testid="requirement-spread-section"
+        >
+          <div className="text-xs font-semibold uppercase tracking-wide text-amber-600 mb-2">
+            Requirement spread
+          </div>
+          <div className="text-xs text-amber-700 mb-3">
+            This role asks for skills across a range of levels. Here's part of what your resume doesn't show yet.
+          </div>
+          <ul className="space-y-1.5">
+            {missingSpread.skills.map((skill, i) => (
+              <li
+                key={skill.name ?? i}
+                className="flex items-center justify-between text-sm"
+                data-testid="requirement-spread-item"
+              >
+                <span className="font-medium text-slate-800">{skill.name}</span>
+                <span className="text-xs text-amber-700 font-semibold">
+                  Role needs: {levelLabel(skill.level)}
+                </span>
+              </li>
+            ))}
+          </ul>
+          {missingSpread.moreCount > 0 && (
+            <div className="text-xs text-amber-600 mt-2" data-testid="requirement-spread-more">
+              ...and {missingSpread.moreCount} more
+            </div>
+          )}
         </div>
       )}
 

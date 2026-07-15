@@ -12,6 +12,7 @@
  */
 
 import { getAffiliateResources } from '@utils/affiliateLoader.js'
+import AffiliateDisclosure from './AffiliateDisclosure.jsx'
 
 const LEVEL_NAMES = [
   '—',
@@ -125,9 +126,11 @@ export default function BoostSection({ skills, zone, jobTitle, isPaidUser = fals
         })}
 
         {showFTC && (
-          <p className="text-xs text-slate-400 italic mt-2">
-            Some links are affiliate links. We may earn a small commission if you enroll — at no extra cost to you.
-          </p>
+          <AffiliateDisclosure
+            count={allResources.length}
+            as="p"
+            className="text-xs text-slate-400 italic mt-2"
+          />
         )}
       </div>
     )
@@ -184,9 +187,11 @@ export default function BoostSection({ skills, zone, jobTitle, isPaidUser = fals
       ))}
 
       {showFTC && (
-        <p className="text-xs text-slate-400 italic mt-2">
-          Some links are affiliate links. We may earn a small commission if you enroll — at no extra cost to you.
-        </p>
+        <AffiliateDisclosure
+          count={allResources.length}
+          as="p"
+          className="text-xs text-slate-400 italic mt-2"
+        />
       )}
     </div>
   )

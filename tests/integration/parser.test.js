@@ -117,6 +117,13 @@ describe('parseJobDescription() -- technicalSignals extraction from sample JD', 
     }
   });
 
+  test('every technical signal has a numeric jdOrder (JD-text position, not a judgment field)', () => {
+    for (const skill of jdSkills) {
+      expect(typeof skill.jdOrder).toBe('number');
+      expect(skill.jdOrder).toBeGreaterThanOrEqual(0);
+    }
+  });
+
   test('Machine Learning has importance 5 (Critical) from the Required Skills section', () => {
     const ml = jdSkills.find((s) => s.name === 'Machine Learning');
     expect(ml).toBeDefined();
@@ -127,6 +134,47 @@ describe('parseJobDescription() -- technicalSignals extraction from sample JD', 
     for (let i = 0; i < jdSkills.length - 1; i++) {
       expect(jdSkills[i].importance).toBeGreaterThanOrEqual(jdSkills[i + 1].importance);
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// parseJobDescription() -- jdOrder reflects true JD-text position
+// ---------------------------------------------------------------------------
+
+describe('parseJobDescription() -- jdOrder is a neutral JD-text-position tiebreak', () => {
+  test('a skill mentioned earlier in the JD text gets a lower jdOrder than one mentioned later, even when the later skill has higher importance', () => {
+    // Python appears first in the text, Docker appears later. jdOrder must
+    // reflect raw textual position regardless of each skill's importance
+    // value -- it is a separate, neutral field.
+    const synthetic =
+      'Nice to have: some Python scripting experience for internal tooling ' +
+      'and automation work across the team on a day to day basis.\n\n' +
+      'Required: Docker experience is essential for this role and for our ' +
+      'containerized deployment pipeline.';
+    const { technicalSignals } = parseJobDescription(synthetic);
+
+    const python = technicalSignals.find((s) => s.name === 'Python');
+    const docker = technicalSignals.find((s) => s.name === 'Docker');
+
+    expect(python).toBeDefined();
+    expect(docker).toBeDefined();
+    expect(python.jdOrder).toBeLessThan(docker.jdOrder);
+  });
+
+  test('jdOrder is computed across the full JD text, not reset per section', () => {
+    // Two skills in different sections; the one in the later section must
+    // still have a strictly larger jdOrder than one in the earlier section.
+    const synthetic =
+      'Required Skills:\nReact experience required.\n\n' +
+      'Preferred Skills:\nGraphQL experience preferred.';
+    const { technicalSignals } = parseJobDescription(synthetic);
+
+    const react = technicalSignals.find((s) => s.name === 'React');
+    const graphql = technicalSignals.find((s) => s.name === 'GraphQL');
+
+    expect(react).toBeDefined();
+    expect(graphql).toBeDefined();
+    expect(react.jdOrder).toBeLessThan(graphql.jdOrder);
   });
 });
 
@@ -379,12 +427,13 @@ describe('parseResumeText() -- technicalSignals extraction from sample resume', 
     expect(docker.source).toMatch(/project/i);
   });
 
-  // React appears only in Technical Skills (wType=0.1, no duration).
-  // Score = 0.1 × 0.4 × 1.0 = 0.04 → L1 Awareness. "Learning" phrase is expected future work.
-  test('React is level 1 -- skills-section-only, no project or experience evidence', () => {
+  // React appears only in Technical Skills (wType=0.05, no duration).
+  // Bug #8 fix: skills-section-only evidence uses the 0.6 E-weight override
+  // instead of the raw 0.05 floor. Score = 0.6 × 1.00 × 0.5 = 0.30 → L2.
+  test('React is level 2 -- skills-section-only, no project or experience evidence', () => {
     const react = resumeSkills.find((s) => s.name === 'React');
     expect(react).toBeDefined();
-    expect(react.level).toBe(1);
+    expect(react.level).toBe(2);
   });
 
   test('technicalSignals are sorted by descending level', () => {

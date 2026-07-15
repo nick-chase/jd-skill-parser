@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 const STEPS = [
   {
@@ -199,15 +199,17 @@ export default function HowToTour({ onStart }) {
 
       {active && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop — visual dim only; does not intercept clicks so the
+              underlying page remains interactive on the visitor's first click.
+              Dismissal is handled via the Skip control on TooltipBox. */}
           <div
             style={{
               position: 'fixed',
               inset: 0,
               background: 'rgba(0,0,0,0.45)',
               zIndex: 9998,
+              pointerEvents: 'none',
             }}
-            onClick={closeTour}
           />
           <TooltipBox
             step={STEPS[stepIndex]}

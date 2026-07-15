@@ -361,3 +361,83 @@ describe('computeLiteMatch() — fixture smoke tests', () => {
         })
     }
 })
+
+// ---------------------------------------------------------------------------
+// 10. computeLiteMatch — missingSpread tier-bucketing logic
+//
+// missingSpread is only computed when there are zero levelGaps (closestGap is
+// null) and at least one critical (fully missing) skill. To exercise it
+// directly and deterministically, these tests use an empty resume
+// (_technicalSignals: []) so every JD skill lands in `critical`, and hand-built
+// jdProfile.technicalSignals arrays with controlled level/importance/jdOrder.
+// ---------------------------------------------------------------------------
+
+describe('computeLiteMatch() — missingSpread tier bucketing', () => {
+    const emptyResumeData = { _technicalSignals: [], _behavioralSignals: [], _degree: null }
+
+    test('all three tiers populated: one skill per tier, in low/mid/high order', () => {
+        const testJdProfile = {
+            technicalSignals: [
+                { name: 'Skill-Low',  level: 2, importance: 3, jdOrder: 10 },
+                { name: 'Skill-Mid',  level: 3, importance: 3, jdOrder: 20 },
+                { name: 'Skill-High', level: 5, importance: 3, jdOrder: 30 },
+            ],
+            behavioralSignals: [],
+        }
+        const result = computeLiteMatch(emptyResumeData, testJdProfile)
+
+        expect(result.closestGap).toBeNull()
+        expect(result.missingSpread).not.toBeNull()
+        expect(result.missingSpread.skills).toHaveLength(3)
+        expect(result.missingSpread.skills.map(s => s.name)).toEqual([
+            'Skill-Low', 'Skill-Mid', 'Skill-High',
+        ])
+    })
+
+    test('tiers omitted when empty, not backfilled from other tiers', () => {
+        const testJdProfile = {
+            technicalSignals: [
+                { name: 'Low-A', level: 1, importance: 3, jdOrder: 10 },
+                { name: 'Low-B', level: 2, importance: 3, jdOrder: 20 },
+            ],
+            behavioralSignals: [],
+        }
+        const result = computeLiteMatch(emptyResumeData, testJdProfile)
+
+        expect(result.missingSpread.skills).toHaveLength(1)
+        expect(result.missingSpread.skills[0].name).toBe('Low-A')
+    })
+
+    test('jdOrder tiebreak within a single tier — earliest JD mention wins, importance ignored', () => {
+        const testJdProfile = {
+            technicalSignals: [
+                // Higher importance but LATER jdOrder — must NOT be picked over jdOrder.
+                { name: 'Mid-HighImportance-LateOrder', level: 3, importance: 5, jdOrder: 50 },
+                { name: 'Mid-LowImportance-EarlyOrder',  level: 3, importance: 1, jdOrder: 10 },
+            ],
+            behavioralSignals: [],
+        }
+        const result = computeLiteMatch(emptyResumeData, testJdProfile)
+
+        expect(result.missingSpread.skills).toHaveLength(1)
+        expect(result.missingSpread.skills[0].name).toBe('Mid-LowImportance-EarlyOrder')
+    })
+
+    test('moreCount equals totalMissing minus shown skills.length', () => {
+        const testJdProfile = {
+            technicalSignals: [
+                { name: 'Low-A',  level: 1, importance: 3, jdOrder: 10 },
+                { name: 'Low-B',  level: 2, importance: 3, jdOrder: 20 },
+                { name: 'Mid-A',  level: 3, importance: 3, jdOrder: 30 },
+                { name: 'Mid-B',  level: 3, importance: 3, jdOrder: 40 },
+                { name: 'High-A', level: 5, importance: 3, jdOrder: 50 },
+            ],
+            behavioralSignals: [],
+        }
+        const result = computeLiteMatch(emptyResumeData, testJdProfile)
+
+        expect(result.missingSpread.totalMissing).toBe(5)
+        expect(result.missingSpread.skills).toHaveLength(3)
+        expect(result.missingSpread.moreCount).toBe(5 - 3)
+    })
+})
