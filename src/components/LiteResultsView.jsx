@@ -204,6 +204,11 @@ export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) 
             )[0] ?? null
             return <GapResourceLink resource={resource} />
           })()}
+          {levelGapsCount - 1 > 0 && (
+            <div className="text-xs text-amber-600 mt-2" data-testid="closest-gap-more">
+              ...and {levelGapsCount - 1} more skills also have a level gap
+            </div>
+          )}
         </div>
       )}
 
