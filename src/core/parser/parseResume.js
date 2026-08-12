@@ -652,6 +652,11 @@ function extractGraduationYearFromBlock(lines, startIdx, maxLook = 4) {
             const rangeMatch = trimmed.match(/\b(20\d{2}|19[89]\d)\b\s*(?:–|—|-{1,2})\s*(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+)?(20\d{2}|19[89]\d)\b/i)
             if (rangeMatch) {
                 startYear = parseInt(rangeMatch[1])
+                // A same-line two-year range is a definitive completed-degree date,
+                // same as "Expected <year>". Lock the end year so a later incidental
+                // year (GPA line, "Class of 2021", coursework term) can't overwrite it.
+                year = parseInt(rangeMatch[2])
+                yearLocked = true
             }
             // Lock ONLY when "Expected" + year appear together — that is the definitive
             // graduation date signal. "(In Progress)" alone does NOT lock, because the
