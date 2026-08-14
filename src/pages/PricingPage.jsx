@@ -58,11 +58,9 @@ export default function PricingPage() {
           {/* Features */}
           <ul className="space-y-3">
             {[
-              'Unlimited JD parses',
               'PDF resume upload',
               'Resume profile saved — no re-paste',
               'Skill profile — evidence strength per skill',
-              'No ads',
             ].map(feature => (
               <li key={feature} className="flex items-center gap-3 text-sm text-slate-700">
                 <span className="text-indigo-500 font-bold">✓</span>
@@ -93,7 +91,7 @@ export default function PricingPage() {
 
         {/* Free tier reminder */}
         <div className="text-center text-sm text-slate-400">
-          Lite tier: unlimited resume + JD parses — always free
+          Lite tier: a real, compressed report with your top skills — always free
         </div>
       </div>
     </div>

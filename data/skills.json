@@ -19,7 +19,7 @@
     { "id": "matlab", "canonical": "MATLAB", "category": "Programming Language", "aliases": ["matlab"], "patterns": ["\\bmatlab\\b"], "guardWords": [] },
     { "id": "bash", "canonical": "Bash", "category": "Programming Language", "aliases": ["bash", "shell scripting"], "patterns": ["\\bbash\\b", "\\bshell scripting\\b"], "guardWords": [] },
     { "id": "typescript", "canonical": "TypeScript", "category": "Programming Language", "aliases": ["typescript", "ts"], "patterns": ["\\btypescript\\b", "\\bts\\b"], "guardWords": [] },
-    { "id": "swift", "canonical": "Swift", "category": "Programming Language", "aliases": ["swift"], "patterns": ["\\bswift\\b"], "guardWords": ["payment domain", "banking", "swift protocol", "swift messaging", "swift financial", "swift network", "swift transfer", "swift code"] },
+    { "id": "swift", "canonical": "Swift", "category": "Programming Language", "aliases": ["swift"], "patterns": ["\\bswift\\b"], "guardWords": ["payment domain", "banking", "swift protocol", "swift messaging", "swift financial", "swift network", "swift transfer", "swift code", "swift payment"] },
     { "id": "php", "canonical": "PHP", "category": "Programming Language", "aliases": ["php"], "patterns": ["\\bphp\\b"], "guardWords": [] },
     { "id": "dart", "canonical": "Dart", "category": "Programming Language", "aliases": ["dart"], "patterns": ["\\bdart\\b"], "guardWords": [] },
     { "id": "lua", "canonical": "Lua", "category": "Programming Language", "aliases": ["lua"], "patterns": ["\\blua\\b"], "guardWords": [] },
