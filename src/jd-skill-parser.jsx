@@ -242,7 +242,7 @@ export function parseJobMeta(text) {
 }
 
 // Duty section header patterns — ordered most-specific first.
-const DUTY_HEADER_RE = /(?:^|\n)\s*(?:what\s+you(?:'ll|(?:\s+will))\s+(?:do|be\s+doing)|key\s+responsibilities|primary\s+responsibilities|responsibilities|in\s+this\s+role|your\s+responsibilities|day[- ]to[- ]day|what\s+the\s+role\s+(?:involves|entails)|role\s+overview)\s*:?\s*(?:\n|$)/gi;
+const DUTY_HEADER_RE = /(?:^|\n)[ \t]*(?:(?:job|key|core|essential|primary|main)\s+)?(?:what\s+you(?:'ll|(?:\s+will))\s+(?:do|be\s+doing)|responsibilities|duties|in\s+this\s+role|your\s+responsibilities|day[- ]to[- ]day|what\s+the\s+role\s+(?:involves|entails)|role\s+overview)\s*:?\s*(?:\n|$)/gi;
 
 // Extract bullet-point job duties from the first matching duties section.
 // Returns an array of plain strings, capped at 10. No matching against vocabulary.
@@ -257,7 +257,7 @@ function extractJobDuties(text) {
     const rest  = text.substring(start, start + 1500);
 
     // Stop at the next visually distinct section (blank line + title-cased/all-caps word)
-    const nextSectionIdx = rest.search(/\n\s*\n\s*(?:[A-Z][A-Z ]{3,}[\n:]|(?:What|Who|About|Our|Your|Requirements|Qualifications|Benefits|Compensation|Perks)\s)/);
+    const nextSectionIdx = rest.search(/\n\s*\n\s*(?:[A-Z][A-Z ]{3,}[\n:]|(?:What|Who|About|Our|Your|Requirements|Qualifications|Benefits|Compensation|Perks)(?:\s|:))/);
     const sectionText    = nextSectionIdx > 0 ? rest.substring(0, nextSectionIdx) : rest;
 
     const duties = [];
