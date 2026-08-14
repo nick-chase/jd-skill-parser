@@ -225,6 +225,64 @@ describe('parseJobDescription() -- jobDuties extraction from sample JD', () => {
 });
 
 // ---------------------------------------------------------------------------
+// parseJobDescription() -- jobDuties header regression (prefixed headers)
+// ---------------------------------------------------------------------------
+// Regression guard for bug: DUTY_HEADER_RE only matched bare headers like
+// "Responsibilities:" and silently returned [] for common real-world variants
+// like "Job Responsibilities:" or "Job Duties:" -- the entire duties panel
+// disappeared with no error. Also guards against the header regex matching
+// mid-sentence body text (false positives), and against the section-boundary
+// regex bleeding past a "Qualifications:" header into qualifications text.
+describe('parseJobDescription() -- jobDuties header prefix regression', () => {
+  const prefixedHeaderVariants = [
+    'Job responsibilities:',
+    'Job Responsibilities:',
+    'Job Duties:',
+    'Key Duties:',
+    'Essential Duties:',
+    'Core Responsibilities:',
+    'Main Responsibilities:',
+  ];
+
+  for (const header of prefixedHeaderVariants) {
+    test(`extracts duties under "${header}" header`, () => {
+      const text = `${header}\n- Own the roadmap for a core product area\n- Partner with design and engineering on delivery\n- Present findings to senior stakeholders regularly\n\nQualifications:\n- 5+ years of experience required\n- Bachelor's degree in a related field`;
+      const { jobDuties } = parseJobDescription(text);
+      expect(jobDuties.length).toBeGreaterThan(0);
+    });
+  }
+
+  test('does not treat mid-sentence "job responsibilities" as a header', () => {
+    const text = 'Your job responsibilities include collaborating with cross-functional teams on a daily basis.\n\nQualifications:\n- 5+ years of experience required';
+    const { jobDuties } = parseJobDescription(text);
+    expect(jobDuties.length).toBe(0);
+  });
+
+  test('does not bleed past "Qualifications:" boundary into qualifications text', () => {
+    const text = [
+      'Job responsibilities:',
+      '• Design and build scalable backend services for the platform',
+      '• Collaborate with product managers to define technical requirements',
+      '• Mentor junior engineers and review pull requests for quality',
+      '• Own incident response and on-call rotations for the team',
+      '• Drive architecture decisions across multiple engineering teams',
+      '• Partner with QA to ensure release readiness every sprint',
+      '',
+      'Qualifications:',
+      '• 5+ years of professional software engineering experience',
+      '• Strong knowledge of distributed systems and databases',
+    ].join('\n');
+    const { jobDuties } = parseJobDescription(text);
+
+    expect(jobDuties.length).toBe(6);
+    for (const duty of jobDuties) {
+      expect(duty.toLowerCase()).not.toContain('professional software engineering experience');
+      expect(duty.toLowerCase()).not.toContain('distributed systems');
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
 // parseJobDescription() -- guardWords regression
 // ---------------------------------------------------------------------------
 
