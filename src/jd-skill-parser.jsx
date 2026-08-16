@@ -64,7 +64,7 @@ const IMPORTANCE_STYLES = {
 const SECTION_PATTERNS = [
     // Most specific first
     { keywords: ['nice-to-have', 'nice to have', 'bonus points', 'bonus', 'good to have', 'pluses'], importance: 2 },
-    { keywords: ['preferred qualifications', 'strongly preferred', 'preferred', 'desired qualifications', 'desired skills'], importance: 3 },
+    { keywords: ['preferred qualifications', 'strongly preferred', 'preferred', 'desired qualifications', 'desired skills', 'preferred skills'], importance: 3 },
     { keywords: ['minimum qualifications', 'required qualifications', 'basic qualifications', 'must-have', 'must have', 'requirements', 'required skills', 'required'], importance: 5 },
     { keywords: ['qualifications', 'skills required', "what you'll need", 'about you', "what we're looking for"], importance: 4 },
 ];
@@ -133,7 +133,7 @@ function detectImportance(context) {
     if (/\b(must have|must-have|essential|critical|required)\b/.test(c)) return 5;
     if (/\b(strongly preferred|preferred experience|preferred)\b/.test(c)) return 3;
     if (/\b(nice to have|bonus|good to have|pluses)\b/.test(c)) return 2;
-    return 4; // default: general qualifications
+    return null; // no explicit local phrase -- defer to the enclosing section's importance
 }
 
 function detectYears(context) {
@@ -316,7 +316,7 @@ export function extractJDDegree(text) {
 }
 
 export function parseJobDescription(text) {
-    if (!text || !text.trim()) return { technicalSignals: [], behavioralSignals: [], jobDuties: [], degree: null };
+    if (!text || !text.trim()) return { technicalSignals: [], behavioralSignals: [], jobDuties: [], degree: null, splitDetected: false };
 
     const sections = getSections(text);
     const skills = new Map();
@@ -361,7 +361,19 @@ export function parseJobDescription(text) {
                 const phraseLvl = detectLevel(context);
                 const years = detectYears(context);
                 const level = Math.max(phraseLvl, yearsToLevel(years));
-                const importance = Math.max(detectImportance(context), section.importance);
+                // detectImportance() only returns non-null when a genuine explicit local
+                // phrase cue (must-have/required/preferred/nice-to-have, etc.) is found
+                // right next to this specific skill mention -- otherwise it returns null
+                // and we defer entirely to section.importance. Because a non-null result
+                // is always a real explicit cue (never a generic fallback), it should
+                // govern directly rather than being Math.max'd with the section default --
+                // otherwise an explicit "Preferred experience in Kotlin" inside a generic
+                // Qualifications section (importance 4) could never be pulled down to the
+                // Preferred level (3) the JD's own wording calls for.
+                const localImportance = detectImportance(context);
+                const importance = localImportance !== null
+                    ? localImportance
+                    : section.importance;
                 // jdOrder: absolute position of the match within the full JD text.
                 // Section text is a substring of the full JD, so section.start
                 // (offset of this section within the whole document) must be
@@ -398,11 +410,23 @@ export function parseJobDescription(text) {
         return a.name.localeCompare(b.name);
     });
 
+    // splitDetected: true only when the FINAL computed skill results contain at
+    // least one skill with a genuine preferred/nice-to-have importance (2 or 3).
+    // This is checked against the actual per-skill results rather than section
+    // headers so that a genuinely preferred skill mentioned via an inline phrase
+    // cue (e.g. "Preferred experience in Kotlin" inside a generic "Qualifications"
+    // header) is still detected -- header-based detection was blind to this case.
+    // Any header-based genuine split (e.g. an actual "Preferred Skills" section)
+    // that contains at least one recognized skill will already produce a skill
+    // with importance 2/3 here, so this is a strict superset of the old check.
+    const splitDetected = technicalSignals.some(s => s.importance === 2 || s.importance === 3);
+
     return {
         technicalSignals,
         behavioralSignals: extractBehavioralSignals(text),
         jobDuties:         extractJobDuties(text),
         degree:            extractJDDegree(text),
+        splitDetected,
     };
 }
 
@@ -608,7 +632,7 @@ function ImportanceBadge({ importance }) {
     );
 }
 
-function ResultsViewSimple({ results, companyName, jobRole, behavioralSignals, jobDuties }) {
+function ResultsViewSimple({ results, companyName, jobRole, behavioralSignals, jobDuties, splitDetected }) {
     if (results.length === 0) {
         return (
             <div className="text-sm text-slate-500 p-8 text-center border border-dashed border-slate-300 rounded-lg bg-white">
@@ -635,7 +659,7 @@ function ResultsViewSimple({ results, companyName, jobRole, behavioralSignals, j
 
             <div style={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '16px' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#0f172a', marginBottom: '12px' }}>Role Requirements</h3>
-                <div className="grid grid-cols-3 gap-4">
+                <div className={splitDetected ? 'grid grid-cols-3 gap-4' : 'grid grid-cols-2 gap-4'}>
                     <div>
                         <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Skills Found</div>
                         <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#0f172a' }}>{results.length}</div>
@@ -644,11 +668,18 @@ function ResultsViewSimple({ results, companyName, jobRole, behavioralSignals, j
                         <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Required</div>
                         <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#d97706' }}>{requiredSkills.length}</div>
                     </div>
-                    <div>
-                        <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Preferred</div>
-                        <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#0369a1' }}>{preferredSkills.length + niceToHave.length}</div>
-                    </div>
+                    {splitDetected && (
+                        <div>
+                            <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>Preferred</div>
+                            <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#0369a1' }}>{preferredSkills.length + niceToHave.length}</div>
+                        </div>
+                    )}
                 </div>
+                {!splitDetected && (
+                    <div style={{ fontSize: '12px', color: '#64748b', marginTop: '10px' }}>
+                        This JD doesn't distinguish required vs. preferred skills, so everything found is shown as Required.
+                    </div>
+                )}
             </div>
 
             {/* What this role does — read first */}
@@ -1226,7 +1257,7 @@ function ResumeResultsView({ results, behavioralSignals, degree, isPaid: isPaidP
     );
 }
 
-function ResultsView({ results, companyName, jobRole, jobMeta, behavioralSignals, jobDuties }) {
+function ResultsView({ results, companyName, jobRole, jobMeta, behavioralSignals, jobDuties, splitDetected }) {
     if (results.length === 0) {
         return (
             <div className="text-sm text-slate-500 p-8 text-center border border-dashed border-slate-300 rounded-lg bg-white">
@@ -1243,6 +1274,7 @@ function ResultsView({ results, companyName, jobRole, jobMeta, behavioralSignals
             jobMeta={jobMeta}
             behavioralSignals={behavioralSignals}
             jobDuties={jobDuties}
+            splitDetected={splitDetected}
         />
     );
 }
@@ -1508,6 +1540,7 @@ export default function App() {
                                 jobMeta={jobMeta}
                                 behavioralSignals={results.behavioralSignals}
                                 jobDuties={results.jobDuties}
+                                splitDetected={results.splitDetected}
                             />
                         )}
                     </div>

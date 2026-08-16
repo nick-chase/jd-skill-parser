@@ -153,3 +153,43 @@ describe.each(TEST_CASES)(
     })
   }
 )
+
+// ---------------------------------------------------------------------------
+// splitDetected -- distinguishes "JD genuinely has 0 preferred skills" from
+// "JD never structurally separated required vs. preferred at all" (bug fix:
+// stat card previously showed "Preferred: 0" for both cases indiscriminately).
+// ---------------------------------------------------------------------------
+
+describe('parseJobDescription() -- splitDetected reflects real section structure', () => {
+  test('job_desc_3.txt has explicit Required/Preferred headers: splitDetected is true, and required/preferred importance actually differ', () => {
+    const text = loadJD('job_desc_3.txt')
+    const { technicalSignals, splitDetected } = parseJobDescription(text)
+
+    expect(splitDetected).toBe(true)
+
+    const requiredSkills = technicalSignals.filter((s) => s.importance >= 4)
+    const preferredSkills = technicalSignals.filter((s) => s.importance < 4)
+
+    // This fixture has both a "Required Qualifications" and a "Preferred
+    // Qualifications" section, each with skills the dictionary recognizes
+    // (e.g. Python/SQL/C++/Linux required; Windows/TCP-IP-adjacent preferred).
+    // A loose `typeof importance === 'number'` check would pass even if every
+    // skill were dumped into one bucket -- assert the split is real.
+    expect(requiredSkills.length).toBeGreaterThan(0)
+    expect(preferredSkills.length).toBeGreaterThan(0)
+  })
+
+  test('a JD with no structural Required/Preferred/Qualifications headers: splitDetected is false', () => {
+    // Minimal synthetic JD: a skills list with no section headers the parser
+    // recognizes (no "Required", "Preferred", "Qualifications", "must-have",
+    // etc.) -- this is the whole-JD fallback path in getSections().
+    const noHeaderJD = `
+      We're looking for a software engineer to join our growing team.
+      You'll write Python and JavaScript, work with SQL databases, and
+      collaborate with designers and product managers on new features.
+      This is a great opportunity to grow your career with us.
+    `
+    const { splitDetected } = parseJobDescription(noHeaderJD)
+    expect(splitDetected).toBe(false)
+  })
+})
