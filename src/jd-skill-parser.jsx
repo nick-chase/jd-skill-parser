@@ -64,7 +64,7 @@ const IMPORTANCE_STYLES = {
 const SECTION_PATTERNS = [
     // Most specific first
     { keywords: ['nice-to-have', 'nice to have', 'bonus points', 'bonus', 'good to have', 'pluses'], importance: 2 },
-    { keywords: ['preferred qualifications', 'strongly preferred', 'preferred', 'desired qualifications', 'desired skills'], importance: 3 },
+    { keywords: ['preferred qualifications', 'strongly preferred', 'preferred', 'desired qualifications', 'desired skills', 'preferred skills'], importance: 3 },
     { keywords: ['minimum qualifications', 'required qualifications', 'basic qualifications', 'must-have', 'must have', 'requirements', 'required skills', 'required'], importance: 5 },
     { keywords: ['qualifications', 'skills required', "what you'll need", 'about you', "what we're looking for"], importance: 4 },
 ];
@@ -319,12 +319,6 @@ export function parseJobDescription(text) {
     if (!text || !text.trim()) return { technicalSignals: [], behavioralSignals: [], jobDuties: [], degree: null, splitDetected: false };
 
     const sections = getSections(text);
-    // splitDetected mirrors getSections()'s internal boundaries.length > 0 check:
-    // true when real section headers (Required/Preferred/etc.) were found, false
-    // when the whole-JD fallback (single section, importance:4, header:null) is in
-    // effect. Used by the UI to distinguish "this JD genuinely has 0 preferred
-    // skills" from "this JD never distinguished required vs. preferred at all."
-    const splitDetected = sections.some(s => s.header !== null);
     const skills = new Map();
 
     const entries = registry.getAllSkillEntries();
@@ -367,16 +361,18 @@ export function parseJobDescription(text) {
                 const phraseLvl = detectLevel(context);
                 const years = detectYears(context);
                 const level = Math.max(phraseLvl, yearsToLevel(years));
-                // Only let an explicit local phrase (e.g. "must-have", "nice to have")
-                // override the enclosing section's importance -- and only upward via
-                // Math.max. When no explicit phrase is present, detectImportance()
-                // returns null and we defer entirely to section.importance. Previously
-                // its generic fallback of 4 always beat a genuine Preferred section's
-                // importance of 3, silently promoting Preferred-section skills into the
-                // Required bucket (importance >= 4).
+                // detectImportance() only returns non-null when a genuine explicit local
+                // phrase cue (must-have/required/preferred/nice-to-have, etc.) is found
+                // right next to this specific skill mention -- otherwise it returns null
+                // and we defer entirely to section.importance. Because a non-null result
+                // is always a real explicit cue (never a generic fallback), it should
+                // govern directly rather than being Math.max'd with the section default --
+                // otherwise an explicit "Preferred experience in Kotlin" inside a generic
+                // Qualifications section (importance 4) could never be pulled down to the
+                // Preferred level (3) the JD's own wording calls for.
                 const localImportance = detectImportance(context);
                 const importance = localImportance !== null
-                    ? Math.max(localImportance, section.importance)
+                    ? localImportance
                     : section.importance;
                 // jdOrder: absolute position of the match within the full JD text.
                 // Section text is a substring of the full JD, so section.start
@@ -413,6 +409,17 @@ export function parseJobDescription(text) {
         if (b.level !== a.level) return b.level - a.level;
         return a.name.localeCompare(b.name);
     });
+
+    // splitDetected: true only when the FINAL computed skill results contain at
+    // least one skill with a genuine preferred/nice-to-have importance (2 or 3).
+    // This is checked against the actual per-skill results rather than section
+    // headers so that a genuinely preferred skill mentioned via an inline phrase
+    // cue (e.g. "Preferred experience in Kotlin" inside a generic "Qualifications"
+    // header) is still detected -- header-based detection was blind to this case.
+    // Any header-based genuine split (e.g. an actual "Preferred Skills" section)
+    // that contains at least one recognized skill will already produce a skill
+    // with importance 2/3 here, so this is a strict superset of the old check.
+    const splitDetected = technicalSignals.some(s => s.importance === 2 || s.importance === 3);
 
     return {
         technicalSignals,
