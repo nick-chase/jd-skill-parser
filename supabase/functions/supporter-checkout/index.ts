@@ -22,12 +22,22 @@ serve(async (req) => {
   }
 
   try {
-    const { userId, userEmail, priceId } = await req.json()
+    const { userId, userEmail } = await req.json()
 
-    if (!userId || !userEmail || !priceId) {
+    if (!userId || !userEmail) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields: userId, userEmail, priceId' }),
+        JSON.stringify({ error: 'Missing required fields: userId, userEmail' }),
         { status: 400, headers: CORS }
+      )
+    }
+
+    const priceId = Deno.env.get('STRIPE_SUPPORTER_PRICE_ID') ?? ''
+
+    if (!priceId) {
+      console.error('[supporter-checkout] Missing STRIPE_SUPPORTER_PRICE_ID env var')
+      return new Response(
+        JSON.stringify({ error: 'Supporter checkout is not configured' }),
+        { status: 500, headers: CORS }
       )
     }
 
@@ -39,8 +49,8 @@ serve(async (req) => {
       cancel_url: `${Deno.env.get('SITE_URL') ?? 'http://localhost:5173'}/pricing`,
       client_reference_id: userId,
       customer_email: userEmail,
-      metadata: { tier: 'pro' },
-      subscription_data: { metadata: { tier: 'pro' } },
+      metadata: { tier: 'supporter' },
+      subscription_data: { metadata: { tier: 'supporter' } },
     })
 
     return new Response(
@@ -48,10 +58,8 @@ serve(async (req) => {
       { headers: CORS }
     )
   } catch (err) {
-    console.error('[create-checkout] Stripe error:', {
+    console.error('[supporter-checkout] Stripe error:', {
       message: err instanceof Error ? err.message : String(err),
-      userId,
-      priceId,
       ts: new Date().toISOString()
     })
     const message = err instanceof Error ? err.message : 'Unknown error'
