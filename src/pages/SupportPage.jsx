@@ -121,7 +121,7 @@ export default function SupportPage() {
                 <a href="mailto:nick@nat20app.com" className="hover:underline">
                   nick@nat20app.com
                 </a>{' '}
-                and I'll cancel it same day.
+                and I'll cancel any future payments.
               </div>
             </div>
           )}
