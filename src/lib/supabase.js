@@ -42,6 +42,26 @@ export async function getUserPlanStatus(userId) {
   return data?.is_paid ?? false
 }
 
+export async function getSupporterStatus(userId) {
+  if (!userId) return { isSupporter: false, termEndsAt: null }
+
+  const { data, error } = await supabase
+    .from('users')
+    .select('is_supporter, supporter_term_ends_at')
+    .eq('id', userId)
+    .single()
+
+  if (error) {
+    console.error('Supporter status fetch error:', error.message)
+    return { isSupporter: false, termEndsAt: null }
+  }
+
+  return {
+    isSupporter: data?.is_supporter ?? false,
+    termEndsAt: data?.supporter_term_ends_at ?? null
+  }
+}
+
 export async function loadResumeProfile(userId) {
   if (!userId) return null
 

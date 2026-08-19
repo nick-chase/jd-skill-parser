@@ -1,11 +1,13 @@
 import { supabase } from './supabase.js'
 import { analytics } from './analytics.js'
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle(redirectPath) {
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: window.location.origin
+      redirectTo: redirectPath
+        ? `${window.location.origin}${redirectPath}`
+        : window.location.origin
     }
   })
   if (error) console.error('Sign in error:', error.message)
