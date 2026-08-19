@@ -1,7 +1,9 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import Stripe from 'https://esm.sh/stripe@12.18.0?target=deno&no-check=true'
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {
+const STRIPE_SECRET_KEY = Deno.env.get('STRIPE_SECRET_KEY')
+if (!STRIPE_SECRET_KEY) throw new Error('STRIPE_SECRET_KEY is required')
+
+const stripe = new Stripe(STRIPE_SECRET_KEY, {
   apiVersion: '2023-10-16',
   httpClient: Stripe.createFetchHttpClient(),
 })
@@ -11,7 +13,7 @@ const CORS = {
   'Access-Control-Allow-Origin': '*',
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       headers: {
