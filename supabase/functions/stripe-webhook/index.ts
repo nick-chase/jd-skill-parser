@@ -1,8 +1,11 @@
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts'
 import { withSupabase } from 'jsr:@supabase/server@^1'
-import Stripe from 'npm:stripe'
+import Stripe from 'https://esm.sh/stripe@12.18.0?target=deno&no-check=true'
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!)
+const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
+  apiVersion: '2023-10-16',
+  httpClient: Stripe.createFetchHttpClient(),
+})
 
 const PRO_PRICE_ID = Deno.env.get('STRIPE_PRO_PRICE_ID')!
 const SUPPORTER_PRICE_ID = Deno.env.get('STRIPE_SUPPORTER_PRICE_ID')!
