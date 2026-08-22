@@ -266,9 +266,14 @@ describe('computeLiteMatch() — sentinel shape', () => {
         expect(result.matchScore).toBeNull()
     })
 
-    test('sentinel: closestGap is null when no jdProfile', () => {
+    test('sentinel: topActionable is null when no jdProfile', () => {
         const result = computeLiteMatch(resumeData, null)
-        expect(result.closestGap).toBeNull()
+        expect(result.topActionable).toBeNull()
+    })
+
+    test('sentinel: remainingCounts is empty object when no jdProfile', () => {
+        const result = computeLiteMatch(resumeData, null)
+        expect(result.remainingCounts).toEqual({})
     })
 
     test('sentinel: missingBehavioral is empty array when no jdProfile', () => {
@@ -363,19 +368,20 @@ describe('computeLiteMatch() — fixture smoke tests', () => {
 })
 
 // ---------------------------------------------------------------------------
-// 10. computeLiteMatch — missingSpread tier-bucketing logic
+// 10. computeLiteMatch — topActionable unified selection logic
 //
-// missingSpread is only computed when there are zero levelGaps (closestGap is
-// null) and at least one critical (fully missing) skill. To exercise it
-// directly and deterministically, these tests use an empty resume
-// (_technicalSignals: []) so every JD skill lands in `critical`, and hand-built
-// jdProfile.technicalSignals arrays with controlled level/importance/jdOrder.
+// Candidate pool = levelGaps (have it, below required level) + critical
+// (missing entirely). Ranked by: gap ascending, then importance descending,
+// then contextCount descending (critical items treated as contextCount 0).
+// To exercise this directly and deterministically, these tests use an empty
+// resume (_technicalSignals: []) so every JD skill lands in `critical`, or a
+// hand-built resumeData/jdProfile pair to produce controlled levelGaps.
 // ---------------------------------------------------------------------------
 
-describe('computeLiteMatch() — missingSpread tier bucketing', () => {
+describe('computeLiteMatch() — topActionable selection', () => {
     const emptyResumeData = { _technicalSignals: [], _behavioralSignals: [], _degree: null }
 
-    test('all three tiers populated: one skill per tier, in low/mid/high order', () => {
+    test('returns at most 3 skills, ranked by gap ascending', () => {
         const testJdProfile = {
             technicalSignals: [
                 { name: 'Skill-Low',  level: 2, importance: 3, jdOrder: 10 },
@@ -386,15 +392,17 @@ describe('computeLiteMatch() — missingSpread tier bucketing', () => {
         }
         const result = computeLiteMatch(emptyResumeData, testJdProfile)
 
-        expect(result.closestGap).toBeNull()
-        expect(result.missingSpread).not.toBeNull()
-        expect(result.missingSpread.skills).toHaveLength(3)
-        expect(result.missingSpread.skills.map(s => s.name)).toEqual([
+        expect(result.topActionable).not.toBeNull()
+        expect(result.topActionable.skills).toHaveLength(3)
+        // All are critical (resume empty) — gap equals jdSkill.level, so
+        // smallest required level ranks first (smaller implicit gap).
+        expect(result.topActionable.skills.map(s => s.name)).toEqual([
             'Skill-Low', 'Skill-Mid', 'Skill-High',
         ])
+        expect(result.topActionable.skills.every(s => s.sourceType === 'critical')).toBe(true)
     })
 
-    test('tiers omitted when empty, not backfilled from other tiers', () => {
+    test('returns fewer than 3 when the combined pool is smaller than 3', () => {
         const testJdProfile = {
             technicalSignals: [
                 { name: 'Low-A', level: 1, importance: 3, jdOrder: 10 },
@@ -404,40 +412,118 @@ describe('computeLiteMatch() — missingSpread tier bucketing', () => {
         }
         const result = computeLiteMatch(emptyResumeData, testJdProfile)
 
-        expect(result.missingSpread.skills).toHaveLength(1)
-        expect(result.missingSpread.skills[0].name).toBe('Low-A')
+        expect(result.topActionable.skills).toHaveLength(2)
     })
 
-    test('jdOrder tiebreak within a single tier — earliest JD mention wins, importance ignored', () => {
+    test('levelGap beats critical at the same JD-required level (partial evidence beats zero)', () => {
+        // Resume has PartialSkill at level 2; JD requires level 3 → gap 1.
+        // MissingSkill is required at level 3 too but absent from resume → gap 3 (critical).
+        const resumeData = {
+            _technicalSignals: [
+                { name: 'PartialSkill', level: 2, confidence: 'high', source: 'Experience', durationMonths: 6, contextCount: 1 },
+            ],
+            _behavioralSignals: [],
+            _degree: null,
+        }
         const testJdProfile = {
             technicalSignals: [
-                // Higher importance but LATER jdOrder — must NOT be picked over jdOrder.
-                { name: 'Mid-HighImportance-LateOrder', level: 3, importance: 5, jdOrder: 50 },
-                { name: 'Mid-LowImportance-EarlyOrder',  level: 3, importance: 1, jdOrder: 10 },
+                { name: 'PartialSkill', level: 3, importance: 3, jdOrder: 10 },
+                { name: 'MissingSkill', level: 3, importance: 3, jdOrder: 20 },
+            ],
+            behavioralSignals: [],
+        }
+        const result = computeLiteMatch(resumeData, testJdProfile)
+
+        expect(result.topActionable.skills[0].name).toBe('PartialSkill')
+        expect(result.topActionable.skills[0].sourceType).toBe('levelGap')
+        expect(result.topActionable.skills[1].name).toBe('MissingSkill')
+        expect(result.topActionable.skills[1].sourceType).toBe('critical')
+    })
+
+    test('within equal gap, higher importance ranks first', () => {
+        const testJdProfile = {
+            technicalSignals: [
+                { name: 'LowImportance',  level: 3, importance: 2, jdOrder: 10 },
+                { name: 'HighImportance', level: 3, importance: 5, jdOrder: 20 },
             ],
             behavioralSignals: [],
         }
         const result = computeLiteMatch(emptyResumeData, testJdProfile)
 
-        expect(result.missingSpread.skills).toHaveLength(1)
-        expect(result.missingSpread.skills[0].name).toBe('Mid-LowImportance-EarlyOrder')
+        expect(result.topActionable.skills.map(s => s.name)).toEqual([
+            'HighImportance', 'LowImportance',
+        ])
     })
 
-    test('moreCount equals totalMissing minus shown skills.length', () => {
+    test('within equal gap and importance, higher contextCount ranks first', () => {
+        const resumeData = {
+            _technicalSignals: [
+                { name: 'FewContexts',  level: 2, confidence: 'high', source: 'Experience', durationMonths: 3, contextCount: 1 },
+                { name: 'ManyContexts', level: 2, confidence: 'high', source: 'Experience', durationMonths: 3, contextCount: 3 },
+            ],
+            _behavioralSignals: [],
+            _degree: null,
+        }
         const testJdProfile = {
             technicalSignals: [
-                { name: 'Low-A',  level: 1, importance: 3, jdOrder: 10 },
-                { name: 'Low-B',  level: 2, importance: 3, jdOrder: 20 },
-                { name: 'Mid-A',  level: 3, importance: 3, jdOrder: 30 },
-                { name: 'Mid-B',  level: 3, importance: 3, jdOrder: 40 },
-                { name: 'High-A', level: 5, importance: 3, jdOrder: 50 },
+                { name: 'FewContexts',  level: 4, importance: 3, jdOrder: 10 },
+                { name: 'ManyContexts', level: 4, importance: 3, jdOrder: 20 },
+            ],
+            behavioralSignals: [],
+        }
+        const result = computeLiteMatch(resumeData, testJdProfile)
+
+        expect(result.topActionable.skills.map(s => s.name)).toEqual([
+            'ManyContexts', 'FewContexts',
+        ])
+    })
+
+    test('deterministic — identical input produces identical output across calls', () => {
+        const result1 = computeLiteMatch(parseResumeLite(newGradText), jdProfile)
+        const result2 = computeLiteMatch(parseResumeLite(newGradText), jdProfile)
+        expect(result1.topActionable.skills.map(s => s.name)).toEqual(
+            result2.topActionable.skills.map(s => s.name)
+        )
+        expect(JSON.stringify(result1.topActionable)).toBe(JSON.stringify(result2.topActionable))
+    })
+})
+
+// ---------------------------------------------------------------------------
+// 11. computeLiteMatch — remainingCounts
+// ---------------------------------------------------------------------------
+
+describe('computeLiteMatch() — remainingCounts', () => {
+    const emptyResumeData = { _technicalSignals: [], _behavioralSignals: [], _degree: null }
+
+    test('high-remaining fixture: counts reflect pool size minus the top 3 shown', () => {
+        const testJdProfile = {
+            technicalSignals: [
+                { name: 'A', level: 1, importance: 3, jdOrder: 10 },
+                { name: 'B', level: 1, importance: 3, jdOrder: 20 },
+                { name: 'C', level: 1, importance: 3, jdOrder: 30 },
+                { name: 'D', level: 1, importance: 3, jdOrder: 40 },
+                { name: 'E', level: 1, importance: 3, jdOrder: 50 },
             ],
             behavioralSignals: [],
         }
         const result = computeLiteMatch(emptyResumeData, testJdProfile)
 
-        expect(result.missingSpread.totalMissing).toBe(5)
-        expect(result.missingSpread.skills).toHaveLength(3)
-        expect(result.missingSpread.moreCount).toBe(5 - 3)
+        // All 5 are critical, gap ties → all same tier, 3 shown, 2 remain.
+        expect(result.remainingCounts.criticalRemaining).toBe(2)
+        expect(result.remainingCounts.levelGapsRemaining).toBeUndefined()
+    })
+
+    test('low/zero-remaining fixture: fields omitted (undefined) rather than 0', () => {
+        const testJdProfile = {
+            technicalSignals: [
+                { name: 'Only-A', level: 1, importance: 3, jdOrder: 10 },
+            ],
+            behavioralSignals: [],
+        }
+        const result = computeLiteMatch(emptyResumeData, testJdProfile)
+
+        expect(result.remainingCounts.criticalRemaining).toBeUndefined()
+        expect(result.remainingCounts.levelGapsRemaining).toBeUndefined()
+        expect(result.remainingCounts).toEqual({})
     })
 })
