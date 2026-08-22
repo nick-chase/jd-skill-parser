@@ -18,11 +18,21 @@
  * @param {object|null} jdProfile - Output of parseJobDescription() (may be null)
  * @returns {{
  *   matchScore:        number | null,
- *   closestGap:        object | null,
- *   missingSpread:      { skills: object[], totalMissing: number, moreCount: number } | null,
+ *   topActionable:     { skills: object[] } | null,
  *   missingBehavioral: object[],
  *   teaserCounts:      { lowMatchCount: number, criticalGapCount: number, lowMatchTeaser?: string, criticalTeaser?: string },
+ *   remainingCounts:   { levelGapsRemaining?: number, criticalRemaining?: number },
+ *   matchedCount:      number,
+ *   missingCount:      number,
+ *   levelGapsCount:    number,
  * }}
+ *
+ * topActionable.skills — up to 3 entries, ranked by actionability (smaller
+ * level gap first, then higher JD importance, then more existing resume
+ * context). Each entry carries { sourceType: 'levelGap' | 'critical',
+ * name, level, resumeLevel, gap, importance, confidence, source,
+ * durationMonths, contextCount }. Deterministic — same input always
+ * produces the same 3 skills in the same order.
  */
 
 import { parseResume, extractResumeSections } from './parseResume.js'
@@ -112,10 +122,10 @@ export function computeLiteMatch(resumeData, jdProfile) {
     if (!jdProfile?.technicalSignals?.length) {
         return {
             matchScore:        null,
-            closestGap:        null,
-            missingSpread:     null,
+            topActionable:     null,
             missingBehavioral: [],
             teaserCounts:      { lowMatchCount: 0, criticalGapCount: 0 },
+            remainingCounts:   {},
         }
     }
 
@@ -135,42 +145,59 @@ export function computeLiteMatch(resumeData, jdProfile) {
     const resumeProfile = { technicalSignals, behavioralSignals, degree }
     const { matchScore } = getDecision(jdProfile, resumeProfile)
 
-    // closestGap — first levelGap entry (smallest gap after sort by importance)
-    const levelGaps  = gapResult?.levelGaps  ?? []
-    const critical   = gapResult?.critical   ?? []
-    const closestGap = levelGaps[0] ?? null
+    const levelGaps = gapResult?.levelGaps ?? []
+    const critical  = gapResult?.critical  ?? []
 
-    // missingSpread — fallback for when there is no single level-gap skill to
-    // anchor the "Closest gap" card (levelGaps.length === 0). Buckets missing
-    // (critical) skills into three required-level tiers — low [L1-2], mid [L3],
-    // high [L4-5] — mirroring the existing EVIDENCE_BANDS convention in
-    // constants.js, which already treats L4-5 as one "Strong Evidence" band and
-    // L3 as its own "Supported" band. Within each tier, picks the single skill
-    // with the lowest jdOrder (earliest JD mention) — never importance — as the
-    // representative. Tiers with zero missing skills are omitted (never
-    // backfilled). Only computed when closestGap is null, since it is unused
-    // otherwise.
-    let missingSpread = null
-    if (!closestGap && critical.length > 0) {
-        const tiers = [
-            { key: 'low',  levels: [1, 2] },
-            { key: 'mid',  levels: [3] },
-            { key: 'high', levels: [4, 5] },
-        ]
-        const shown = []
-        for (const tier of tiers) {
-            const candidates = critical.filter(s => tier.levels.includes(s.level))
-            if (candidates.length === 0) continue
-            const pick = candidates.reduce((lowest, s) =>
-                (s.jdOrder ?? Infinity) < (lowest.jdOrder ?? Infinity) ? s : lowest
-            )
-            shown.push(pick)
-        }
-        missingSpread = {
-            skills: shown,
-            totalMissing: critical.length,
-            moreCount: critical.length - shown.length,
-        }
+    // topActionable — unified top-3 "most actionable skills" selection.
+    // Candidate pool = levelGaps (have it, below required level) + critical
+    // (missing entirely). matched/bonus are excluded — matched is already
+    // met, bonus is resume-only and not JD-relevant.
+    //
+    // Ranking priority (stable multi-key sort):
+    //   1. gap ascending          — smaller gap = closer to done = more actionable
+    //   2. importance descending  — JD-required ranks above nice-to-have
+    //   3. contextCount descending — some existing evidence beats zero context
+    //      (critical items have no resume evidence, so contextCount is
+    //      treated as 0 for them)
+    const pool = [
+        ...levelGaps.map(s => ({
+            ...s,
+            sourceType:    'levelGap',
+            confidence:    s.confidence     ?? null,
+            source:        s.source         ?? null,
+            durationMonths: s.durationMonths ?? null,
+            contextCount:  s.contextCount   ?? 0,
+        })),
+        ...critical.map(s => ({
+            ...s,
+            sourceType:    'critical',
+            resumeLevel:   0,
+            confidence:    null,
+            source:        null,
+            durationMonths: null,
+            contextCount:  0,
+        })),
+    ]
+
+    pool.sort((a, b) => {
+        if (a.gap !== b.gap) return a.gap - b.gap
+        if (a.importance !== b.importance) return b.importance - a.importance
+        return (b.contextCount ?? 0) - (a.contextCount ?? 0)
+    })
+
+    const topActionableSkills = pool.slice(0, 3)
+    const topActionable = { skills: topActionableSkills }
+
+    // remainingCounts — true remaining pool minus what's shown in the top 3,
+    // split by type. Undefined (not 0) when nothing remains of that type, so
+    // the display layer can omit rather than render an odd "0 more" sentence.
+    const shownLevelGaps = topActionableSkills.filter(s => s.sourceType === 'levelGap').length
+    const shownCritical  = topActionableSkills.filter(s => s.sourceType === 'critical').length
+    const levelGapsRemaining = levelGaps.length - shownLevelGaps
+    const criticalRemaining  = critical.length  - shownCritical
+    const remainingCounts = {
+        ...(levelGapsRemaining > 0 && { levelGapsRemaining }),
+        ...(criticalRemaining  > 0 && { criticalRemaining }),
     }
 
     // missingBehavioral — present/absent only, no scoring
@@ -182,16 +209,16 @@ export function computeLiteMatch(resumeData, jdProfile) {
     const teaserCounts = {
         lowMatchCount,
         criticalGapCount,
-        ...(lowMatchCount    > 0 && { lowMatchTeaser:  `${lowMatchCount} other skills match but score low` }),
-        ...(criticalGapCount > 0 && { criticalTeaser:  `${criticalGapCount} skills missing from your resume` }),
+        ...(lowMatchCount    > 0 && { lowMatchTeaser:  `${lowMatchCount} other skill${lowMatchCount !== 1 ? 's' : ''} ${lowMatchCount !== 1 ? 'match' : 'matches'}, but your resume doesn't show enough evidence yet` }),
+        ...(criticalGapCount > 0 && { criticalTeaser:  `${criticalGapCount} skill${criticalGapCount !== 1 ? 's' : ''} the JD asks for ${criticalGapCount !== 1 ? "aren't" : "isn't"} on your resume at all` }),
     }
 
     return {
         matchScore,
-        closestGap,
-        missingSpread,
+        topActionable,
         missingBehavioral,
         teaserCounts,
+        remainingCounts,
         matchedCount:    (gapResult?.matched   ?? []).length,
         missingCount:    critical.length,
         levelGapsCount:  levelGaps.length,

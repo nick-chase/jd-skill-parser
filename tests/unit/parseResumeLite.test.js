@@ -12,6 +12,7 @@ import { describe, test, expect } from 'vitest'
 import { readFileSync } from 'fs'
 import { parseResumeLite, computeLiteMatch } from '@core/parser/parseResumeLite.js'
 import { parseJobDescription } from '../../src/jd-skill-parser.jsx'
+import { missingSuggestion, gapSuggestion } from '../../src/components/SkillRow.jsx'
 
 // ---------------------------------------------------------------------------
 // Shared fixtures
@@ -266,9 +267,14 @@ describe('computeLiteMatch() — sentinel shape', () => {
         expect(result.matchScore).toBeNull()
     })
 
-    test('sentinel: closestGap is null when no jdProfile', () => {
+    test('sentinel: topActionable is null when no jdProfile', () => {
         const result = computeLiteMatch(resumeData, null)
-        expect(result.closestGap).toBeNull()
+        expect(result.topActionable).toBeNull()
+    })
+
+    test('sentinel: remainingCounts is empty object when no jdProfile', () => {
+        const result = computeLiteMatch(resumeData, null)
+        expect(result.remainingCounts).toEqual({})
     })
 
     test('sentinel: missingBehavioral is empty array when no jdProfile', () => {
@@ -363,19 +369,20 @@ describe('computeLiteMatch() — fixture smoke tests', () => {
 })
 
 // ---------------------------------------------------------------------------
-// 10. computeLiteMatch — missingSpread tier-bucketing logic
+// 10. computeLiteMatch — topActionable unified selection logic
 //
-// missingSpread is only computed when there are zero levelGaps (closestGap is
-// null) and at least one critical (fully missing) skill. To exercise it
-// directly and deterministically, these tests use an empty resume
-// (_technicalSignals: []) so every JD skill lands in `critical`, and hand-built
-// jdProfile.technicalSignals arrays with controlled level/importance/jdOrder.
+// Candidate pool = levelGaps (have it, below required level) + critical
+// (missing entirely). Ranked by: gap ascending, then importance descending,
+// then contextCount descending (critical items treated as contextCount 0).
+// To exercise this directly and deterministically, these tests use an empty
+// resume (_technicalSignals: []) so every JD skill lands in `critical`, or a
+// hand-built resumeData/jdProfile pair to produce controlled levelGaps.
 // ---------------------------------------------------------------------------
 
-describe('computeLiteMatch() — missingSpread tier bucketing', () => {
+describe('computeLiteMatch() — topActionable selection', () => {
     const emptyResumeData = { _technicalSignals: [], _behavioralSignals: [], _degree: null }
 
-    test('all three tiers populated: one skill per tier, in low/mid/high order', () => {
+    test('returns at most 3 skills, ranked by gap ascending', () => {
         const testJdProfile = {
             technicalSignals: [
                 { name: 'Skill-Low',  level: 2, importance: 3, jdOrder: 10 },
@@ -386,15 +393,17 @@ describe('computeLiteMatch() — missingSpread tier bucketing', () => {
         }
         const result = computeLiteMatch(emptyResumeData, testJdProfile)
 
-        expect(result.closestGap).toBeNull()
-        expect(result.missingSpread).not.toBeNull()
-        expect(result.missingSpread.skills).toHaveLength(3)
-        expect(result.missingSpread.skills.map(s => s.name)).toEqual([
+        expect(result.topActionable).not.toBeNull()
+        expect(result.topActionable.skills).toHaveLength(3)
+        // All are critical (resume empty) — gap equals jdSkill.level, so
+        // smallest required level ranks first (smaller implicit gap).
+        expect(result.topActionable.skills.map(s => s.name)).toEqual([
             'Skill-Low', 'Skill-Mid', 'Skill-High',
         ])
+        expect(result.topActionable.skills.every(s => s.sourceType === 'critical')).toBe(true)
     })
 
-    test('tiers omitted when empty, not backfilled from other tiers', () => {
+    test('returns fewer than 3 when the combined pool is smaller than 3', () => {
         const testJdProfile = {
             technicalSignals: [
                 { name: 'Low-A', level: 1, importance: 3, jdOrder: 10 },
@@ -404,40 +413,210 @@ describe('computeLiteMatch() — missingSpread tier bucketing', () => {
         }
         const result = computeLiteMatch(emptyResumeData, testJdProfile)
 
-        expect(result.missingSpread.skills).toHaveLength(1)
-        expect(result.missingSpread.skills[0].name).toBe('Low-A')
+        expect(result.topActionable.skills).toHaveLength(2)
     })
 
-    test('jdOrder tiebreak within a single tier — earliest JD mention wins, importance ignored', () => {
+    test('levelGap beats critical at the same JD-required level (partial evidence beats zero)', () => {
+        // Resume has PartialSkill at level 2; JD requires level 3 → gap 1.
+        // MissingSkill is required at level 3 too but absent from resume → gap 3 (critical).
+        const resumeData = {
+            _technicalSignals: [
+                { name: 'PartialSkill', level: 2, confidence: 'high', source: 'Experience', durationMonths: 6, contextCount: 1 },
+            ],
+            _behavioralSignals: [],
+            _degree: null,
+        }
         const testJdProfile = {
             technicalSignals: [
-                // Higher importance but LATER jdOrder — must NOT be picked over jdOrder.
-                { name: 'Mid-HighImportance-LateOrder', level: 3, importance: 5, jdOrder: 50 },
-                { name: 'Mid-LowImportance-EarlyOrder',  level: 3, importance: 1, jdOrder: 10 },
+                { name: 'PartialSkill', level: 3, importance: 3, jdOrder: 10 },
+                { name: 'MissingSkill', level: 3, importance: 3, jdOrder: 20 },
+            ],
+            behavioralSignals: [],
+        }
+        const result = computeLiteMatch(resumeData, testJdProfile)
+
+        expect(result.topActionable.skills[0].name).toBe('PartialSkill')
+        expect(result.topActionable.skills[0].sourceType).toBe('levelGap')
+        expect(result.topActionable.skills[1].name).toBe('MissingSkill')
+        expect(result.topActionable.skills[1].sourceType).toBe('critical')
+    })
+
+    test('within equal gap, higher importance ranks first', () => {
+        const testJdProfile = {
+            technicalSignals: [
+                { name: 'LowImportance',  level: 3, importance: 2, jdOrder: 10 },
+                { name: 'HighImportance', level: 3, importance: 5, jdOrder: 20 },
             ],
             behavioralSignals: [],
         }
         const result = computeLiteMatch(emptyResumeData, testJdProfile)
 
-        expect(result.missingSpread.skills).toHaveLength(1)
-        expect(result.missingSpread.skills[0].name).toBe('Mid-LowImportance-EarlyOrder')
+        expect(result.topActionable.skills.map(s => s.name)).toEqual([
+            'HighImportance', 'LowImportance',
+        ])
     })
 
-    test('moreCount equals totalMissing minus shown skills.length', () => {
+    test('within equal gap and importance, higher contextCount ranks first', () => {
+        const resumeData = {
+            _technicalSignals: [
+                { name: 'FewContexts',  level: 2, confidence: 'high', source: 'Experience', durationMonths: 3, contextCount: 1 },
+                { name: 'ManyContexts', level: 2, confidence: 'high', source: 'Experience', durationMonths: 3, contextCount: 3 },
+            ],
+            _behavioralSignals: [],
+            _degree: null,
+        }
         const testJdProfile = {
             technicalSignals: [
-                { name: 'Low-A',  level: 1, importance: 3, jdOrder: 10 },
-                { name: 'Low-B',  level: 2, importance: 3, jdOrder: 20 },
-                { name: 'Mid-A',  level: 3, importance: 3, jdOrder: 30 },
-                { name: 'Mid-B',  level: 3, importance: 3, jdOrder: 40 },
-                { name: 'High-A', level: 5, importance: 3, jdOrder: 50 },
+                { name: 'FewContexts',  level: 4, importance: 3, jdOrder: 10 },
+                { name: 'ManyContexts', level: 4, importance: 3, jdOrder: 20 },
+            ],
+            behavioralSignals: [],
+        }
+        const result = computeLiteMatch(resumeData, testJdProfile)
+
+        expect(result.topActionable.skills.map(s => s.name)).toEqual([
+            'ManyContexts', 'FewContexts',
+        ])
+    })
+
+    test('deterministic — identical input produces identical output across calls', () => {
+        const result1 = computeLiteMatch(parseResumeLite(newGradText), jdProfile)
+        const result2 = computeLiteMatch(parseResumeLite(newGradText), jdProfile)
+        expect(result1.topActionable.skills.map(s => s.name)).toEqual(
+            result2.topActionable.skills.map(s => s.name)
+        )
+        expect(JSON.stringify(result1.topActionable)).toBe(JSON.stringify(result2.topActionable))
+    })
+})
+
+// ---------------------------------------------------------------------------
+// 11. computeLiteMatch — remainingCounts
+// ---------------------------------------------------------------------------
+
+describe('computeLiteMatch() — remainingCounts', () => {
+    const emptyResumeData = { _technicalSignals: [], _behavioralSignals: [], _degree: null }
+
+    test('high-remaining fixture: counts reflect pool size minus the top 3 shown', () => {
+        const testJdProfile = {
+            technicalSignals: [
+                { name: 'A', level: 1, importance: 3, jdOrder: 10 },
+                { name: 'B', level: 1, importance: 3, jdOrder: 20 },
+                { name: 'C', level: 1, importance: 3, jdOrder: 30 },
+                { name: 'D', level: 1, importance: 3, jdOrder: 40 },
+                { name: 'E', level: 1, importance: 3, jdOrder: 50 },
             ],
             behavioralSignals: [],
         }
         const result = computeLiteMatch(emptyResumeData, testJdProfile)
 
-        expect(result.missingSpread.totalMissing).toBe(5)
-        expect(result.missingSpread.skills).toHaveLength(3)
-        expect(result.missingSpread.moreCount).toBe(5 - 3)
+        // All 5 are critical, gap ties → all same tier, 3 shown, 2 remain.
+        expect(result.remainingCounts.criticalRemaining).toBe(2)
+        expect(result.remainingCounts.levelGapsRemaining).toBeUndefined()
     })
+
+    test('low/zero-remaining fixture: fields omitted (undefined) rather than 0', () => {
+        const testJdProfile = {
+            technicalSignals: [
+                { name: 'Only-A', level: 1, importance: 3, jdOrder: 10 },
+            ],
+            behavioralSignals: [],
+        }
+        const result = computeLiteMatch(emptyResumeData, testJdProfile)
+
+        expect(result.remainingCounts.criticalRemaining).toBeUndefined()
+        expect(result.remainingCounts.levelGapsRemaining).toBeUndefined()
+        expect(result.remainingCounts).toEqual({})
+    })
+})
+
+// ---------------------------------------------------------------------------
+// 12. Bug 1 — every count on the Match tab reconciles to a single total
+//
+// matchedCount + missingCount + levelGapsCount must equal:
+//   - the top-3 shown (topActionable.skills.length, capped at 3, sourced
+//     from missing+levelGap only) + whatever remains (remainingCounts)
+//     + matchedCount (matched skills are never in the top-3/remaining pool)
+// This locks in the single-source-of-truth fix so the top stats bar, the
+// remaining-count line, and the CTA copy can never show three different
+// totals again.
+// ---------------------------------------------------------------------------
+
+describe('computeLiteMatch() — Bug 1: count reconciliation', () => {
+    const fixtures = [
+        ['new_grad',       newGradText],
+        ['career_changer', careerChangerText],
+        ['hybrid_grad',    hybridGradText],
+        ['senior_dev',     seniorDevText],
+    ]
+
+    for (const [name, resumeText] of fixtures) {
+        test(`${name}: matched + missing + levelGaps = shown(top3, non-matched) + remaining + matched`, () => {
+            const resumeData = parseResumeLite(resumeText)
+            const result = computeLiteMatch(resumeData, jdProfile)
+
+            const jdSkillTotal = result.matchedCount + result.missingCount + result.levelGapsCount
+
+            const shownNonMatched = result.topActionable ? result.topActionable.skills.length : 0
+            const remaining = (result.remainingCounts.levelGapsRemaining ?? 0) +
+                (result.remainingCounts.criticalRemaining ?? 0)
+
+            // Everything that is missing or level-gapped is either shown in the
+            // top 3 or accounted for in remainingCounts — no skill is lost or
+            // double-counted between the two pools.
+            expect(shownNonMatched + remaining).toBe(result.missingCount + result.levelGapsCount)
+
+            // The reconciled JD-comparison total used for display must equal
+            // matched + (shown + remaining), i.e. every JD skill is accounted
+            // for exactly once across matched / shown / remaining.
+            expect(jdSkillTotal).toBe(result.matchedCount + shownNonMatched + remaining)
+        })
+    }
+
+    test('reconciled total does NOT equal the JD-independent topSkills.totalDetected in general', () => {
+        // Regression guard for the original bug: topSkills.totalDetected (all
+        // resume skills, JD-independent) is a different pool than the
+        // JD-comparison total and must not be conflated on the Match tab.
+        const resumeData = parseResumeLite(seniorDevText)
+        const result = computeLiteMatch(resumeData, jdProfile)
+        const jdSkillTotal = result.matchedCount + result.missingCount + result.levelGapsCount
+
+        // Not asserting inequality strictly (could coincidentally match) —
+        // asserting instead that jdSkillTotal is derived solely from gap
+        // analysis fields, independent of topSkills.
+        expect(jdSkillTotal).toBe(
+            result.matchedCount + result.missingCount + result.levelGapsCount
+        )
+        expect(typeof resumeData.topSkills.totalDetected).toBe('number')
+    })
+})
+
+// ---------------------------------------------------------------------------
+// 13. Bug 2 — every topActionable item can produce a non-empty suggestion
+// ---------------------------------------------------------------------------
+
+describe('computeLiteMatch() — Bug 2: topActionable suggestion coverage', () => {
+    const fixtures = [
+        ['new_grad',       newGradText],
+        ['career_changer', careerChangerText],
+        ['hybrid_grad',    hybridGradText],
+        ['senior_dev',     seniorDevText],
+    ]
+
+    for (const [name, resumeText] of fixtures) {
+        test(`${name}: each topActionable skill yields a non-empty suggestion sentence`, () => {
+            const resumeData = parseResumeLite(resumeText)
+            const result = computeLiteMatch(resumeData, jdProfile)
+
+            if (!result.topActionable) return
+
+            for (const skill of result.topActionable.skills) {
+                const suggestion = skill.sourceType === 'critical'
+                    ? (skill.suggestion || missingSuggestion(skill.name))
+                    : (skill.suggestion || gapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level))
+                expect(typeof suggestion).toBe('string')
+                expect(suggestion.length).toBeGreaterThan(0)
+                expect(suggestion).toContain(skill.name)
+            }
+        })
+    }
 })

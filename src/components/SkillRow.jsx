@@ -47,12 +47,12 @@ function ImportanceBadge({ importance }) {
 }
 
 // Generate a specific action string for a missing skill.
-function missingSuggestion(name) {
+export function missingSuggestion(name) {
   return `Build a project or complete a course using ${name} and add it to your Projects section with a clear outcome.`
 }
 
 // Generate a specific action string for a level-gap skill.
-function gapSuggestion(name, resumeLevel, requiredLevel) {
+export function gapSuggestion(name, resumeLevel, requiredLevel) {
   if (resumeLevel <= 1) {
     return `Your resume lists ${name} but shows no context. ` +
       `If you have used it professionally or in a project, describe where, ` +

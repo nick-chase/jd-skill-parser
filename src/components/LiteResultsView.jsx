@@ -14,11 +14,16 @@
  *   }
  *   liteMatch {
  *     matchScore:        number | null   (null = JD not yet parsed — show empty state)
- *     closestGap:        object | null
- *     missingSpread:     { skills: object[], totalMissing: number, moreCount: number } | null
+ *     topActionable:     { skills: object[] } | null
+ *       — up to 3 skills, ranked by actionability (gap asc, importance desc,
+ *         contextCount desc). Each skill: { sourceType: 'levelGap'|'critical',
+ *         name, level, resumeLevel, gap, importance, confidence, source,
+ *         durationMonths, contextCount }
  *     missingBehavioral: object[]
  *     teaserCounts:      { lowMatchCount: number, criticalGapCount: number,
  *                          lowMatchTeaser?: string, criticalTeaser?: string }
+ *     remainingCounts:   { levelGapsRemaining?: number, criticalRemaining?: number }
+ *       — true counts left over after the top-3, omitted (undefined) when zero
  *     matchedCount:      number
  *     missingCount:      number
  *     levelGapsCount:    number
@@ -35,6 +40,7 @@ import {
 import { getAffiliateResources } from '@utils/affiliateLoader.js'
 import ConfidenceDotInline from './ConfidenceDot.jsx'
 import GapResourceLink from './GapResourceLink.jsx'
+import { missingSuggestion, gapSuggestion } from './SkillRow.jsx'
 
 // Compact evidence line for the closest-gap card — shared with GapAnalysisView
 // (jd-skill-parser.jsx) via @utils/constants.js.
@@ -56,14 +62,22 @@ export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) 
 
   const {
     matchScore        = null,
-    closestGap        = null,
-    missingSpread     = null,
+    topActionable     = null,
     missingBehavioral = [],
     teaserCounts      = { lowMatchCount: 0, criticalGapCount: 0 },
+    remainingCounts   = {},
     matchedCount      = 0,
     missingCount      = 0,
     levelGapsCount    = 0,
   } = liteMatch ?? {}
+
+  // Single reconciled total for "skills in play for this JD comparison" —
+  // every JD skill matched, level-gapped, or missing. Used for every count
+  // shown on this screen so the top stats, remaining-count line, and CTA
+  // copy never disagree with each other. Do NOT use topSkills.totalDetected
+  // here — that's the JD-independent resume-only total (Resume tab only).
+  const jdSkillTotal = matchedCount + missingCount + levelGapsCount
+  const fixableCount = missingCount + levelGapsCount
 
   // Sentinel: JD not yet parsed — show empty state instead of stale/wrong data
   if (matchScore === null) {
@@ -170,81 +184,70 @@ export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) 
         </div>
       )}
 
-      {/* 3. Closest gap */}
-      {closestGap && (
+      {/* 3. Most actionable skills — unified top-3, ranked by gap size, then
+             JD importance, then existing resume context. Replaces the former
+             separate "closest gap" / "requirement spread" cards. */}
+      {topActionable && topActionable.skills.length > 0 && (
         <div
           className="rounded-lg border border-amber-200 bg-amber-50 p-5"
-          data-testid="closest-gap-section"
+          data-testid="top-actionable-section"
         >
           <div className="text-xs font-semibold uppercase tracking-wide text-amber-600 mb-2">
-            Closest gap
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-slate-800">{closestGap.name}</span>
-            <span className="text-xs text-amber-700 font-semibold">
-              {typeof closestGap.gap === 'number'
-                ? `${closestGap.gap} level${closestGap.gap !== 1 ? 's' : ''} away`
-                : 'Gap detected'}
-            </span>
-          </div>
-          <div className="flex items-center gap-1 text-xs text-amber-700 mt-1">
-            <span>You: {levelLabel(closestGap.resumeLevel)} ({closestGapEvidenceLine(closestGap)})</span>
-            {closestGap.confidence && <ConfidenceDotInline confidence={closestGap.confidence} />}
-            <span>→ Role needs: {levelLabel(closestGap.level)}</span>
-          </div>
-          <div className="text-xs text-amber-600 mt-1">
-            This is the skill where a small resume edit would move the needle most.
-          </div>
-          {(() => {
-            const resource = getAffiliateResources(
-              nameToResourceId(closestGap.name),
-              closestGap.resumeLevel ?? 1,
-              'tech',
-              closestGap.name
-            )[0] ?? null
-            return <GapResourceLink resource={resource} />
-          })()}
-          {levelGapsCount - 1 > 0 && (
-            <div className="text-xs text-amber-600 mt-2" data-testid="closest-gap-more">
-              ...and {levelGapsCount - 1} more skills also have a level gap
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* 3b. Requirement spread — fallback when no single level-gap skill exists to anchor
-             the Closest gap card. Shows up to one missing skill per required-level tier
-             (low/mid/high), picked by earliest JD mention (jdOrder), not importance. */}
-      {!closestGap && missingSpread && missingSpread.skills.length > 0 && (
-        <div
-          className="rounded-lg border border-amber-200 bg-amber-50 p-5"
-          data-testid="requirement-spread-section"
-        >
-          <div className="text-xs font-semibold uppercase tracking-wide text-amber-600 mb-2">
-            Requirement spread
+            Most actionable skills
           </div>
           <div className="text-xs text-amber-700 mb-3">
-            This role asks for skills across a range of levels. Here's part of what your resume doesn't show yet.
+            These are the skills where a resume edit would move the needle most.
           </div>
-          <ul className="space-y-1.5">
-            {missingSpread.skills.map((skill, i) => (
-              <li
-                key={skill.name ?? i}
-                className="flex items-center justify-between text-sm"
-                data-testid="requirement-spread-item"
-              >
-                <span className="font-medium text-slate-800">{skill.name}</span>
-                <span className="text-xs text-amber-700 font-semibold">
-                  Role needs: {levelLabel(skill.level)}
-                </span>
-              </li>
-            ))}
+          <ul className="space-y-3">
+            {topActionable.skills.map((skill, i) => {
+              const isCritical = skill.sourceType === 'critical'
+              const resource = getAffiliateResources(
+                nameToResourceId(skill.name),
+                skill.resumeLevel ?? 1,
+                'tech',
+                skill.name
+              )[0] ?? null
+              const suggestion = isCritical
+                ? (skill.suggestion || missingSuggestion(skill.name))
+                : (skill.suggestion || gapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level))
+              return (
+                <li
+                  key={skill.name ?? i}
+                  className="border-t border-amber-200 first:border-t-0 first:pt-0 pt-3"
+                  data-testid="top-actionable-item"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-slate-800">{skill.name}</span>
+                    <span className="text-xs text-amber-700 font-semibold">
+                      {isCritical
+                        ? 'Missing entirely'
+                        : typeof skill.gap === 'number'
+                          ? `${skill.gap} level${skill.gap !== 1 ? 's' : ''} away`
+                          : 'Gap detected'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-amber-700 mt-1">
+                    <span>
+                      You: {levelLabel(skill.resumeLevel)}
+                      {!isCritical && ` (${closestGapEvidenceLine(skill)})`}
+                    </span>
+                    {skill.confidence && <ConfidenceDotInline confidence={skill.confidence} />}
+                    <span>→ Role needs: {levelLabel(skill.level)}</span>
+                  </div>
+                  {suggestion && (
+                    <div
+                      className="text-xs text-amber-800 mt-1 flex gap-1 items-start"
+                      data-testid="top-actionable-suggestion"
+                    >
+                      <span className="shrink-0 font-bold">→</span>
+                      <span>{suggestion}</span>
+                    </div>
+                  )}
+                  <GapResourceLink resource={resource} />
+                </li>
+              )
+            })}
           </ul>
-          {missingSpread.moreCount > 0 && (
-            <div className="text-xs text-amber-600 mt-2" data-testid="requirement-spread-more">
-              ...and {missingSpread.moreCount} more
-            </div>
-          )}
         </div>
       )}
 
@@ -301,6 +304,16 @@ export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) 
               {teaserCounts.criticalTeaser}
             </p>
           )}
+          {(remainingCounts.levelGapsRemaining || remainingCounts.criticalRemaining) && (
+            <p className="text-sm text-slate-600" data-testid="remaining-actionable-teaser">
+              {remainingCounts.levelGapsRemaining
+                ? `${remainingCounts.levelGapsRemaining} more skill${remainingCounts.levelGapsRemaining !== 1 ? 's' : ''} already ${remainingCounts.levelGapsRemaining !== 1 ? 'have' : 'has'} some evidence — a resume edit could strengthen ${remainingCounts.levelGapsRemaining !== 1 ? 'them' : 'it'}. `
+                : ''}
+              {remainingCounts.criticalRemaining
+                ? `${remainingCounts.criticalRemaining} more ${remainingCounts.criticalRemaining !== 1 ? "aren't" : "isn't"} on your resume at all.`
+                : ''}
+            </p>
+          )}
         </div>
       )}
 
@@ -312,17 +325,22 @@ export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) 
         <p className="text-sm font-semibold text-indigo-900 mb-1">
           See the full picture — every skill gap, every level.
         </p>
-        <p className="text-xs text-indigo-700 mb-4">
-          The complete report shows all {topSkills.totalDetected > 5
-            ? topSkills.totalDetected
-            : 'matched'} skills with per-bullet context, evidence strength, and
-          what to add or reframe to close each gap before your next application.
+        <p className="text-xs text-indigo-700 mb-4" data-testid="cta-body-copy">
+          This role compares against {jdSkillTotal} skill{jdSkillTotal !== 1 ? 's' : ''}.
+          {' '}{matchedCount} {matchedCount !== 1 ? 'are' : 'is'} well-supported.
+          {' '}{missingCount} {missingCount !== 1 ? "aren't" : "isn't"} on your resume.
+          {' '}{levelGapsCount} {levelGapsCount !== 1 ? 'have' : 'has'} some evidence but
+          {' '}need{levelGapsCount !== 1 ? '' : 's'} more to match what this role requires.
+          The complete report shows the evidence behind all {jdSkillTotal}, full detail on
+          your biggest opportunities, and exactly what to add or change first.
         </p>
         <a
           href="/pricing"
           className="inline-block px-5 py-2 rounded-md bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors"
         >
-          Get the full report — closer to your next offer
+          {fixableCount > 3
+            ? `See all ${fixableCount} fixable skills — with what to fix first`
+            : 'See the full report — with what to fix first'}
         </a>
       </div>
 
