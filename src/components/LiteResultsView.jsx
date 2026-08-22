@@ -40,6 +40,7 @@ import {
 import { getAffiliateResources } from '@utils/affiliateLoader.js'
 import ConfidenceDotInline from './ConfidenceDot.jsx'
 import GapResourceLink from './GapResourceLink.jsx'
+import { missingSuggestion, gapSuggestion } from './SkillRow.jsx'
 
 // Compact evidence line for the closest-gap card — shared with GapAnalysisView
 // (jd-skill-parser.jsx) via @utils/constants.js.
@@ -69,6 +70,14 @@ export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) 
     missingCount      = 0,
     levelGapsCount    = 0,
   } = liteMatch ?? {}
+
+  // Single reconciled total for "skills in play for this JD comparison" —
+  // every JD skill matched, level-gapped, or missing. Used for every count
+  // shown on this screen so the top stats, remaining-count line, and CTA
+  // copy never disagree with each other. Do NOT use topSkills.totalDetected
+  // here — that's the JD-independent resume-only total (Resume tab only).
+  const jdSkillTotal = matchedCount + missingCount + levelGapsCount
+  const fixableCount = missingCount + levelGapsCount
 
   // Sentinel: JD not yet parsed — show empty state instead of stale/wrong data
   if (matchScore === null) {
@@ -198,6 +207,9 @@ export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) 
                 'tech',
                 skill.name
               )[0] ?? null
+              const suggestion = isCritical
+                ? (skill.suggestion || missingSuggestion(skill.name))
+                : (skill.suggestion || gapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level))
               return (
                 <li
                   key={skill.name ?? i}
@@ -222,6 +234,15 @@ export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) 
                     {skill.confidence && <ConfidenceDotInline confidence={skill.confidence} />}
                     <span>→ Role needs: {levelLabel(skill.level)}</span>
                   </div>
+                  {suggestion && (
+                    <div
+                      className="text-xs text-amber-800 mt-1 flex gap-1 items-start"
+                      data-testid="top-actionable-suggestion"
+                    >
+                      <span className="shrink-0 font-bold">→</span>
+                      <span>{suggestion}</span>
+                    </div>
+                  )}
                   <GapResourceLink resource={resource} />
                 </li>
               )
@@ -304,18 +325,19 @@ export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) 
         <p className="text-sm font-semibold text-indigo-900 mb-1">
           See the full picture — every skill gap, every level.
         </p>
-        <p className="text-xs text-indigo-700 mb-4">
-          The complete report shows all {topSkills.totalDetected > 5
-            ? topSkills.totalDetected
-            : 'matched'} skills with per-bullet context, evidence strength, and
-          what's missing or under-leveled for this role.
+        <p className="text-xs text-indigo-700 mb-4" data-testid="cta-body-copy">
+          This role compares against {jdSkillTotal} skill{jdSkillTotal !== 1 ? 's' : ''} total
+          ({matchedCount} matched, {missingCount} missing, {levelGapsCount} below the
+          required level). The complete report shows evidence strength for all {jdSkillTotal},
+          with full per-bullet detail on your top gaps, plus what to fix first for the
+          {' '}{fixableCount} that {fixableCount !== 1 ? 'are' : 'is'} missing or under-leveled.
         </p>
         <a
           href="/pricing"
           className="inline-block px-5 py-2 rounded-md bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors"
         >
-          {missingCount + levelGapsCount > 3
-            ? `See all ${missingCount + levelGapsCount} — with what to fix first`
+          {fixableCount > 3
+            ? `See all ${fixableCount} fixable skills — with what to fix first`
             : 'See the full report — with what to fix first'}
         </a>
       </div>
