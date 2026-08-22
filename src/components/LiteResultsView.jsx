@@ -307,10 +307,10 @@ export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) 
           {(remainingCounts.levelGapsRemaining || remainingCounts.criticalRemaining) && (
             <p className="text-sm text-slate-600" data-testid="remaining-actionable-teaser">
               {remainingCounts.levelGapsRemaining
-                ? `${remainingCounts.levelGapsRemaining} more skill${remainingCounts.levelGapsRemaining !== 1 ? 's are' : ' is'} close to leveling up. `
+                ? `${remainingCounts.levelGapsRemaining} more skill${remainingCounts.levelGapsRemaining !== 1 ? 's' : ''} already ${remainingCounts.levelGapsRemaining !== 1 ? 'have' : 'has'} some evidence — a resume edit could strengthen ${remainingCounts.levelGapsRemaining !== 1 ? 'them' : 'it'}. `
                 : ''}
               {remainingCounts.criticalRemaining
-                ? `${remainingCounts.criticalRemaining} more ${remainingCounts.criticalRemaining !== 1 ? 'are' : 'is'} missing entirely.`
+                ? `${remainingCounts.criticalRemaining} more ${remainingCounts.criticalRemaining !== 1 ? "aren't" : "isn't"} on your resume at all.`
                 : ''}
             </p>
           )}
@@ -326,11 +326,13 @@ export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) 
           See the full picture — every skill gap, every level.
         </p>
         <p className="text-xs text-indigo-700 mb-4" data-testid="cta-body-copy">
-          This role compares against {jdSkillTotal} skill{jdSkillTotal !== 1 ? 's' : ''} total
-          ({matchedCount} matched, {missingCount} missing, {levelGapsCount} below the
-          required level). The complete report shows evidence strength for all {jdSkillTotal},
-          with full per-bullet detail on your top gaps, plus what to fix first for the
-          {' '}{fixableCount} that {fixableCount !== 1 ? 'are' : 'is'} missing or under-leveled.
+          This role compares against {jdSkillTotal} skill{jdSkillTotal !== 1 ? 's' : ''}.
+          {' '}{matchedCount} {matchedCount !== 1 ? 'are' : 'is'} well-supported.
+          {' '}{missingCount} {missingCount !== 1 ? "aren't" : "isn't"} on your resume.
+          {' '}{levelGapsCount} {levelGapsCount !== 1 ? 'have' : 'has'} some evidence but
+          {' '}need{levelGapsCount !== 1 ? '' : 's'} more to match what this role requires.
+          The complete report shows the evidence behind all {jdSkillTotal}, full detail on
+          your biggest opportunities, and exactly what to add or change first.
         </p>
         <a
           href="/pricing"

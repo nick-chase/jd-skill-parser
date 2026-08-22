@@ -209,8 +209,8 @@ export function computeLiteMatch(resumeData, jdProfile) {
     const teaserCounts = {
         lowMatchCount,
         criticalGapCount,
-        ...(lowMatchCount    > 0 && { lowMatchTeaser:  `${lowMatchCount} other skills match but score low` }),
-        ...(criticalGapCount > 0 && { criticalTeaser:  `${criticalGapCount} skills missing from your resume` }),
+        ...(lowMatchCount    > 0 && { lowMatchTeaser:  `${lowMatchCount} other skill${lowMatchCount !== 1 ? 's' : ''} ${lowMatchCount !== 1 ? 'match' : 'matches'}, but your resume doesn't show enough evidence yet` }),
+        ...(criticalGapCount > 0 && { criticalTeaser:  `${criticalGapCount} skill${criticalGapCount !== 1 ? 's' : ''} the JD asks for ${criticalGapCount !== 1 ? "aren't" : "isn't"} on your resume at all` }),
     }
 
     return {
