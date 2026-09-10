@@ -118,8 +118,8 @@ export default function SupportPage() {
               )}
               <div className="text-xs text-slate-400 pt-2">
                 Need to stop early? Email{' '}
-                <a href="mailto:nick@nat20app.com" className="hover:underline">
-                  nick@nat20app.com
+                <a href="mailto:devteam@nat20app.com" className="hover:underline">
+                  devteam@nat20app.com
                 </a>{' '}
                 and I'll cancel any future payments.
               </div>

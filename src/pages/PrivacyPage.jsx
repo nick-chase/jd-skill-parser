@@ -53,6 +53,15 @@ export default function PrivacyPage() {
               </p>
             </div>
             <div>
+              <p className="font-medium text-slate-700">Supporters</p>
+              <p className="mt-1">
+                If you join the Supporter tier, Stripe processes the payment and we store a Stripe
+                customer ID (<code>supporter_stripe_customer_id</code>) to link your account to your
+                Supporter status. We collect no personal data beyond what is already described above
+                for signed-in and Pro users.
+              </p>
+            </div>
+            <div>
               <p className="font-medium text-slate-700">Billing</p>
               <p className="mt-1">
                 Payments are processed by Stripe. We never see or store your full card number.
