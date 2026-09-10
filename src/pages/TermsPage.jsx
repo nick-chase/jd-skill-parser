@@ -29,13 +29,41 @@ export default function TermsPage() {
           <h2 className="text-lg font-semibold text-slate-800">2. Lite tier</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
             The Lite tier allows unlimited job description and resume parses with no account required.
-            Lite-tier results are not saved — they disappear when you close the tab. The Lite tier
-            is ad-supported. We reserve the right to adjust Lite-tier limits with reasonable notice.
+            Lite-tier results are not saved — they disappear when you close the tab. We reserve the
+            right to adjust Lite-tier limits with reasonable notice.
           </p>
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-800">3. Pro subscription</h2>
+          <h2 className="text-lg font-semibold text-slate-800">3. Supporter tier</h2>
+          <p className="text-sm text-slate-600 leading-relaxed">
+            Supporter is an optional patronage tier costing $5 per month (USD), billed through Stripe
+            for a fixed term of 12 billing cycles. After the 12th cycle it ends automatically and does
+            not renew.
+          </p>
+          <p className="text-sm text-slate-600 leading-relaxed">
+            Becoming a Supporter funds the general, ongoing development of Nat20 — server and
+            operating costs, future improvements, and potential expansion of the skill library to
+            industries beyond technology. It does not grant any product feature, higher usage limit,
+            access level, or other deliverable, and we make no promise about what specific work the
+            funding will produce. If you want the full report and saved profiles, that is Pro
+            (section 4), which is separate.
+          </p>
+          <p className="text-sm text-slate-600 leading-relaxed">
+            Supporter status is independent of Pro status. You may be a Supporter without Pro, hold
+            Pro without being a Supporter, or have both at the same time. Neither affects the price,
+            billing, or benefits of the other.
+          </p>
+          <p className="text-sm text-slate-600 leading-relaxed">
+            You may stop future Supporter payments at any time by emailing
+            <a href="mailto:devteam@nat20app.com" className="text-indigo-600 hover:underline ml-1">devteam@nat20app.com</a>.
+            Cancellation takes effect at the end of the current billing cycle. We do not offer
+            refunds for partial billing periods.
+          </p>
+        </section>
+
+        <section className="space-y-3">
+          <h2 className="text-lg font-semibold text-slate-800">4. Pro subscription</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
             Pro costs $9.99 per month (USD), billed monthly through Stripe. Pro includes unlimited
             JD parses, PDF resume upload, saved resume profile, and no ads.
@@ -53,7 +81,7 @@ export default function TermsPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-800">4. Your content</h2>
+          <h2 className="text-lg font-semibold text-slate-800">5. Your content</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
             You own your resume content and any job descriptions you paste. By using Nat20 you
             grant us a limited license to process that content locally in your browser (Lite tier)
@@ -63,7 +91,7 @@ export default function TermsPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-800">5. Acceptable use</h2>
+          <h2 className="text-lg font-semibold text-slate-800">6. Acceptable use</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
             You may not use Nat20 to build a competing product, scrape the service programmatically,
             resell access, or circumvent usage limits. One account per person. Accounts found to be
@@ -72,7 +100,7 @@ export default function TermsPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-800">6. Accuracy disclaimer</h2>
+          <h2 className="text-lg font-semibold text-slate-800">7. Accuracy disclaimer</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
             Nat20 uses a rule-based parser against a curated skill dictionary. Results are
             informational only. We do not guarantee that the skill gap map accurately reflects
@@ -82,7 +110,7 @@ export default function TermsPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-800">7. Disclaimer of warranties</h2>
+          <h2 className="text-lg font-semibold text-slate-800">8. Disclaimer of warranties</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
             Nat20 is provided "as is" without warranties of any kind, express or implied.
             We do not warrant that the service will be uninterrupted, error-free, or that
@@ -91,7 +119,7 @@ export default function TermsPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-800">8. Limitation of liability</h2>
+          <h2 className="text-lg font-semibold text-slate-800">9. Limitation of liability</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
             To the maximum extent permitted by law, Nat20 and its operator shall not be liable
             for any indirect, incidental, special, or consequential damages arising from your use
@@ -101,7 +129,7 @@ export default function TermsPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-800">9. Changes to these terms</h2>
+          <h2 className="text-lg font-semibold text-slate-800">10. Changes to these terms</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
             We may update these terms as the product evolves. Material changes will be communicated
             via email to signed-in users at least 7 days before taking effect. Continued use of
@@ -110,7 +138,7 @@ export default function TermsPage() {
         </section>
 
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-slate-800">10. Governing law</h2>
+          <h2 className="text-lg font-semibold text-slate-800">11. Governing law</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
             These terms are governed by the laws of the State of New Jersey, United States,
             without regard to conflict of law provisions.
