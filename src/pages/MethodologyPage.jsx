@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import ReferenceFooter from '../components/ReferenceFooter.jsx'
 
 export default function MethodologyPage() {
   return (
@@ -127,17 +128,7 @@ export default function MethodologyPage() {
         </section>
       </main>
 
-      <footer className="border-t border-slate-100 py-8 px-6">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="text-sm text-slate-400">⚔ Nat20 · Skill-based job matching, leveled.</div>
-          <div className="flex items-center gap-6 text-sm text-slate-400">
-            <Link to="/terms" className="hover:text-slate-600 transition">Terms</Link>
-            <Link to="/privacy" className="hover:text-slate-600 transition">Privacy</Link>
-            <Link to="/methodology" className="hover:text-slate-600 transition">Methodology</Link>
-            <Link to="/pricing" className="hover:text-slate-600 transition">Pricing</Link>
-          </div>
-        </div>
-      </footer>
+      <ReferenceFooter />
     </div>
   )
 }

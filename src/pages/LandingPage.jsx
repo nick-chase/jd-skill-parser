@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { onAuthStateChange } from '../lib/auth.js'
 import TierBadge from '../components/TierBadge.jsx'
+import AppFooter from '../components/AppFooter.jsx'
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
 
@@ -136,21 +137,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-slate-100 py-8 px-6">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="text-sm text-slate-400">
-            ⚔ Nat20 · Know your stats before you apply.
-          </div>
-          <div className="flex items-center gap-6 text-sm text-slate-400">
-            <Link to="/app" className="hover:text-slate-600 transition">App</Link>
-            <Link to="/privacy" className="hover:text-slate-600 transition">Privacy</Link>
-            <Link to="/terms" className="hover:text-slate-600 transition">Terms</Link>
-            <Link to="/support" className="hover:text-slate-600 transition">Support the project</Link>
-            <a href="mailto:devteam@nat20app.com"
-               className="hover:text-slate-600 transition">Contact</a>
-          </div>
-        </div>
-      </footer>
+      <AppFooter />
 
     </div>
   )

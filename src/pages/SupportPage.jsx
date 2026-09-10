@@ -4,7 +4,7 @@ import { onAuthStateChange } from '../lib/auth.js'
 import { redirectToSupporterCheckout } from '../lib/stripe.js'
 import { getSupporterStatus } from '../lib/supabase.js'
 import SignInButton from '../components/SignInButton.jsx'
-import AppFooter from '../components/AppFooter.jsx'
+import ReferenceFooter from '../components/ReferenceFooter.jsx'
 
 function formatDate(isoString) {
   if (!isoString) return null
@@ -77,7 +77,7 @@ export default function SupportPage() {
             Loading...
           </div>
         </div>
-        <AppFooter />
+        <ReferenceFooter />
       </>
     )
   }
@@ -143,7 +143,7 @@ export default function SupportPage() {
           )}
         </div>
       </div>
-      <AppFooter />
+      <ReferenceFooter />
     </>
   )
 }
