@@ -95,14 +95,14 @@ export default function MethodologyPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-slate-800">Where the model comes from</h2>
           <p className="text-sm text-slate-600 leading-relaxed">
-            The five-level shape is informed by two things I found useful while building it: the U.S.
+            The five-level shape is informed by two things we found useful while building it: the U.S.
             Office of Personnel Management's five-level competency scale, which is a long-standing way
             of describing proficiency from awareness up to expert, and Bloom's revised taxonomy,
             which orders thinking from simple recall up to creating something new and is what shapes
             how Nat20 reads action verbs.
           </p>
           <p className="text-sm text-slate-600 leading-relaxed">
-            Nat20's model is not a direct implementation of either one. It is my own interpretation,
+            Nat20's model is not a direct implementation of either one. It is our own interpretation,
             adapted for the narrow job of reading a resume against a job description. Where those
             frameworks describe a person's competence, Nat20 only ever describes what a document
             shows.
