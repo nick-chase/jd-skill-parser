@@ -61,23 +61,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Demo placeholder */}
-      <section className="max-w-4xl mx-auto px-6 pb-20">
-        <div className="rounded-2xl border border-slate-200 bg-slate-50
-                        aspect-video flex items-center justify-center shadow-sm">
-          <div className="text-center space-y-3">
-            <div className="text-4xl">⚔️</div>
-            <div className="text-slate-400 text-sm font-medium">
-              Demo video coming soon
-            </div>
-            <Link to="/app"
-                  className="inline-block text-sm text-indigo-600 hover:underline">
-              Try it live instead →
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* Features */}
       <section className="bg-slate-50 border-y border-slate-100 py-20">
         <div className="max-w-4xl mx-auto px-6">
