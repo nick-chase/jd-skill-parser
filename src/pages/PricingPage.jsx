@@ -85,7 +85,7 @@ export default function PricingPage() {
           )}
 
           <p className="text-xs text-center text-slate-400">
-            Cancel anytime. No contracts.
+            Cancel anytime, effective at period end.
           </p>
         </div>
 
