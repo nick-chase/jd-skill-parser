@@ -114,8 +114,8 @@ export default function AccountPage() {
                 </span>
               </div>
               <ul className="text-sm text-slate-500 space-y-1">
-                <li>Full skill list with per-skill evidence detail</li>
-                <li>Per-bullet fast fixes (BoostSection)</li>
+                <li>Full skill list with evidence-strength scoring on every skill</li>
+                <li>Per-bullet fix checklists for your top gap skills</li>
                 <li>Affiliate links and learning recommendations</li>
                 <li>Priority cards with full context</li>
                 <li>PDF resume upload</li>
