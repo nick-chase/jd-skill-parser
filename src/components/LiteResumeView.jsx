@@ -16,7 +16,7 @@
  *     topSkills:           { skills: object[], totalDetected: number }
  *     allBehavioralSignals: { name: string, present: boolean }[]
  *     credentialGap:       { degreePresent: boolean, degreeLevel: string|null,
- *                            certCount: number, certPresent: boolean }
+ *                            degreeLevels: string[], certCount: number, certPresent: boolean }
  *     sectionsPresent:     string[]
  *   }
  */
@@ -27,7 +27,7 @@ export default function LiteResumeView({ liteResults }) {
   const {
     topSkills            = { skills: [], totalDetected: 0 },
     allBehavioralSignals = [],
-    credentialGap        = { degreePresent: false, degreeLevel: null, certCount: 0, certPresent: false },
+    credentialGap        = { degreePresent: false, degreeLevel: null, degreeLevels: [], certCount: 0, certPresent: false },
     sectionsPresent      = [],
   } = liteResults
 
@@ -35,9 +35,9 @@ export default function LiteResumeView({ liteResults }) {
     const parts = []
 
     if (credentialGap.degreePresent) {
-      // Show type token only (e.g. "B.S.") — never field-of-study or institution
-      const token = credentialGap.degreeLevel ?? 'Degree'
-      parts.push(`${token} detected`)
+      // Show type token(s) only (e.g. "B.S." or "M.S., B.S.") — never field-of-study or institution
+      const tokens = credentialGap.degreeLevels?.length ? credentialGap.degreeLevels : [credentialGap.degreeLevel ?? 'Degree']
+      parts.push(`${tokens.join(', ')} detected`)
     } else {
       parts.push('No degree detected')
     }

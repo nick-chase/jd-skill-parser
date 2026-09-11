@@ -1133,7 +1133,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
     );
 }
 
-function ResumeResultsView({ results, behavioralSignals, degree, isPaid: isPaidProp }) {
+function ResumeResultsView({ results, behavioralSignals, degrees, isPaid: isPaidProp }) {
     const SOURCE_COLORS = {
         'Technical Skills': '#0369a1',
         'Education':        '#7c3aed',
@@ -1202,12 +1202,19 @@ function ResumeResultsView({ results, behavioralSignals, degree, isPaid: isPaidP
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1.5">
                     Education &amp; Degrees
                 </div>
-                {degree?.degreeLevel ? (
-                    <div className="text-xs text-slate-600">
-                        <span className="font-medium">{DEGREE_LEVEL_LABELS[degree.degreeLevel]}</span>
-                        {degree.field && <span className="text-slate-500"> in {degree.field}</span>}
-                        {degree.institution && <span className="text-slate-400"> · {degree.institution}</span>}
-                        {degree.graduationYear && <span className="text-slate-400"> ({degree.graduationYear})</span>}
+                {degrees && degrees.length > 0 ? (
+                    <div className="space-y-1">
+                        {degrees.map((d, i) => (
+                            <div key={i} className="text-xs text-slate-600">
+                                <span className="font-medium">{DEGREE_LEVEL_LABELS[d.degreeLevel]}</span>
+                                {d.field && <span className="text-slate-500"> in {d.field}</span>}
+                                {d.institution && <span className="text-slate-400"> · {d.institution}</span>}
+                                {d.graduationStatus === 'in_progress'
+                                    ? <span className="text-slate-400"> (In Progress{d.graduationYear ? ` · ${d.graduationYear}` : ''})</span>
+                                    : (d.graduationYear && <span className="text-slate-400"> ({d.graduationYear})</span>)
+                                }
+                            </div>
+                        ))}
                     </div>
                 ) : (
                     <span className="text-xs text-slate-400">No degree detected in Education section</span>
@@ -1641,7 +1648,7 @@ export default function App() {
                                         <ResumeResultsView
                                             results={resumeResults.technicalSignals}
                                             behavioralSignals={resumeResults.behavioralSignals}
-                                            degree={resumeResults.degree}
+                                            degrees={resumeResults.allDegrees}
                                             isPaid={isPaidStatus}
                                         />
                                     </>

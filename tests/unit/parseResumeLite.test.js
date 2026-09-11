@@ -73,10 +73,10 @@ describe('parseResumeLite() — return shape', () => {
         expect(typeof result.topSkills.totalDetected).toBe('number')
     })
 
-    test('credentialGap has degreePresent, degreeLevel, certCount, and certPresent', () => {
+    test('credentialGap has degreePresent, degreeLevel, degreeLevels, certCount, and certPresent', () => {
         const keys = Object.keys(result.credentialGap)
-        expect(keys).toEqual(expect.arrayContaining(['degreePresent', 'degreeLevel', 'certCount', 'certPresent']))
-        expect(keys).toHaveLength(4)
+        expect(keys).toEqual(expect.arrayContaining(['degreePresent', 'degreeLevel', 'degreeLevels', 'certCount', 'certPresent']))
+        expect(keys).toHaveLength(5)
     })
 
     test('allBehavioralSignals is an array of { name, present } objects', () => {

@@ -806,6 +806,9 @@ export function parseResume(text) {
     return {
         technicalSignals,
         behavioralSignals: extractBehavioralSignals(text),
+        // degree: single collapsed value (completed-first precedence) — used for
+        // scoring/gap-matching only. allDegrees: full list — used for display only.
+        // Do not re-collapse allDegrees back into degree.
         degree: extractDegree(sections.education),
         allDegrees: extractAllDegrees(sections.education),
     }
