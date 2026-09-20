@@ -1,135 +1,102 @@
-# Nat20 — Close the Gap Between Your Work and Your Resume
+Nat20 — Close the Gap Between Your Work and Your Resume
+A web app that reads your resume the way a hiring system does — surfacing the gaps between what you've done and what your resume says you've done, for both early-career and experienced job seekers.
 
-A web app that reads your resume the way a hiring system does —
-surfacing the gaps between what you've done and what your resume says
-you've done, for both early-career and experienced job seekers.
+🔗  www.nat20app.com
 
-🔗 **[Live App](https://jd-skill-parser.vercel.app)**
+Nat20 is the working name. Public launch name TBD.
 
-> *Nat20 is the working name. Public launch name TBD.*
-
----
-
-## What It Does
-
+What It Does
 Nat20 answers one question for anyone targeting a specific job:
 
-> **Based on how my resume reads today, how well does it match this job description?**
+Based on how my resume reads today, how well does it match this job description?
 
-For early-career users — students, bootcamp grads, new grads — that usually means
-turning a skills list into evidence-backed bullets. For experienced professionals
-and career changers, it usually means reframing existing work so the resume
-reflects what was actually done. Same parser, different gap.
+For early-career users — students, bootcamp grads, new grads — that usually means turning a skills list into evidence-backed bullets. For experienced professionals and career changers, it usually means reframing existing work so the resume reflects what was actually done. Same parser, different gap. A unique interpretation of the purpose of a resume.
 
-Instead of a vague "match percentage," it shows you the signal clearly across three panels:
+Instead of a vague "match percentage," it shows the signal clearly across three panels:
 
-- **Technical Match** — skills scored by weighted evidence (L1–L5 proficiency)
-- **Behavioral Signals** — soft skills found or missing on your resume
-- **What This Role Does** — duties listed as-is, for you to interpret
+Technical Match — skills scored by weighted evidence (L1–L5 proficiency)
+Behavioral Signals — soft skills found or missing on the resume, unscored
+What This Role Does — duties listed as free text, for the user to interpret
+The parser reads the document. It does not decide whether the user is qualified or what role they "should" be in — it reports what the resume and Job Description say, and lets the user act on the gap.
 
----
+Product Tiers
+Nat20 ships as two tiers, gated by output depth, not by call rate:
 
-## Current Features
+Lite (free)
+Anonymous — no account, no server-side write
+Unlimited parses
+Top 5 skills by experience, with an "of N detected" teaser
+Closest matched skill gap, missing behavioral signals, cert/degree gap flagged as existence-only
+Match score shown
+Pro (paid)
+Google OAuth account required
+Full skill list with per-skill detail
+Per-bullet fast-fix suggestions
+Affiliate learning resources
+PDF resume upload, resume save/load
+Current Features
+Parse Job Descriptions
+Extract skills against a Lightcast-aligned skill dictionary
+Detect proficiency levels (L1–L5, aligned to the OPM 5-Level Scale)
+Classify importance tiers (Critical / Required / Preferred / Nice-to-have)
+Pull metadata: company, role, location type, job type, salary range
+Parse Resumes
+PDF upload (client-side extraction via pdfjs-dist)
+Text paste fallback
+Section-aware extraction across Technical Skills, Education/Coursework, Projects, and Professional Experience
+Skill Scoring
+Weighted composite scoring per skill: evidence type × Bloom-verb complexity × duration × recurrence, plus a bounded phrase boost
+Grounded in published frameworks rather than intuitive weights — OPM's 5-level competency scale, the Dreyfus model of skill acquisition, and Bloom's revised taxonomy for action-verb complexity
+Every assigned level carries a confidence indicator (High / Medium / Low)
+Gap Analysis
+Matched skills (resume meets or exceeds required level)
+Level gaps (skill present but below required level)
+Missing skills (required, not on resume)
+Bonus skills (on resume, not required)
+Match score: Strong (≥85) / Partial (≥60) / Weak (<60)
+Accounts & Payments (Pro tier)
+Google OAuth via Supabase Auth
+Stripe Checkout for subscription signup, Stripe Customer Portal for self-service plan management and cancellation
+Supabase Postgres (Row-Level Security) for resume profile persistence
+How It Works
+Parse a JD — paste any tech job description, get a structured skill profile
+Parse a resume — upload PDF or paste text, get a skill inventory by section
+See the gap — a three-panel comparison, priority-ranked
+All parsing runs client-side. Resumes never leave the browser on the free tier.
 
-### Parse Job Descriptions
-- Extract skills against a 122-skill, Lightcast-aligned dictionary
-- Detect proficiency levels (L1–L5, OPM 5-Level Scale)
-- Classify importance tiers (Critical / Required / Preferred / Nice-to-have)
-- Pull metadata: company, role, location type, job type, salary range
+Tech Stack
+Frontend: React 19 + Vite
+Styling: Tailwind CSS v4
+PDF parsing: pdfjs-dist (client-side)
+Auth: Supabase Auth (Google OAuth)
+Database: Supabase Postgres + Row-Level Security
+Serverless functions: Supabase Edge Functions (checkout, webhook, billing portal)
+Payments: Stripe Checkout + Customer Portal
+Data layer: JSON registry (data/skills.json, data/soft-skills.json, data/roles.json) via a registry.js seam
+Tests: Vitest
+Analytics: Plausible (future, no current users)
+Deployment: Vercel (auto-deploy from master)
+Classification standards: OPM 5-Level Scale, Dreyfus skill-acquisition model, Bloom's revised taxonomy, Lightcast skill taxonomy
 
-### Parse Resumes
-- **PDF upload** (client-side extraction via pdfjs-dist)
-- **Text paste** fallback
-- Section-aware extraction:
-  - Technical Skills section — L2 max
-  - Education / coursework — L1–L2 by grade
-  - Projects — L2 default
-  - Professional Experience — L3+ for tech roles only
+Project Status
+Phase E — Publish-Ready (current)
 
-### Gap Analysis
-- Matched skills (resume meets or exceeds required level)
-- Level gaps (skill present but below required level)
-- Missing skills (required, not on resume)
-- Bonus skills (on resume, not required)
-- Match score: Strong (≥70%) / Partial (≥40%) / Weak (<40%)
+Phases A–D (foundation, gap engine, accounts & persistence, payment infrastructure) are complete. Remaining work before public promotion:
 
-### Reference Library
-- Built-in OPM 5-Level Scale documentation
-- Importance tier definitions
-- Phrase-to-level detection rules
-- Years-of-experience-to-level mapping
+Task	Status
+1	Weighted evidence scoring (Bloom / Dreyfus / OPM-grounded)	✅
+2	Two-tier model — Lite (free) / Pro (paid)	✅
+3	Google OAuth + Stripe subscription billing	✅
+4	Accuracy gate — ≥85% exact+adjacent agreement on a hand-labeled fixture set	🔄
+5	Lite-tier parser + copy pass	🔄
+6	Vitest suite covering parser, inference, and decision modules	🔄
+7	Public promotion (NJIT → Reddit → LinkedIn → Product Hunt)	⬜
+Current state: in active development, pre-launch. No public users yet, and no social media or marketing exposure to date. This project is a personal exercise in using agentic AI to drive the full development lifecycle of a product, end to end.
 
----
+Next phase — Publish + Promote: ship the Lite tier live, post across all launch channels, target ~100 unique visitors in the first week. A paid conversion is a stretch outcome, not the bar.
 
-## How It Works
-
-1. **Parse a JD** — paste any tech job description, get a structured
-   skill profile
-2. **Parse your resume** — upload PDF or paste text, get your skill
-   inventory by section
-3. **See the gap** — comparison with priority-ranked results
-
-All parsing is **client-side**. Resumes never leave the browser.
-
----
-
-## Tech Stack
-
-- **Frontend:** React 18 + Vite
-- **Styling:** Tailwind CSS 4 + Inter font
-- **PDF parsing:** pdfjs-dist (client-side)
-- **Data layer:** JSON registry (`data/skills.json`, `data/roles.json`)
-  via `src/lib/registry.js` seam
-- **Tests:** Vitest (137 passing)
-- **Deployment:** Vercel (auto-deploy from `master`)
-- **Classification standards:** OPM 5-Level Scale + Lightcast Skill Taxonomy
-
----
-
-## Getting Started
-
-```bash
-git clone https://github.com/nick-chase/jd-skill-parser.git
-cd jd-skill-parser
-npm install
-npm run dev        # http://localhost:5173
-npm test           # run Vitest suite
-npm run build      # production build
-```
-
----
-
-## Project Status
-
-**Phase 1 — Foundation** (May–June 2026)
-
-| | Task | Status |
-|---|---|---|
-| 1 | Registry refactor (constants → JSON) | ✅ |
-| 2 | PDF upload + text paste parity | ✅ |
-| 3 | 4-tab UI (JD / Resume / Match / Reference) | ✅ |
-| 4 | Tailwind v4 migration + Nat20 rebrand | ✅ |
-| 5 | Mobile-responsive layout | ✅ |
-| 6 | JD test bank (10 real JDs) | ✅ |
-| 7 | Vitest test suite | 🔄 |
-| 8 | `guardWords` false-positive fix | ⬜ |
-| 9 | Expand `skills.json` to 300–500 (Lightcast-aligned) | ⬜ |
-| 10 | O*NET API integration for role definitions | ⬜ |
-| 11 | Weighted evidence scoring (see `docs/scoring-model.md`) | ⬜ |
-| 12 | Entry-level calibration logic | ⬜ |
-
-**Phase 2 — Output Quality** (June–July 2026)
-Per-skill action suggestions · evidence transparency · resume rewrite hints · export to PDF/CSV
-
-**Phase 3 — Scale** (July–August 2026)
-Skill database 500+ · non-tech domain expansion
-
----
-
-## Author
-
-[Nicholas Chase](https://github.com/nick-chase) — NJIT MS Artificial Intelligence
-
+Author
+Nicholas Chase — NJIT M.S. Artificial Intelligence
 ---
 
 *Skill classifications are rule-based heuristics, not formal assessments.*
