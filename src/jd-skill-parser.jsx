@@ -847,6 +847,18 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
     const topGaps       = sortedGaps.slice(0, 3);
     const remainingGaps = sortedGaps.slice(3);
 
+    // Group "Missing from Resume" by importance tier (tier is the primary axis,
+    // not required level -- see PATH_TO_LAUNCH task on Match view reorder).
+    const missingCritical = critical.filter(s => s.importance >= 5);
+    const missingRequired = critical.filter(s => s.importance === 4);
+    const missingPreferred = critical.filter(s => s.importance <= 3);
+    const sortByLevelDesc = (a, b) => b.level - a.level;
+    const missingGroups = [
+        { key: 'critical', label: 'Critical', skills: [...missingCritical].sort(sortByLevelDesc) },
+        { key: 'required', label: 'Required', skills: [...missingRequired].sort(sortByLevelDesc) },
+        { key: 'preferred', label: 'Preferred', skills: [...missingPreferred].sort(sortByLevelDesc) },
+    ].filter(g => g.skills.length > 0);
+
     // Use the decision engine's matchScore as the single source of truth (fixes B-FIX-01).
     const score = decisionResult?.matchScore ?? 0;
     const scoreColor = score >= 70 ? '#059669' : score >= 40 ? '#d97706' : '#dc2626';
@@ -986,30 +998,12 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                 </div>
             )}
 
-            {/* Missing skills */}
-            {critical.length > 0 && (
-                <div className="mb-2">
-                    <SectionHeader label="Missing from Resume" count={critical.length} color="text-slate-600" />
-                    <div style={{ overflowX: 'auto' }}>
-                        {critical.map((skill, idx) => (
-                            <SkillRow
-                                key={skill.name}
-                                skill={skill}
-                                variant="missing"
-                                idx={idx}
-                                isLast={idx === critical.length - 1}
-                            />
-                        ))}
-                    </div>
-                </div>
-            )}
-
             {/* Evidence Gaps — Focus Zone */}
             {levelGaps.length > 0 && (
                 <div className="mb-2">
 
                     <div className="text-xs font-semibold uppercase tracking-wide text-amber-700 mb-2">
-                        Top gaps to address — {topGaps.length} of {levelGaps.length}
+                        Top gaps to address
                     </div>
 
                     {/* Focus Zone — top 3 */}
@@ -1083,7 +1077,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                             <div className="border-t border-slate-100 my-4" />
                             <div className="pl-3 border-l-2 border-slate-100 mb-4">
                                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">
-                                    Other gaps — {remainingGaps.length}
+                                    Other gaps
                                 </div>
                                 <div className="border border-slate-100 rounded-xl overflow-hidden">
                                     {remainingGaps.map((skill, index) => (
@@ -1104,6 +1098,31 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                             </div>
                         </>
                     )}
+                </div>
+            )}
+
+            {/* Missing skills — grouped by importance tier (Critical / Required / Preferred) */}
+            {critical.length > 0 && (
+                <div className="mb-2">
+                    <SectionHeader label="Missing from Resume" count={critical.length} color="text-slate-600" />
+                    {missingGroups.map(group => (
+                        <div key={group.key} className="mb-3">
+                            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1.5">
+                                {group.label} — {group.skills.length}
+                            </div>
+                            <div style={{ overflowX: 'auto' }}>
+                                {group.skills.map((skill, idx) => (
+                                    <SkillRow
+                                        key={skill.name}
+                                        skill={skill}
+                                        variant="missing"
+                                        idx={idx}
+                                        isLast={idx === group.skills.length - 1}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
 
