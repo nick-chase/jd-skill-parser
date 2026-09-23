@@ -43,6 +43,7 @@
     { "id": "prompt-engineering", "canonical": "Prompt Engineering", "category": "ML / AI", "aliases": ["prompt engineering"], "patterns": ["\\bprompt engineering\\b"], "guardWords": [] },
     { "id": "rag", "canonical": "RAG", "category": "ML / AI", "aliases": ["rag", "retrieval-augmented generation", "retrieval augmented generation"], "patterns": ["\\bRAG\\b", "\\bretrieval.augmented generation\\b"], "guardWords": [] },
     { "id": "vector-database", "canonical": "Vector Database", "category": "ML / AI", "aliases": ["vector database", "vector db", "vector store"], "patterns": ["\\bvector database\\b", "\\bvector db\\b", "\\bvector store\\b"], "guardWords": [] },
+    { "id": "mcp", "canonical": "MCP", "category": "ML / AI", "aliases": ["mcp", "model context protocol"], "patterns": ["\\bMCP\\b", "\\bmodel context protocol\\b"], "guardWords": [] },
     { "id": "fine-tuning", "canonical": "Fine-Tuning", "category": "ML / AI", "aliases": ["fine-tuning", "fine tuning", "finetuning"], "patterns": ["\\bfine[- ]tuning\\b", "\\bfinetuning\\b"], "guardWords": [] },
     { "id": "anomaly-detection", "canonical": "Anomaly Detection", "category": "ML / AI", "aliases": ["anomaly detection"], "patterns": ["\\banomaly detection\\b"], "guardWords": [] },
     { "id": "time-series", "canonical": "Time Series Analysis", "category": "ML / AI", "aliases": ["time series", "time-series"], "patterns": ["\\btime[- ]series\\b"], "guardWords": [] },

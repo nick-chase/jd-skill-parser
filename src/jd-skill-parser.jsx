@@ -120,8 +120,16 @@ function getSections(text) {
     return sections;
 }
 
+// De-emphasis / negation phrases. If any of these appear in the same window
+// detectLevel() scans, the skill mention is being explicitly de-emphasized or
+// compared away (e.g. "matters more than X expertise", "isn't required") --
+// keyword/years escalation must be suppressed and the skill held at the
+// default level (L3) rather than raised. Suppress-only: never used to escalate.
+const LEVEL_SUPPRESSION_RE = /\b(do not need|don't need|not required|isn't required|matters more than|rather than|or comparable|no experience|not necessary|nice to have)\b/;
+
 function detectLevel(context) {
     const c = context.toLowerCase();
+    if (LEVEL_SUPPRESSION_RE.test(c)) return 3;
     if (/\b(expert(ise)?|mastery|guru)\b/.test(c)) return 5;
     if (/\b(advanced|deep (knowledge|understanding|experience)|highly proficient|in[- ]depth)\b/.test(c)) return 4;
     if (/\b(strong|proficient|extensive experience|solid|skilled|significant experience)\b/.test(c)) return 4;
@@ -133,6 +141,12 @@ function detectLevel(context) {
 
 function detectImportance(context) {
     const c = context.toLowerCase();
+    // Same de-emphasis/negation phrases detectLevel() checks. Without this, a
+    // phrase like "isn't required" would still hit the "required" keyword match
+    // below and wrongly report Critical importance for a skill the JD is
+    // explicitly de-emphasizing (e.g. "Deep ERP knowledge isn't required").
+    // This is an explicit local cue, so it overrides the section default.
+    if (LEVEL_SUPPRESSION_RE.test(c)) return 2;
     if (/\b(must have|must-have|essential|critical|required)\b/.test(c)) return 5;
     if (/\b(strongly preferred|preferred experience|preferred)\b/.test(c)) return 3;
     if (/\b(nice to have|bonus|good to have|pluses)\b/.test(c)) return 2;
@@ -361,9 +375,6 @@ export function parseJobDescription(text) {
                 const ctxEnd = Math.min(section.text.length, m.index + m[0].length + 40);
                 const context = section.text.substring(ctxStart, ctxEnd);
 
-                const phraseLvl = detectLevel(context);
-                const years = detectYears(context);
-                const level = Math.max(phraseLvl, yearsToLevel(years));
                 // detectImportance() only returns non-null when a genuine explicit local
                 // phrase cue (must-have/required/preferred/nice-to-have, etc.) is found
                 // right next to this specific skill mention -- otherwise it returns null
@@ -373,10 +384,22 @@ export function parseJobDescription(text) {
                 // otherwise an explicit "Preferred experience in Kotlin" inside a generic
                 // Qualifications section (importance 4) could never be pulled down to the
                 // Preferred level (3) the JD's own wording calls for.
+                // Computed BEFORE level so a de-emphasized importance (Optional/Nice-to-have)
+                // can cap the level assignment below.
                 const localImportance = detectImportance(context);
                 const importance = localImportance !== null
                     ? localImportance
                     : section.importance;
+
+                const phraseLvl = detectLevel(context);
+                const years = detectYears(context);
+                const suppressed = LEVEL_SUPPRESSION_RE.test(context.toLowerCase());
+                let level = suppressed ? 3 : Math.max(phraseLvl, yearsToLevel(years));
+                // Cap level at L2 when this skill's importance is de-emphasized
+                // (Optional=1 / Nice-to-have=2). The skill was genuinely mentioned,
+                // just not framed as a hard requirement, so it should never be
+                // displayed as a high required level.
+                if (importance <= 2 && level > 2) level = 2;
                 // jdOrder: absolute position of the match within the full JD text.
                 // Section text is a substring of the full JD, so section.start
                 // (offset of this section within the whole document) must be
