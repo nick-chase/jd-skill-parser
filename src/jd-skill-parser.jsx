@@ -26,7 +26,8 @@ import {
     EVIDENCE_BANDS,
     getMatchScoreLabel,
     evidenceSummary,
-    formatDuration,
+    gapSuggestion,
+    shouldShowGapResource,
 } from '@utils/constants.js';
 // Re-exported for backward compatibility — canonical definition lives in @utils/constants.js.
 export { getMatchScoreLabel };
@@ -34,6 +35,7 @@ import { runGapAnalysis, runBehavioralGap } from './core/parser/gap.js';
 import TierBadge from './components/TierBadge.jsx';
 import ConfidenceDot from './components/ConfidenceDot.jsx';
 import GapResourceLink from './components/GapResourceLink.jsx';
+import AffiliateDisclosure from './components/AffiliateDisclosure.jsx';
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
 const feedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
@@ -533,37 +535,10 @@ To review our candidate privacy notice, click here.
 // in @utils/constants.js / components/ConfidenceDot.jsx (single source of
 // truth, shared with LiteResultsView — see imports above).
 
-// evidence: { durationMonths, contextCount } — actual evidence facts already
-// computed by the inference layer. Copy must cite these numbers, never a
-// generic "no context" phrase when evidence exists.
-function getGapSuggestion(name, resumeLevel, requiredLevel, evidence = {}) {
-    const { durationMonths, contextCount } = evidence;
-    const dur   = formatDuration(durationMonths);
-    const count = contextCount ?? 1;
-
-    // State 4 — real evidence (Supported+) but still below the level this role wants.
-    if (resumeLevel >= 3) {
-        return `Your ${name} evidence is solid, but this role wants deeper experience than ` +
-            `your resume currently shows. If you have more depth — ownership, scale, or a ` +
-            `longer timeline — add it.`;
-    }
-
-    // State 3 — multiple contexts already on the resume.
-    if (count >= 2) {
-        return `Your resume shows ${name} in ${count} places. ` +
-            `Add what you built and a measurable outcome in at least one of them to strengthen this evidence.`;
-    }
-
-    // State 2 — a duration is known for a single context.
-    if (dur) {
-        return `Your resume shows ${dur} of ${name} experience in one place. ` +
-            `Say where it was used and what you accomplished to strengthen this evidence.`;
-    }
-
-    // State 1 — no duration, no additional context: skills-list mention only.
-    return `Your resume lists ${name} in your skills list and nowhere else. ` +
-        `Add a bullet under a job or project describing how you used it and for how long.`;
-}
+// getGapSuggestion is now the shared gapSuggestion() from @utils/constants.js
+// (consolidated — see import above). Kept as a local alias so existing
+// call sites in this file don't need to change.
+const getGapSuggestion = gapSuggestion;
 
 // ============================================================
 // SHARED UI PRIMITIVES
@@ -860,6 +835,10 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
     });
     const topGaps       = sortedGaps.slice(0, 3);
     const remainingGaps = sortedGaps.slice(3);
+    // Whether any Focus-Zone card will show an affiliate/course link — used to
+    // decide whether to render the single consolidated disclosure once per
+    // section, instead of repeating it per card.
+    const topGapsHaveResource = topGaps.some(skill => shouldShowGapResource(skill));
 
     // Group "Missing from Resume" by importance tier (tier is the primary axis,
     // not required level -- see PATH_TO_LAUNCH task on Match view reorder).
@@ -1030,7 +1009,13 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                         </div>
 
                         {topGaps.map((skill, index) => {
-                            const affiliateResource = getAffiliateResources(nameToResourceId(skill.name), skill.resumeLevel ?? 1, 'tech', skill.name)[0] ?? null;
+                            // Gate the affiliate/course link by evidence level: show only
+                            // when L1-L2 with no meaningful duration/context yet — once
+                            // duration or multiple contexts exist, the honest fix is
+                            // editing existing resume content, not learning something new.
+                            const affiliateResource = shouldShowGapResource(skill)
+                                ? getAffiliateResources(nameToResourceId(skill.name), skill.resumeLevel ?? 1, 'tech', skill.name)[0] ?? null
+                                : null;
                             const resumeLabel = skill.resumeLevel
                                 ? (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`)
                                 : 'Not evidenced';
@@ -1086,10 +1071,17 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                                     </div>
 
                                     {/* Resources */}
-                                    <GapResourceLink resource={affiliateResource} />
+                                    <GapResourceLink resource={affiliateResource} showDisclosure={false} />
                                 </div>
                             );
                         })}
+
+                        {topGapsHaveResource && (
+                            <AffiliateDisclosure
+                                count={2}
+                                className="text-[10px] text-amber-600 pt-2 border-t border-amber-200"
+                            />
+                        )}
                     </div>
 
                     {/* Remaining gaps — compact list */}

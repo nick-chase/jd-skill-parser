@@ -36,10 +36,12 @@ import {
   LEVEL_NAMES,
   nameToResourceId,
   evidenceSummary,
+  shouldShowGapResource,
 } from '@utils/constants.js'
 import { getAffiliateResources } from '@utils/affiliateLoader.js'
 import ConfidenceDotInline from './ConfidenceDot.jsx'
 import GapResourceLink from './GapResourceLink.jsx'
+import AffiliateDisclosure from './AffiliateDisclosure.jsx'
 import { missingSuggestion, gapSuggestion } from './SkillRow.jsx'
 
 // Compact evidence line for the closest-gap card — shared with GapAnalysisView
@@ -187,7 +189,35 @@ export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) 
       {/* 3. Most actionable skills — unified top-3, ranked by gap size, then
              JD importance, then existing resume context. Replaces the former
              separate "closest gap" / "requirement spread" cards. */}
-      {topActionable && topActionable.skills.length > 0 && (
+      {topActionable && topActionable.skills.length > 0 && (() => {
+        // Precompute per-skill resource + suggestion once, so we know before
+        // render whether this section has any affiliate links at all (for the
+        // single consolidated disclosure) and gate links by evidence level:
+        // show only when L1-L2 with no meaningful duration/context yet — once
+        // duration or multiple contexts exist, the honest fix is editing
+        // existing resume content, not a course link.
+        const items = topActionable.skills.map((skill, i) => {
+          const isCritical = skill.sourceType === 'critical'
+          const showResource = isCritical || shouldShowGapResource(skill)
+          const resource = showResource
+            ? getAffiliateResources(
+                nameToResourceId(skill.name),
+                skill.resumeLevel ?? 1,
+                'tech',
+                skill.name
+              )[0] ?? null
+            : null
+          const suggestion = isCritical
+            ? (skill.suggestion || missingSuggestion(skill.name))
+            : (skill.suggestion || gapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level, {
+                durationMonths: skill.durationMonths,
+                contextCount:   skill.contextCount,
+              }))
+          return { skill, i, isCritical, resource, suggestion }
+        })
+        const hasAnyResource = items.some(item => item.resource)
+
+        return (
         <div
           className="rounded-lg border border-amber-200 bg-amber-50 p-5"
           data-testid="top-actionable-section"
@@ -199,17 +229,7 @@ export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) 
             These are the skills where a resume edit would move the needle most.
           </div>
           <ul className="space-y-3">
-            {topActionable.skills.map((skill, i) => {
-              const isCritical = skill.sourceType === 'critical'
-              const resource = getAffiliateResources(
-                nameToResourceId(skill.name),
-                skill.resumeLevel ?? 1,
-                'tech',
-                skill.name
-              )[0] ?? null
-              const suggestion = isCritical
-                ? (skill.suggestion || missingSuggestion(skill.name))
-                : (skill.suggestion || gapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level))
+            {items.map(({ skill, i, isCritical, resource, suggestion }) => {
               return (
                 <li
                   key={skill.name ?? i}
@@ -243,13 +263,20 @@ export default function LiteResultsView({ resumeData, liteMatch, duties = [] }) 
                       <span>{suggestion}</span>
                     </div>
                   )}
-                  <GapResourceLink resource={resource} />
+                  <GapResourceLink resource={resource} showDisclosure={false} />
                 </li>
               )
             })}
           </ul>
+          {hasAnyResource && (
+            <AffiliateDisclosure
+              count={2}
+              className="text-[10px] text-amber-600 mt-3 pt-3 border-t border-amber-200"
+            />
+          )}
         </div>
-      )}
+        )
+      })()}
 
       {/* 4. Missing behavioral signals */}
       {missingBehavioral.length > 0 && (
