@@ -8,7 +8,7 @@
  * @returns {{
  *   topSkills:              { skills: object[], totalDetected: number },
  *   allBehavioralSignals:   { name: string, present: boolean }[],
- *   credentialGap:          { degreePresent: boolean, degreeLevel: string|null, certCount: number, certPresent: boolean },
+ *   credentialGap:          { degreePresent: boolean, degreeLevel: string|null, degreeLevels: string[], certCount: number, certPresent: boolean },
  *   sectionsPresent:        string[],
  * }}
  *
@@ -63,7 +63,7 @@ export function parseResumeLite(resumeText) {
     // 1. Full parse — existing logic, no reimplementation
     const resumeProfile = parseResume(resumeText)
 
-    const { technicalSignals, behavioralSignals, degree } = resumeProfile
+    const { technicalSignals, behavioralSignals, degree, allDegrees } = resumeProfile
 
     // 2. topSkills — top 5 using parseResume()'s existing sort order (already sorted)
     const topSkills = {
@@ -81,13 +81,18 @@ export function parseResumeLite(resumeText) {
         present: detectedBehavioralNames.has(name),
     }))
 
-    // 4. credentialGap — expanded: booleans + degreeLevel token + certCount.
+    // 4. credentialGap — expanded: booleans + degreeLevel token(s) + certCount.
     //    degreeLevel: short type token only (B.S., M.S., etc.) — never field/institution.
+    //    degreeLevels: same token, one per detected degree — for display of multiple degrees.
     //    certCount: number of skills detected from the certifications section.
     const certCount = technicalSignals.filter(s => s.level === 'certified').length
+    const degreeLevels = (allDegrees ?? [])
+        .map(d => DEGREE_LEVEL_TOKEN[d.degreeLevel] ?? null)
+        .filter(Boolean)
     const credentialGap = {
         degreePresent: Boolean(degree?.degreeLevel),
         degreeLevel:   degree?.degreeLevel ? (DEGREE_LEVEL_TOKEN[degree.degreeLevel] ?? null) : null,
+        degreeLevels,
         certCount,
         certPresent:   certCount > 0,
     }

@@ -10,7 +10,19 @@
 
 import ResourceLink from './ResourceLink.jsx'
 import { getAffiliateResources } from '../utils/affiliateLoader.js'
-import { LEVEL_NAMES, IMPORTANCE_NAMES, nameToResourceId } from '@utils/constants.js'
+import {
+  LEVEL_NAMES,
+  IMPORTANCE_NAMES,
+  nameToResourceId,
+  gapSuggestion,
+  shouldShowGapResource,
+} from '@utils/constants.js'
+
+// Re-exported for backward compatibility — LiteResultsView.jsx and existing
+// tests import gapSuggestion from this module. Canonical implementation now
+// lives in @utils/constants.js (single source of truth, shared with
+// GapAnalysisView in jd-skill-parser.jsx — see consolidation note there).
+export { gapSuggestion }
 
 const LEVEL_TIPS = [
   '',
@@ -51,26 +63,6 @@ export function missingSuggestion(name) {
   return `Build a project or complete a course using ${name} and add it to your Projects section with a clear outcome.`
 }
 
-// Generate a specific action string for a level-gap skill.
-export function gapSuggestion(name, resumeLevel, requiredLevel) {
-  if (resumeLevel <= 1) {
-    return `Your resume lists ${name} but shows no context. ` +
-      `If you have used it professionally or in a project, describe where, ` +
-      `how long, and what you accomplished. If you are still learning, ` +
-      `a documented hands-on project will build the evidence your resume needs.`
-  }
-  if (resumeLevel === 2) {
-    return `You have some ${name} experience showing on your resume. ` +
-      `Add a duration, a specific outcome, and a scale detail to push this higher.`
-  }
-  if (resumeLevel >= 3) {
-    return `Your ${name} evidence is solid. ` +
-      `Add an ownership or leadership signal — led, architected, owned — ` +
-      `with a measurable outcome to close this gap.`
-  }
-  return `Add duration and a specific outcome to your ${name} experience to close the one-level gap.`
-}
-
 export default function SkillRow({ skill, variant, isLast, idx }) {
   const isOdd     = idx % 2 !== 0
   const isGap     = variant === 'gap'
@@ -79,7 +71,7 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
 
   // TODO: Huntr placement at bottom of results page (Phase E)
   const skillLevel     = isMissing ? 1 : (skill.resumeLevel ?? 1)
-  const showResources  = isMissing || (isGap && (skill.resumeLevel ?? 0) <= 2)
+  const showResources  = isMissing || (isGap && shouldShowGapResource(skill))
   const skillResources = showResources
     ? getAffiliateResources(nameToResourceId(skill.name), skillLevel, 'tech', skill.name)
     : []
@@ -93,7 +85,10 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
   const suggestion = isMissing
     ? (skill.suggestion || missingSuggestion(skill.name))
     : isGap
-      ? (skill.suggestion || gapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level))
+      ? (skill.suggestion || gapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level, {
+          durationMonths: skill.durationMonths,
+          contextCount:   skill.contextCount,
+        }))
       : null
 
   const confidenceSuffix = skill.confidence

@@ -1,14 +1,17 @@
 import AffiliateDisclosure from './AffiliateDisclosure.jsx'
 
 /**
- * GapResourceLink — single-resource "learn this" link + affiliate disclosure,
- * used on the closest-gap / focus-zone gap cards.
+ * GapResourceLink — single-resource "learn this" link, used on the
+ * closest-gap / focus-zone gap cards.
  * Shared by GapAnalysisView (jd-skill-parser.jsx) and LiteResultsView.
  *
  * Props:
- *   resource  { title, url, platform } | null — renders nothing when null
+ *   resource        { title, url, platform } | null — renders nothing when null
+ *   showDisclosure  boolean, default true — set false when the parent section
+ *                   already renders one consolidated AffiliateDisclosure for
+ *                   the whole list of cards, to avoid repeating it per card.
  */
-export default function GapResourceLink({ resource }) {
+export default function GapResourceLink({ resource, showDisclosure = true }) {
   if (!resource) return null
 
   return (
@@ -25,10 +28,12 @@ export default function GapResourceLink({ resource }) {
           {resource.platform} · affiliate
         </span>
       </a>
-      <AffiliateDisclosure
-        count={1}
-        className="text-[10px] text-slate-400 mt-1"
-      />
+      {showDisclosure && (
+        <AffiliateDisclosure
+          count={1}
+          className="text-[10px] text-slate-400 mt-1"
+        />
+      )}
     </div>
   )
 }

@@ -43,6 +43,55 @@ export function evidenceSummary(skill) {
   return parts.join(' · ');
 }
 
+// Level-gap remediation copy — single source of truth for both tiers.
+// evidence: { durationMonths, contextCount } — actual evidence facts already
+// computed by the inference layer. Copy must cite these numbers, never a
+// generic "no context" phrase when evidence exists.
+// Used by GapAnalysisView (jd-skill-parser.jsx), SkillRow.jsx, and LiteResultsView.
+export function gapSuggestion(name, resumeLevel, requiredLevel, evidence = {}) {
+  const { durationMonths, contextCount } = evidence;
+  const dur   = formatDuration(durationMonths);
+  const count = contextCount ?? 1;
+
+  // State 4 — real evidence (Supported+) but still below the level this role wants.
+  if (resumeLevel >= 3) {
+    return `Your ${name} evidence is solid, but this role wants deeper experience than ` +
+      `your resume currently shows. If you have more depth — ownership, scale, or a ` +
+      `longer timeline — add it.`;
+  }
+
+  // State 3 — multiple contexts already on the resume.
+  if (count >= 2) {
+    return `Your resume shows ${name} in ${count} places. ` +
+      `Add what you built and a measurable outcome in at least one of them to strengthen this evidence.`;
+  }
+
+  // State 2 — a duration is known for a single context.
+  if (dur) {
+    return `Your resume shows ${dur} of ${name} experience in one place. ` +
+      `Say where it was used and what you accomplished to strengthen this evidence.`;
+  }
+
+  // State 1 — no duration, no additional context: skills-list mention only.
+  return `Your resume lists ${name} in your skills list and nowhere else. ` +
+    `Add a bullet under a job or project describing how you used it and for how long.`;
+}
+
+// Returns true when the evidence gate for showing a course/affiliate link is
+// met: L1-L2 with no meaningful duration or multi-context evidence yet
+// (skills-list-only / coursework-only / no-duration). Once duration and/or
+// multiple contexts exist, the honest fix is editing existing resume content,
+// not learning something new — so links are suppressed.
+// Does not apply to the Missing-from-Resume path (missingSuggestion) — that
+// path always shows links regardless of this gate.
+export function shouldShowGapResource(skill) {
+  const resumeLevel = skill.resumeLevel ?? 0;
+  if (resumeLevel > 2) return false;
+  const hasDuration = skill.durationMonths != null;
+  const hasMultiContext = (skill.contextCount ?? 1) >= 2;
+  return !hasDuration && !hasMultiContext;
+}
+
 // Canonical skill-name → resource-id slug converter.
 // Single source of truth — used by jd-skill-parser.jsx and SkillRow.jsx.
 export function nameToResourceId(name) {

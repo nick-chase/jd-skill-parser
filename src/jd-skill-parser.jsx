@@ -26,6 +26,8 @@ import {
     EVIDENCE_BANDS,
     getMatchScoreLabel,
     evidenceSummary,
+    gapSuggestion,
+    shouldShowGapResource,
 } from '@utils/constants.js';
 // Re-exported for backward compatibility — canonical definition lives in @utils/constants.js.
 export { getMatchScoreLabel };
@@ -33,6 +35,7 @@ import { runGapAnalysis, runBehavioralGap } from './core/parser/gap.js';
 import TierBadge from './components/TierBadge.jsx';
 import ConfidenceDot from './components/ConfidenceDot.jsx';
 import GapResourceLink from './components/GapResourceLink.jsx';
+import AffiliateDisclosure from './components/AffiliateDisclosure.jsx';
 
 const paymentsEnabled = import.meta.env.VITE_PAYMENTS_ENABLED === 'true'
 const feedbackEnabled = import.meta.env.VITE_BETA_FEEDBACK_ENABLED === 'true'
@@ -117,8 +120,16 @@ function getSections(text) {
     return sections;
 }
 
+// De-emphasis / negation phrases. If any of these appear in the same window
+// detectLevel() scans, the skill mention is being explicitly de-emphasized or
+// compared away (e.g. "matters more than X expertise", "isn't required") --
+// keyword/years escalation must be suppressed and the skill held at the
+// default level (L3) rather than raised. Suppress-only: never used to escalate.
+const LEVEL_SUPPRESSION_RE = /\b(do not need|don't need|not required|isn't required|matters more than|rather than|or comparable|no experience|not necessary|nice to have)\b/;
+
 function detectLevel(context) {
     const c = context.toLowerCase();
+    if (LEVEL_SUPPRESSION_RE.test(c)) return 3;
     if (/\b(expert(ise)?|mastery|guru)\b/.test(c)) return 5;
     if (/\b(advanced|deep (knowledge|understanding|experience)|highly proficient|in[- ]depth)\b/.test(c)) return 4;
     if (/\b(strong|proficient|extensive experience|solid|skilled|significant experience)\b/.test(c)) return 4;
@@ -130,6 +141,12 @@ function detectLevel(context) {
 
 function detectImportance(context) {
     const c = context.toLowerCase();
+    // Same de-emphasis/negation phrases detectLevel() checks. Without this, a
+    // phrase like "isn't required" would still hit the "required" keyword match
+    // below and wrongly report Critical importance for a skill the JD is
+    // explicitly de-emphasizing (e.g. "Deep ERP knowledge isn't required").
+    // This is an explicit local cue, so it overrides the section default.
+    if (LEVEL_SUPPRESSION_RE.test(c)) return 2;
     if (/\b(must have|must-have|essential|critical|required)\b/.test(c)) return 5;
     if (/\b(strongly preferred|preferred experience|preferred)\b/.test(c)) return 3;
     if (/\b(nice to have|bonus|good to have|pluses)\b/.test(c)) return 2;
@@ -358,9 +375,6 @@ export function parseJobDescription(text) {
                 const ctxEnd = Math.min(section.text.length, m.index + m[0].length + 40);
                 const context = section.text.substring(ctxStart, ctxEnd);
 
-                const phraseLvl = detectLevel(context);
-                const years = detectYears(context);
-                const level = Math.max(phraseLvl, yearsToLevel(years));
                 // detectImportance() only returns non-null when a genuine explicit local
                 // phrase cue (must-have/required/preferred/nice-to-have, etc.) is found
                 // right next to this specific skill mention -- otherwise it returns null
@@ -370,10 +384,22 @@ export function parseJobDescription(text) {
                 // otherwise an explicit "Preferred experience in Kotlin" inside a generic
                 // Qualifications section (importance 4) could never be pulled down to the
                 // Preferred level (3) the JD's own wording calls for.
+                // Computed BEFORE level so a de-emphasized importance (Optional/Nice-to-have)
+                // can cap the level assignment below.
                 const localImportance = detectImportance(context);
                 const importance = localImportance !== null
                     ? localImportance
                     : section.importance;
+
+                const phraseLvl = detectLevel(context);
+                const years = detectYears(context);
+                const suppressed = LEVEL_SUPPRESSION_RE.test(context.toLowerCase());
+                let level = suppressed ? 3 : Math.max(phraseLvl, yearsToLevel(years));
+                // Cap level at L2 when this skill's importance is de-emphasized
+                // (Optional=1 / Nice-to-have=2). The skill was genuinely mentioned,
+                // just not framed as a hard requirement, so it should never be
+                // displayed as a high required level.
+                if (importance <= 2 && level > 2) level = 2;
                 // jdOrder: absolute position of the match within the full JD text.
                 // Section text is a substring of the full JD, so section.start
                 // (offset of this section within the whole document) must be
@@ -532,24 +558,10 @@ To review our candidate privacy notice, click here.
 // in @utils/constants.js / components/ConfidenceDot.jsx (single source of
 // truth, shared with LiteResultsView — see imports above).
 
-function getGapSuggestion(name, resumeLevel, requiredLevel) {
-    if (!resumeLevel || resumeLevel <= 1) {
-        return `Your resume lists ${name} but shows no context. ` +
-            `If you have used it professionally or in a project, describe where, ` +
-            `how long, and what you accomplished. If you are still learning, ` +
-            `a documented hands-on project will build the evidence your resume needs.`;
-    }
-    if (resumeLevel === 2) {
-        return `You have some ${name} experience showing on your resume. ` +
-            `Add a duration, a specific outcome, and a scale detail to push this higher.`;
-    }
-    if (resumeLevel >= 3) {
-        return `Your ${name} evidence is solid. ` +
-            `Add an ownership or leadership signal — led, architected, owned — ` +
-            `with a measurable outcome to close this gap.`;
-    }
-    return `Add duration and a specific outcome to your ${name} experience to close the one-level gap.`;
-}
+// getGapSuggestion is now the shared gapSuggestion() from @utils/constants.js
+// (consolidated — see import above). Kept as a local alias so existing
+// call sites in this file don't need to change.
+const getGapSuggestion = gapSuggestion;
 
 // ============================================================
 // SHARED UI PRIMITIVES
@@ -846,6 +858,22 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
     });
     const topGaps       = sortedGaps.slice(0, 3);
     const remainingGaps = sortedGaps.slice(3);
+    // Whether any Focus-Zone card will show an affiliate/course link — used to
+    // decide whether to render the single consolidated disclosure once per
+    // section, instead of repeating it per card.
+    const topGapsHaveResource = topGaps.some(skill => shouldShowGapResource(skill));
+
+    // Group "Missing from Resume" by importance tier (tier is the primary axis,
+    // not required level -- see PATH_TO_LAUNCH task on Match view reorder).
+    const missingCritical = critical.filter(s => s.importance >= 5);
+    const missingRequired = critical.filter(s => s.importance === 4);
+    const missingPreferred = critical.filter(s => s.importance <= 3);
+    const sortByLevelDesc = (a, b) => b.level - a.level;
+    const missingGroups = [
+        { key: 'critical', label: 'Critical', skills: [...missingCritical].sort(sortByLevelDesc) },
+        { key: 'required', label: 'Required', skills: [...missingRequired].sort(sortByLevelDesc) },
+        { key: 'preferred', label: 'Preferred', skills: [...missingPreferred].sort(sortByLevelDesc) },
+    ].filter(g => g.skills.length > 0);
 
     // Use the decision engine's matchScore as the single source of truth (fixes B-FIX-01).
     const score = decisionResult?.matchScore ?? 0;
@@ -986,30 +1014,12 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                 </div>
             )}
 
-            {/* Missing skills */}
-            {critical.length > 0 && (
-                <div className="mb-2">
-                    <SectionHeader label="Missing from Resume" count={critical.length} color="text-slate-600" />
-                    <div style={{ overflowX: 'auto' }}>
-                        {critical.map((skill, idx) => (
-                            <SkillRow
-                                key={skill.name}
-                                skill={skill}
-                                variant="missing"
-                                idx={idx}
-                                isLast={idx === critical.length - 1}
-                            />
-                        ))}
-                    </div>
-                </div>
-            )}
-
             {/* Evidence Gaps — Focus Zone */}
             {levelGaps.length > 0 && (
                 <div className="mb-2">
 
                     <div className="text-xs font-semibold uppercase tracking-wide text-amber-700 mb-2">
-                        Top gaps to address — {topGaps.length} of {levelGaps.length}
+                        Top gaps to address
                     </div>
 
                     {/* Focus Zone — top 3 */}
@@ -1022,12 +1032,30 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                         </div>
 
                         {topGaps.map((skill, index) => {
-                            const affiliateResource = getAffiliateResources(nameToResourceId(skill.name), skill.resumeLevel ?? 1, 'tech', skill.name)[0] ?? null;
+                            // Gate the affiliate/course link by evidence level: show only
+                            // when L1-L2 with no meaningful duration/context yet — once
+                            // duration or multiple contexts exist, the honest fix is
+                            // editing existing resume content, not learning something new.
+                            const affiliateResource = shouldShowGapResource(skill)
+                                ? getAffiliateResources(nameToResourceId(skill.name), skill.resumeLevel ?? 1, 'tech', skill.name)[0] ?? null
+                                : null;
                             const resumeLabel = skill.resumeLevel
                                 ? (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`)
                                 : 'Not evidenced';
                             const jdLabel = LEVEL_NAMES[skill.level] ?? `L${skill.level}`;
-                            const suggestion = getGapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level);
+                            const suggestion = getGapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level, {
+                                durationMonths: skill.durationMonths,
+                                contextCount:   skill.contextCount,
+                            });
+                            // Drop checklist items the resume already satisfies.
+                            const isListedOnly   = skill.source === 'Technical Skills' || skill.source === 'Summary';
+                            const knowsWhereUsed = !isListedOnly || (skill.contextCount ?? 1) >= 2;
+                            const checklistItems = [
+                                knowsWhereUsed ? null : 'Where you used it (job title or project name)',
+                                skill.durationMonths != null ? null : 'How long (months or years)',
+                                'What you built or accomplished',
+                                'One specific outcome or scale detail',
+                            ].filter(Boolean);
 
                             return (
                                 <div key={skill.name}
@@ -1057,12 +1085,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                                         To strengthen your {skill.name} evidence, add:
                                     </div>
                                     <div className="space-y-0.5 pl-1 mb-3">
-                                        {[
-                                            'Where you used it (job title or project name)',
-                                            'How long (months or years)',
-                                            'What you built or accomplished',
-                                            'One specific outcome or scale detail',
-                                        ].map(item => (
+                                        {checklistItems.map(item => (
                                             <div key={item} className="flex items-start gap-1.5 text-xs text-slate-500">
                                                 <span className="text-amber-300 mt-0.5 flex-shrink-0">☐</span>
                                                 <span>{item}</span>
@@ -1071,10 +1094,17 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                                     </div>
 
                                     {/* Resources */}
-                                    <GapResourceLink resource={affiliateResource} />
+                                    <GapResourceLink resource={affiliateResource} showDisclosure={false} />
                                 </div>
                             );
                         })}
+
+                        {topGapsHaveResource && (
+                            <AffiliateDisclosure
+                                count={2}
+                                className="text-[10px] text-amber-600 pt-2 border-t border-amber-200"
+                            />
+                        )}
                     </div>
 
                     {/* Remaining gaps — compact list */}
@@ -1083,7 +1113,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                             <div className="border-t border-slate-100 my-4" />
                             <div className="pl-3 border-l-2 border-slate-100 mb-4">
                                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">
-                                    Other gaps — {remainingGaps.length}
+                                    Other gaps
                                 </div>
                                 <div className="border border-slate-100 rounded-xl overflow-hidden">
                                     {remainingGaps.map((skill, index) => (
@@ -1104,6 +1134,31 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                             </div>
                         </>
                     )}
+                </div>
+            )}
+
+            {/* Missing skills — grouped by importance tier (Critical / Required / Preferred) */}
+            {critical.length > 0 && (
+                <div className="mb-2">
+                    <SectionHeader label="Missing from Resume" count={critical.length} color="text-slate-600" />
+                    {missingGroups.map(group => (
+                        <div key={group.key} className="mb-3">
+                            <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1.5">
+                                {group.label} — {group.skills.length}
+                            </div>
+                            <div style={{ overflowX: 'auto' }}>
+                                {group.skills.map((skill, idx) => (
+                                    <SkillRow
+                                        key={skill.name}
+                                        skill={skill}
+                                        variant="missing"
+                                        idx={idx}
+                                        isLast={idx === group.skills.length - 1}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             )}
 
@@ -1133,7 +1188,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
     );
 }
 
-function ResumeResultsView({ results, behavioralSignals, degree, isPaid: isPaidProp }) {
+function ResumeResultsView({ results, behavioralSignals, degrees, isPaid: isPaidProp }) {
     const SOURCE_COLORS = {
         'Technical Skills': '#0369a1',
         'Education':        '#7c3aed',
@@ -1202,12 +1257,19 @@ function ResumeResultsView({ results, behavioralSignals, degree, isPaid: isPaidP
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-1.5">
                     Education &amp; Degrees
                 </div>
-                {degree?.degreeLevel ? (
-                    <div className="text-xs text-slate-600">
-                        <span className="font-medium">{DEGREE_LEVEL_LABELS[degree.degreeLevel]}</span>
-                        {degree.field && <span className="text-slate-500"> in {degree.field}</span>}
-                        {degree.institution && <span className="text-slate-400"> · {degree.institution}</span>}
-                        {degree.graduationYear && <span className="text-slate-400"> ({degree.graduationYear})</span>}
+                {degrees && degrees.length > 0 ? (
+                    <div className="space-y-1">
+                        {degrees.map((d, i) => (
+                            <div key={i} className="text-xs text-slate-600">
+                                <span className="font-medium">{DEGREE_LEVEL_LABELS[d.degreeLevel]}</span>
+                                {d.field && <span className="text-slate-500"> in {d.field}</span>}
+                                {d.institution && <span className="text-slate-400"> · {d.institution}</span>}
+                                {d.graduationStatus === 'in_progress'
+                                    ? <span className="text-slate-400"> (In Progress{d.graduationYear ? ` · ${d.graduationYear}` : ''})</span>
+                                    : (d.graduationYear && <span className="text-slate-400"> ({d.graduationYear})</span>)
+                                }
+                            </div>
+                        ))}
                     </div>
                 ) : (
                     <span className="text-xs text-slate-400">No degree detected in Education section</span>
@@ -1641,7 +1703,7 @@ export default function App() {
                                         <ResumeResultsView
                                             results={resumeResults.technicalSignals}
                                             behavioralSignals={resumeResults.behavioralSignals}
-                                            degree={resumeResults.degree}
+                                            degrees={resumeResults.allDegrees}
                                             isPaid={isPaidStatus}
                                         />
                                     </>
