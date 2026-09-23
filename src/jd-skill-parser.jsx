@@ -26,6 +26,7 @@ import {
     EVIDENCE_BANDS,
     getMatchScoreLabel,
     evidenceSummary,
+    formatDuration,
 } from '@utils/constants.js';
 // Re-exported for backward compatibility — canonical definition lives in @utils/constants.js.
 export { getMatchScoreLabel };
@@ -532,23 +533,36 @@ To review our candidate privacy notice, click here.
 // in @utils/constants.js / components/ConfidenceDot.jsx (single source of
 // truth, shared with LiteResultsView — see imports above).
 
-function getGapSuggestion(name, resumeLevel, requiredLevel) {
-    if (!resumeLevel || resumeLevel <= 1) {
-        return `Your resume lists ${name} but shows no context. ` +
-            `If you have used it professionally or in a project, describe where, ` +
-            `how long, and what you accomplished. If you are still learning, ` +
-            `a documented hands-on project will build the evidence your resume needs.`;
-    }
-    if (resumeLevel === 2) {
-        return `You have some ${name} experience showing on your resume. ` +
-            `Add a duration, a specific outcome, and a scale detail to push this higher.`;
-    }
+// evidence: { durationMonths, contextCount } — actual evidence facts already
+// computed by the inference layer. Copy must cite these numbers, never a
+// generic "no context" phrase when evidence exists.
+function getGapSuggestion(name, resumeLevel, requiredLevel, evidence = {}) {
+    const { durationMonths, contextCount } = evidence;
+    const dur   = formatDuration(durationMonths);
+    const count = contextCount ?? 1;
+
+    // State 4 — real evidence (Supported+) but still below the level this role wants.
     if (resumeLevel >= 3) {
-        return `Your ${name} evidence is solid. ` +
-            `Add an ownership or leadership signal — led, architected, owned — ` +
-            `with a measurable outcome to close this gap.`;
+        return `Your ${name} evidence is solid, but this role wants deeper experience than ` +
+            `your resume currently shows. If you have more depth — ownership, scale, or a ` +
+            `longer timeline — add it.`;
     }
-    return `Add duration and a specific outcome to your ${name} experience to close the one-level gap.`;
+
+    // State 3 — multiple contexts already on the resume.
+    if (count >= 2) {
+        return `Your resume shows ${name} in ${count} places. ` +
+            `Add what you built and a measurable outcome in at least one of them to strengthen this evidence.`;
+    }
+
+    // State 2 — a duration is known for a single context.
+    if (dur) {
+        return `Your resume shows ${dur} of ${name} experience in one place. ` +
+            `Say where it was used and what you accomplished to strengthen this evidence.`;
+    }
+
+    // State 1 — no duration, no additional context: skills-list mention only.
+    return `Your resume lists ${name} in your skills list and nowhere else. ` +
+        `Add a bullet under a job or project describing how you used it and for how long.`;
 }
 
 // ============================================================
@@ -1021,7 +1035,19 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                                 ? (LEVEL_NAMES[skill.resumeLevel] ?? `L${skill.resumeLevel}`)
                                 : 'Not evidenced';
                             const jdLabel = LEVEL_NAMES[skill.level] ?? `L${skill.level}`;
-                            const suggestion = getGapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level);
+                            const suggestion = getGapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level, {
+                                durationMonths: skill.durationMonths,
+                                contextCount:   skill.contextCount,
+                            });
+                            // Drop checklist items the resume already satisfies.
+                            const isListedOnly   = skill.source === 'Technical Skills' || skill.source === 'Summary';
+                            const knowsWhereUsed = !isListedOnly || (skill.contextCount ?? 1) >= 2;
+                            const checklistItems = [
+                                knowsWhereUsed ? null : 'Where you used it (job title or project name)',
+                                skill.durationMonths != null ? null : 'How long (months or years)',
+                                'What you built or accomplished',
+                                'One specific outcome or scale detail',
+                            ].filter(Boolean);
 
                             return (
                                 <div key={skill.name}
@@ -1051,12 +1077,7 @@ function GapAnalysisView({ gap, behavioralGap, jobDuties, companyName, jobRole, 
                                         To strengthen your {skill.name} evidence, add:
                                     </div>
                                     <div className="space-y-0.5 pl-1 mb-3">
-                                        {[
-                                            'Where you used it (job title or project name)',
-                                            'How long (months or years)',
-                                            'What you built or accomplished',
-                                            'One specific outcome or scale detail',
-                                        ].map(item => (
+                                        {checklistItems.map(item => (
                                             <div key={item} className="flex items-start gap-1.5 text-xs text-slate-500">
                                                 <span className="text-amber-300 mt-0.5 flex-shrink-0">☐</span>
                                                 <span>{item}</span>

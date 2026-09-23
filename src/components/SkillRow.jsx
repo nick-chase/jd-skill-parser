@@ -10,7 +10,7 @@
 
 import ResourceLink from './ResourceLink.jsx'
 import { getAffiliateResources } from '../utils/affiliateLoader.js'
-import { LEVEL_NAMES, IMPORTANCE_NAMES, nameToResourceId } from '@utils/constants.js'
+import { LEVEL_NAMES, IMPORTANCE_NAMES, nameToResourceId, formatDuration } from '@utils/constants.js'
 
 const LEVEL_TIPS = [
   '',
@@ -52,23 +52,36 @@ export function missingSuggestion(name) {
 }
 
 // Generate a specific action string for a level-gap skill.
-export function gapSuggestion(name, resumeLevel, requiredLevel) {
-  if (resumeLevel <= 1) {
-    return `Your resume lists ${name} but shows no context. ` +
-      `If you have used it professionally or in a project, describe where, ` +
-      `how long, and what you accomplished. If you are still learning, ` +
-      `a documented hands-on project will build the evidence your resume needs.`
-  }
-  if (resumeLevel === 2) {
-    return `You have some ${name} experience showing on your resume. ` +
-      `Add a duration, a specific outcome, and a scale detail to push this higher.`
-  }
+// evidence: { durationMonths, contextCount } — actual evidence facts already
+// computed by the inference layer. Copy must cite these numbers, never a
+// generic "no context" phrase when evidence exists.
+export function gapSuggestion(name, resumeLevel, requiredLevel, evidence = {}) {
+  const { durationMonths, contextCount } = evidence
+  const dur   = formatDuration(durationMonths)
+  const count = contextCount ?? 1
+
+  // State 4 — real evidence (Supported+) but still below the level this role wants.
   if (resumeLevel >= 3) {
-    return `Your ${name} evidence is solid. ` +
-      `Add an ownership or leadership signal — led, architected, owned — ` +
-      `with a measurable outcome to close this gap.`
+    return `Your ${name} evidence is solid, but this role wants deeper experience than ` +
+      `your resume currently shows. If you have more depth — ownership, scale, or a ` +
+      `longer timeline — add it.`
   }
-  return `Add duration and a specific outcome to your ${name} experience to close the one-level gap.`
+
+  // State 3 — multiple contexts already on the resume.
+  if (count >= 2) {
+    return `Your resume shows ${name} in ${count} places. ` +
+      `Add what you built and a measurable outcome in at least one of them to strengthen this evidence.`
+  }
+
+  // State 2 — a duration is known for a single context.
+  if (dur) {
+    return `Your resume shows ${dur} of ${name} experience in one place. ` +
+      `Say where it was used and what you accomplished to strengthen this evidence.`
+  }
+
+  // State 1 — no duration, no additional context: skills-list mention only.
+  return `Your resume lists ${name} in your skills list and nowhere else. ` +
+    `Add a bullet under a job or project describing how you used it and for how long.`
 }
 
 export default function SkillRow({ skill, variant, isLast, idx }) {
@@ -93,7 +106,10 @@ export default function SkillRow({ skill, variant, isLast, idx }) {
   const suggestion = isMissing
     ? (skill.suggestion || missingSuggestion(skill.name))
     : isGap
-      ? (skill.suggestion || gapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level))
+      ? (skill.suggestion || gapSuggestion(skill.name, skill.resumeLevel ?? 0, skill.level, {
+          durationMonths: skill.durationMonths,
+          contextCount:   skill.contextCount,
+        }))
       : null
 
   const confidenceSuffix = skill.confidence
