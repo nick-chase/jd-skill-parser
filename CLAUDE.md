@@ -22,7 +22,8 @@
 |----------|------|----------|
 | Open tasks + known bugs + current phase | `../nat20-core/PATH_TO_LAUNCH.md` | Active task IDs, DoDs, open bugs, what's in flight — single source of truth |
 | Master plan | `../nat20-core/docs/master-plan-v5.md` | Phase definitions, completed history, architecture decisions |
-| Scoring spec | `../nat20-core/docs/scoring-model.md` | Full E×C×D×R tables, weight values, score→level map |
+| Scoring spec | `../nat20-core/docs/nat20-research-dive-scoring.md` | E×C×D×R research basis, weight tables, score→level map (verify values against `src/core/parser/inference.js` — the code is live) |
+| Pricing model | `../nat20-core/docs/PRICING_MODEL.md` | Lite / Pro / Supporter offers and access rules |
 | Affiliate plan | `../nat20-core/docs/affiliate_masterplan.md` | Affiliate program strategy and implementation |
 
 Do not rely on anything in this file for current task state, bug status,
@@ -32,6 +33,9 @@ or test counts. Read the live documents directly.
 ## Tier vocabulary
 
 The product has two tiers: **Lite** (free) and **Pro** (paid).
+
+Three offers exist: Lite, Pro, and Supporter (see `../nat20-core/docs/PRICING_MODEL.md`).
+Supporter grants no product access — no gate may ever read `is_supporter`.
 
 Earlier product writing used three deprecated terms:
 - "Rookie" referred to the free tier (now: Lite)
@@ -55,23 +59,14 @@ Going forward:
 
 ---
 
-## Two-Repo Workflow
+## Repos
 
-| Repo | Location | Claude Code can... |
-|------|----------|--------------------|
-| **jd-skill-parser** (public) | `C:\Users\nikec\Desktop\jd-skill-parser` | Read + write freely |
-| **nat20-core** (private) | `C:\Users\nikec\Desktop\nat20-core` | Read only — never write |
+| Repo | Location | Holds | Claude Code can... |
+|------|----------|-------|--------------------|
+| **jd-skill-parser** | `C:\Users\nikec\Desktop\jd-skill-parser` | All live code and data (`src/`, `src/core/`, `data/`) | Read + write freely |
+| **nat20-core** (private) | `C:\Users\nikec\Desktop\nat20-core` | Docs and strategy only — no code, no data | Read; write `PATH_TO_LAUNCH.md` only |
 
-### Deployment copy pattern
-
-Vercel cannot access nat20-core. Core files are copied into this repo:
-- `nat20-core/src/` → `src/core/`
-- `nat20-core/data/` → `data/`
-
-When editing core files (`inference.js`, `parseResume.js`, `skills.json`),
-edit the copy in this repo. Nicholas copies changes back to nat20-core manually.
-
-### Hard rules — no exceptions
+Engine and data edits happen in this repo only. There is no copy-back step.
 
 ## Hard Rules — File System
 - NEVER write to ~/.claude/ or the global Claude config directory
@@ -80,9 +75,10 @@ edit the copy in this repo. Nicholas copies changes back to nat20-core manually.
 - Global Claude config (~/.claude/) is managed by Nicholas manually
 
 - NEVER commit. NEVER push. Nicholas commits manually via GitHub Desktop.
-- NEVER write to `../nat20-core/`.
-- NEVER edit `PATH_TO_LAUNCH.md` or `master-plan-v5.md` —
-  Nicholas updates those.
+- In `../nat20-core/`, write ONLY `PATH_TO_LAUNCH.md`. Every other file there
+  (master plan, PRODUCT_PHILOSOPHY, PRICING_MODEL, etc.) is read-only.
+  Enforced by `.claude/hooks/block-dangerous.ps1`.
+- NEVER commit, push, or run any other mutating git command in nat20-core.
 - NEVER bypass the pre-commit hook with `--no-verify`.
 - NEVER add new dependencies without explicit approval.
 - NEVER add hardcoded skill or role data to source files — belongs in `/data`.
@@ -111,7 +107,8 @@ Branch naming:
 
 ## Product Goal
 
-**By August 31, 2026, Nat20 produces recurring revenue from paying subscribers.**
+**Publish and promote Lite.** Recurring revenue from Pro subscribers is a
+stretch goal, not the bar for done.
 
 The one question the app answers:
 > "Based on how my resume reads today, how well does it match this JD?"
@@ -146,7 +143,9 @@ Permanent decisions — not phase-specific deferrals:
 - "Apply Now / Build Skill / Consider Adjacent Role" output —
   deleted in v3, do not recreate under any framing
 - L1–L5 scoring for behavioral signals — present/absent only, always
-- A single 0–100 overall match score displayed to users — explicitly banned
+- A 0–100 match score shown on its own — the score is always displayed with
+  its label (`getMatchScoreLabel()`) and alongside the gap map, never as a
+  standalone verdict (master plan decision, June 20, 2026)
 - Role template matching in any parser or scoring function
 - Salary data, company ratings, or external enrichment
 
@@ -178,8 +177,9 @@ Permanent decisions — not phase-specific deferrals:
 
 ## Scoring Formula
 
-Formula structure is stable. Full weight tables live in the scoring spec:
-`../nat20-core/docs/scoring-model.md`
+Formula structure is stable. Research basis and weight tables live in the scoring spec:
+`../nat20-core/docs/nat20-research-dive-scoring.md`. Where it differs from
+`src/core/parser/inference.js`, the code is what ships.
 
 ```
 Skill Score = SUM(E × C × D) × R + B
@@ -194,7 +194,7 @@ Skill Score = SUM(E × C × D) × R + B
 | B | Bounded phrase boost | Self-claim language (capped, Dunning-Kruger guard) |
 
 Score maps to L1 (Awareness) → L5 (Expert).
-Full tables: `../nat20-core/docs/scoring-model.md`
+Full tables: `../nat20-core/docs/nat20-research-dive-scoring.md`
 
 ---
 
@@ -237,6 +237,14 @@ Do not track a total count — the count grows. Track groups.
 | Unit: projects | `tests/unit/projects.test.js` | Project evidence, outcome flag |
 | Unit: certifications | `tests/unit/certifications.test.js` | Cert detection and scoring |
 | Unit: supabase | `tests/unit/supabase.test.js` | Supabase client init |
+| Unit: parseResumeLite | `tests/unit/parseResumeLite.test.js` | Lite compression, computeLiteMatch, top-3 actionable |
+| Unit: boostSkills | `tests/unit/boostSkills.test.js` | Resume/match boost-skill selection, resource IDs |
+| Unit: resolveToCanonical | `tests/unit/resolveToCanonical.test.js` | Alias → canonical skill resolution |
+| Unit: LiteResultsView | `tests/unit/LiteResultsView.test.js` | Lite JD results component |
+| Unit: LiteResumeView | `tests/unit/LiteResumeView.test.js` | Lite resume component |
+| Unit: ConfidenceDot | `tests/unit/ConfidenceDot.test.js` | Confidence indicator component |
+| Unit: GapResourceLink | `tests/unit/GapResourceLink.test.js` | Gap resource link component |
+| Unit: TierBadge | `tests/unit/TierBadge.test.js` | Tier badge component |
 | Integration: parser | `tests/integration/parser.test.js` | End-to-end resume parsing |
 | Integration: JD bank | `tests/integration/jd-test-bank.test.js` | 10 real JD fixtures |
 | Integration: alt JDs | `tests/integration/alt-jd-fixtures.test.js` | Edge case JDs |
@@ -308,9 +316,15 @@ Rules:
 3. Report to Nicholas: what changed, which files, test group summary
 4. Nicholas reviews staged changes
 5. Nicholas commits via GitHub Desktop
-6. Nicholas updates `PATH_TO_LAUNCH.md` and `master-plan-v5.md` in nat20-core (including any new bugs found)
+6. Edit `../nat20-core/PATH_TO_LAUNCH.md` directly: move the task to Completed
+   with date and branch, add any new bugs found, and add a one-line decision
+   entry if a decision was made. Nicholas reviews the diff and commits.
 
-**Do not commit. Do not push. Do not write to nat20-core.**
+**A task is not done until the PATH_TO_LAUNCH.md edit is made.** The Stop hook
+(`auto-update-plan.ps1`) blocks once if tracked files changed and
+PATH_TO_LAUNCH.md has no uncommitted change.
+
+**Do not commit. Do not push. In nat20-core, write PATH_TO_LAUNCH.md only.**
 
 ---
 
@@ -337,7 +351,6 @@ Only the decisions most relevant to daily parser work are listed here.
 | Decision | Date |
 |----------|------|
 | Parser stays client-side through launch | June 1, 2026 |
-| Two-repo split — parser logic private, UI public | June 1, 2026 |
 | isTechRole() removed — judged person not document | June 2, 2026 |
 | roles.json is reference-only — never used in inference | June 2, 2026 |
 | Four-decision label system retired — DecisionCard deleted | June 8, 2026 |
@@ -347,6 +360,7 @@ Only the decisions most relevant to daily parser work are listed here.
 | JD parser extraction from React file deferred to Phase F | June 8, 2026 |
 | parseDateRange() is single source of truth for all date extraction | June 9, 2026 |
 | Season date recognition live — Summer/Fall/Spring/Winter YYYY | June 9, 2026 |
+| Match score shown with its label, alongside the gap map (supersedes June 8 ban) | June 20, 2026 |
 
 ---
 
