@@ -5,6 +5,7 @@ import {
   classifyBloomLevel,
   scoreSkillEvidence,
 } from '@core/parser/inference.js'
+import { parseResume } from '@core/parser/parseResume.js'
 
 // ---------------------------------------------------------------------------
 // B1 — parseDateRange
@@ -572,16 +573,15 @@ describe('scoreSkillEvidence()', () => {
 // ---------------------------------------------------------------------------
 
 describe('scoreSkillEvidence() — confidence', () => {
-  // Bug #8 fix: a single skills-section-only instance with the real
-  // classifyEvidenceType() weight (0.05) now uses the skills-only E override
-  // (0.6 × 1.00 × 0.5 = 0.30 → L2) instead of being floored at L1 forever.
+  // A single skills-section-only instance is a claim: 0.05 × 1.00 × 0.4 = 0.02 → L1
+  // (skills-only E override removed per owner ruling 2026-10-12).
   // Confidence stays 'low' — a skills-list mention alone is still unconfirmed.
   test('skills-section-only → low confidence', () => {
     const result = scoreSkillEvidence([
       { wType: 0.05, durationMonths: null, sectionName: 'skills' },
     ])
     expect(result.confidence).toBe('low')
-    expect(result.level).toBe('L2')
+    expect(result.level).toBe('L1')
   })
 
   test('3-year FT job + Create verb → high confidence', () => {
@@ -720,5 +720,71 @@ describe('scoreSkillEvidence() — per-bullet bloomC propagation (regression: E1
     ])
     // "Architected" → C=1.40. Score = (1.0×1.40×1.0 + 0.05×1.00×0.4) × 1.2 = 1.704 → L4.
     expect(result.score).toBeGreaterThan(1.224)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Claims-only evidence → L1 (owner ruling 2026-10-12)
+// A skill whose only evidence is a claim (skills section, summary, or both)
+// is L1 Awareness. Adding evidence must never lower a level.
+// ---------------------------------------------------------------------------
+
+describe('claims-only evidence scores L1', () => {
+  const SKILLS  = 'TECHNICAL SKILLS\nPython\n'
+  const SUMMARY = 'SUMMARY\nAnalyst who works with Python every day.\n'
+  const EXP_ONE_BULLET =
+    'PROFESSIONAL EXPERIENCE\nData Analyst | Acme Corp | 2022\n- Optimized reporting scripts in Python\n'
+  const EXP_TWO_DATED =
+    'PROFESSIONAL EXPERIENCE\n' +
+    'Data Analyst | Acme Corp | Jan 2020 – Jan 2022\n- Built reporting scripts in Python\n\n' +
+    'Data Engineer | Beta LLC | Feb 2022 – Feb 2024\n- Developed ETL jobs in Python\n'
+
+  const python = text => parseResume(text).technicalSignals.find(s => s.name === 'Python')
+
+  const inputs = {
+    skillsOnly:       SKILLS,
+    summaryOnly:      SUMMARY,
+    skillsAndSummary: SUMMARY + '\n' + SKILLS,
+    skillsAndBullet:  SKILLS + '\n' + EXP_ONE_BULLET,
+    skillsAndDated:   SKILLS + '\n' + EXP_TWO_DATED,
+  }
+
+  test('skills section only → L1', () => {
+    expect(python(inputs.skillsOnly).level).toBe(1)
+  })
+
+  test('summary only → L1', () => {
+    expect(python(inputs.summaryOnly).level).toBe(1)
+  })
+
+  test('skills + summary → L1', () => {
+    expect(python(inputs.skillsAndSummary).level).toBe(1)
+  })
+
+  test('claims-only cannot exceed L1 even at the highest Bloom multiplier', () => {
+    const result = scoreSkillEvidence([
+      { wType: classifyEvidenceType('skills'),  durationMonths: null, sectionName: 'skills',  bloomC: 1.4 },
+      { wType: classifyEvidenceType('summary'), durationMonths: null, sectionName: 'summary', bloomC: 1.4 },
+    ])
+    expect(result.score).toBeLessThan(0.25)
+    expect(result.level).toBe('L1')
+  })
+
+  test('monotonic: adding evidence never lowers the level', () => {
+    const lvl = key => python(inputs[key]).level
+    // summary-only + skills claim
+    expect(lvl('skillsAndSummary')).toBeGreaterThanOrEqual(lvl('summaryOnly'))
+    // skills-only + summary claim / + experience bullet / + dated contexts
+    expect(lvl('skillsAndSummary')).toBeGreaterThanOrEqual(lvl('skillsOnly'))
+    expect(lvl('skillsAndBullet')).toBeGreaterThanOrEqual(lvl('skillsOnly'))
+    expect(lvl('skillsAndDated')).toBeGreaterThanOrEqual(lvl('skillsOnly'))
+    // adding a summary claim to the experience-backed inputs
+    expect(python(SUMMARY + '\n' + inputs.skillsAndBullet).level).toBeGreaterThanOrEqual(lvl('skillsAndBullet'))
+    expect(python(SUMMARY + '\n' + inputs.skillsAndDated).level).toBeGreaterThanOrEqual(lvl('skillsAndDated'))
+  })
+
+  test('skills with real experience evidence are unchanged (scores captured before the ruling)', () => {
+    expect(python(inputs.skillsAndBullet)).toMatchObject({ level: 3, score: 0.744 })
+    expect(python(inputs.skillsAndDated)).toMatchObject({ level: 4, score: 1.224 })
   })
 })
