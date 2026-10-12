@@ -26,8 +26,8 @@ export { gapSuggestion }
 
 const LEVEL_TIPS = [
   '',
-  'L1 Mentioned — skill appears on resume with no supporting context.',
-  'L2 Limited evidence — skill backed by coursework, short project, or brief mention.',
+  'L1 Mentioned — skill listed in skills or summary, with no example of using it.',
+  'L2 Limited evidence — skill backed by coursework or short project.',
   'L3 Supported — skill backed by project work or internship context.',
   'L4 Strong evidence — skill backed by sustained job history or multiple contexts.',
   'L5 Extensive evidence — skill backed by multi-year professional history across roles.',

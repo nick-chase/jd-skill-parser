@@ -69,8 +69,8 @@ export default function MethodologyPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold text-slate-800">The five levels</h2>
           <ul className="text-sm text-slate-600 leading-relaxed space-y-2 list-disc list-inside">
-            <li><span className="font-medium text-slate-700">L1 — Mentioned:</span> the skill appears on the resume with no supporting context.</li>
-            <li><span className="font-medium text-slate-700">L2 — Limited evidence:</span> backed by coursework, a short project, or a brief mention.</li>
+            <li><span className="font-medium text-slate-700">L1 — Mentioned:</span> listed in your skills or summary, with no example of using it.</li>
+            <li><span className="font-medium text-slate-700">L2 — Limited evidence:</span> backed by coursework or a short project.</li>
             <li><span className="font-medium text-slate-700">L3 — Supported:</span> backed by project work or internship context.</li>
             <li><span className="font-medium text-slate-700">L4 — Strong evidence:</span> backed by sustained job history or several distinct contexts.</li>
             <li><span className="font-medium text-slate-700">L5 — Extensive evidence:</span> backed by a multi-year professional history across more than one role.</li>
