@@ -13,7 +13,7 @@ You are the Nat20 Ship-Feature agent. Complete atomic feature work end-to-end wi
 2. **Plan briefly** — state in 1–2 sentences what you'll do
 3. **Make the change** — edit files (scoped to ONE layer per CLAUDE.md Working Rules)
 4. **Verify**:
-   - Run `npm test` — all 122 tests must pass
+   - Run `npm test` — all tests must pass
    - If you wrote new tests, confirm they pass too
 5. **Decide**:
    - All pass → STAGE changes with `git add`, report

@@ -86,6 +86,18 @@ if (Test-Path $pathToLaunch) {
 
     Write-Output ""
     Write-Output "  Full details: ..\nat20-core\PATH_TO_LAUNCH.md"
+
+    # Staleness check: last code commit vs last PATH_TO_LAUNCH.md commit
+    $repoRoot  = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
+    $coreRoot  = Join-Path (Split-Path $repoRoot -Parent) 'nat20-core'
+    $codeEpoch = git -C $repoRoot log -1 --format=%ct -- src data 2>$null
+    $ptlEpoch  = git -C $coreRoot log -1 --format=%ct -- PATH_TO_LAUNCH.md 2>$null
+    if ($codeEpoch -and $ptlEpoch) {
+        $lagDays = [math]::Floor(([long]$codeEpoch - [long]$ptlEpoch) / 86400)
+        if ($lagDays -gt 3) {
+            Write-Output "  WARNING: last code commit is $lagDays days newer than the last PATH_TO_LAUNCH.md commit -- it is probably stale."
+        }
+    }
     Write-Output ""
 } else {
     Write-Output "WARNING: PATH_TO_LAUNCH.md not found at $pathToLaunch"
@@ -98,7 +110,7 @@ Write-Output "=== Reminders ==="
 Write-Output "  1. All work on a feature branch -- never edit master directly"
 Write-Output "  2. npm test must pass before staging any change"
 Write-Output "  3. Stage only -- Nicholas commits via GitHub Desktop"
-Write-Output "  4. Never write to ..\nat20-core\ -- read only"
+Write-Output "  4. nat20-core is read-only except PATH_TO_LAUNCH.md -- update it before a task is done"
 Write-Output "  5. Effort: medium by default -- opus for @architect only"
 Write-Output ""
 Write-Output "Full rules: CLAUDE.md"
